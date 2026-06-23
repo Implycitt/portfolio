@@ -14,7 +14,7 @@ export const RaytracedBlackHole = () => {
   texture.wrapT = THREE.RepeatWrapping;
   texture.minFilter = THREE.LinearFilter;
 
-const uniforms = useMemo(() => ({
+  const uniforms = useMemo(() => ({
     uTime: { value: 0 },
     uResolution: { value: new THREE.Vector2(size.width, size.height) },
     uTexture: { value: texture },
@@ -62,8 +62,8 @@ const uniforms = useMemo(() => ({
           varying vec2 vUv;
 
           const float RS = 1.0; 
-          const int MAX_STEPS = 350; 
-          const float STEP_SIZE = 0.1; 
+          const int MAX_STEPS = 120; 
+          const float STEP_SIZE = 0.25; 
 
           mat2 rot(float a) {
             float s = sin(a), c = cos(a);
@@ -78,7 +78,7 @@ const uniforms = useMemo(() => ({
                 uv.y *= uResolution.y / uResolution.x;
             } 
 
-            float plunge = pow(uScroll, 3.0);
+            float plunge = uScroll * uScroll * uScroll; 
             vec3 ro = mix(vec3(0.0, 0.0, 24.0), vec3(0.0, 0.0, 0.0), plunge);
             float baseFov = uResolution.x > uResolution.y ? -1.2 : -1.0;
             float currentFov = mix(baseFov, -3.0, plunge);
@@ -94,34 +94,35 @@ const uniforms = useMemo(() => ({
             float alphaAccum = 0.0; 
             
             for(int i = 0; i < MAX_STEPS; i++) {
-              float r = length(pos);
+              float rSq = dot(pos, pos); 
               
-              if(r < RS) {
+              if(rSq < 1.0) { 
                   hitEventHorizon = 1.0;
                   break;
               }
               
-              if(r > 45.0 || alphaAccum >= 1.0) {
+              if(rSq > 900.0 || alphaAccum >= 1.0) { 
                   break;
               }
               
-              vec3 accel = -normalize(pos) * (RS / (r * r)); 
+              vec3 accel = -pos * (1.0 / (rSq * sqrt(rSq))); 
               dir = normalize(dir + accel * STEP_SIZE * 2.0); 
               vec3 nextPos = pos + dir * STEP_SIZE;
               
               if(pos.y * nextPos.y < 0.0) {
                 float t = -pos.y / dir.y;
                 vec3 hitPos = pos + dir * t;
-                float hitR = length(hitPos);
+                float hitRSq = dot(hitPos, hitPos);
                 
-                if(hitR > RS * 2.5 && hitR < RS * 12.0) {
-                  float texU = (hitR - RS * 2.5) / (RS * 12.0 - RS * 2.5);
-                  float texV = atan(hitPos.z, hitPos.x) / (2.0 * 3.14159) + 0.5;
+                if(hitRSq > 6.25 && hitRSq < 144.0) {
+                  float hitR = sqrt(hitRSq);
+                  float texU = (hitR - 2.5) / 9.5; 
+                  float texV = atan(hitPos.z, hitPos.x) / 6.283185 + 0.5;
                   
                   texV += uTime * 0.02;
                   vec4 diskTex = texture2D(uTexture, vec2(texU, texV));
                   
-                  float edgeFade = smoothstep(RS * 12.0, RS * 9.0, hitR) * smoothstep(RS * 2.5, RS * 3.0, hitR);
+                  float edgeFade = smoothstep(12.0, 9.0, hitR) * smoothstep(2.5, 3.0, hitR);
                   vec3 diskVelocity = normalize(vec3(-hitPos.z, 0.0, hitPos.x)); 
                   
                   float doppler = 1.0 + dot(dir, diskVelocity) * 0.4; 
