@@ -62,16 +62,17 @@ export const Header = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-6 sm:px-12 mix-blend-difference pointer-events-auto select-none font-mono text-xs tracking-widest uppercase text-white/80 transition-transform duration-500 ease-in-out
+      className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 sm:p-6 sm:px-12 mix-blend-difference pointer-events-auto select-none font-mono text-xs tracking-widest uppercase text-white/80 transition-transform duration-500 ease-in-out
         ${isVisible ? 'translate-y-0' : '-translate-y-full'}
       `}
     >
       
-      <Link href="/" className="hover:text-white transition-colors">
-        [ Quentin Bordelon ]
+      <Link href="/" className="hover:text-white transition-colors whitespace-nowrap z-10">
+        <span className="hidden sm:inline">[ Quentin Bordelon ]</span>
+        <span className="sm:hidden font-bold text-sm">[ Q.B. ]</span>
       </Link>
 
-      <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-6">
+      <nav className="flex items-center gap-1 sm:gap-6 sm:absolute sm:left-1/2 sm:-translate-x-1/2 z-0">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
           
@@ -79,7 +80,7 @@ export const Header = () => {
             <Link
               key={item.name}
               href={item.path}
-              className={`group flex items-center justify-center p-3 rounded-full transition-all duration-300 ease-out border
+              className={`group flex items-center justify-center p-2.5 sm:p-3 rounded-full transition-all duration-300 ease-out border
                 ${isActive 
                   ? 'border-purple-500/30 bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white shadow-[0_0_20px_rgba(139,92,246,0.25)]' 
                   : 'border-transparent text-white/60 hover:text-white hover:bg-white/10'
@@ -91,8 +92,8 @@ export const Header = () => {
               <span 
                 className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out font-medium
                   ${isActive 
-                    ? 'max-w-[100px] opacity-100 ml-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400' 
-                    : 'max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 group-hover:ml-3'
+                    ? 'max-w-[100px] opacity-100 ml-2 sm:ml-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400' 
+                    : 'max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 group-hover:ml-2 sm:group-hover:ml-3'
                   }
                 `}
               >
@@ -103,7 +104,7 @@ export const Header = () => {
         })}
       </nav>
 
-      <div className="text-white/40 hidden sm:block">
+      <div className="text-white/40 hidden md:block z-10">
         PORTFOLIO // 2026
       </div>
       
