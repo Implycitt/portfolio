@@ -90,17 +90,15 @@ export const MorphingGalaxy = () => {
     <group rotation={[Math.PI * 0.15, 0, 0]}>
       <points ref={pointsRef}>
         <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={parameters.count}
-            array={positions}
-            itemSize={3}
+          <bufferAttribute 
+            attach="attributes-position" 
+            count={parameters.count} 
+            args={[positions, 3]} 
           />
           <bufferAttribute
             attach="attributes-color"
             count={parameters.count}
-            array={colors}
-            itemSize={3}
+            args={[colors, 3]}
           />
         </bufferGeometry>
         <pointsMaterial
