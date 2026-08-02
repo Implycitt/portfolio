@@ -42,6 +42,10 @@ matching the portfolio's dark terminal aesthetic. When the GitHub API is
 unreachable it renders a graceful "temporarily unavailable" card instead of
 erroring, so the README image never breaks.
 
+It is deliberately kept static (no SMIL `<animate>` or scripts) so GitHub's
+image proxy renders it reliably, and its cache headers let GitHub refresh it
+about every 5 minutes.
+
 ```markdown
 ![GitHub stats](https://quentinb.dev/api/stats/card)
 ```

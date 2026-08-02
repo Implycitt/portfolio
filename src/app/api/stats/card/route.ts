@@ -84,12 +84,12 @@ export async function GET(request: Request) {
          stats.total_watchers
        )}</text>
        ${langChips ? `<text x="20" y="262" font-family="${FONT}" font-size="10" fill="#ffffff" opacity="0.45">TOP LANGUAGES</text>${langChips}` : ""}
-       <text x="20" y="286" font-family="${FONT}" font-size="10" fill="#ffffff" opacity="0.35">// live from quentinb.dev/api/stats · cached 1h</text>`
+       <text x="20" y="286" font-family="${FONT}" font-size="10" fill="#ffffff" opacity="0.35">// live from quentinb.dev/api/stats · refreshed 5m</text>`
     : `<text x="20" y="58" font-family="${FONT}" font-size="13" fill="${CYAN}">$</text>
        <text x="34" y="58" font-family="${FONT}" font-size="13" fill="#ffffff" opacity="0.9">./stats.sh --live</text>
        <text x="20" y="110" font-family="${FONT}" font-size="15" fill="#ffffff" opacity="0.8">stats temporarily unavailable</text>
        <text x="20" y="134" font-family="${FONT}" font-size="12" fill="${MAUVE}">// github api unreachable — retrying shortly</text>
-       <text x="20" y="286" font-family="${FONT}" font-size="10" fill="#ffffff" opacity="0.35">// live from quentinb.dev/api/stats · cached 1h</text>`;
+       <text x="20" y="286" font-family="${FONT}" font-size="10" fill="#ffffff" opacity="0.35">// live from quentinb.dev/api/stats · refreshed 5m</text>`;
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="GitHub stats">
   <defs>
@@ -104,9 +104,7 @@ export async function GET(request: Request) {
   <rect x="0" y="17" width="${W}" height="17" fill="#ffffff" fill-opacity="0.05"/>
   <text x="16" y="22" font-family="${FONT}" font-size="12" fill="${CYAN}">▚</text>
   <text x="34" y="22" font-family="${FONT}" font-size="12" fill="#ffffff" opacity="0.55">~/stats.sh — bash — tty1</text>
-  <rect x="470" y="10" width="8" height="14" fill="${CYAN}" fill-opacity="0.9">
-    <animate attributeName="opacity" values="1;0;1" dur="1.05s" repeatCount="indefinite"/>
-  </rect>
+  <rect x="470" y="10" width="8" height="14" fill="${CYAN}" fill-opacity="0.9"/>
   <rect x="0" y="34" width="${W}" height="2" fill="url(#accent)"/>
   ${body}
 </svg>`;
@@ -114,7 +112,7 @@ export async function GET(request: Request) {
   return new Response(svg, {
     headers: {
       "Content-Type": "image/svg+xml; charset=utf-8",
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
       "X-Robots-Tag": "noindex, nofollow",
     },
   });

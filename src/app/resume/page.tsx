@@ -203,7 +203,7 @@ export default function Resume() {
               <span className="text-white/40">##</span> Toolchain
               <span className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
             </h3>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {TOOLS.map((tool) => (
                 <span
                   key={tool}

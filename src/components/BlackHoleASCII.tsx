@@ -66,19 +66,43 @@ function buildNameMask(
   charWidth: number,
   charHeight: number
 ): { cells: NameCell[]; rowMin: number; rowMax: number } {
-  let fontSize = h * CONFIG.nameFontRatio;
-  ctx.font = `bold ${fontSize}px "Courier New", monospace`;
+  const words = name.trim().split(/\s+/).filter(Boolean);
   const maxWidth = w * CONFIG.nameMaxWidthRatio;
-  const measured = ctx.measureText(name).width;
-  if (measured > maxWidth) {
-    fontSize *= maxWidth / measured;
+  const ideal = h * CONFIG.nameFontRatio;
+
+  let lines: string[] = [name];
+  let fontSize = ideal;
+  ctx.font = `bold ${fontSize}px "Courier New", monospace`;
+
+  const singleW = ctx.measureText(name).width;
+  if (singleW > maxWidth && words.length > 1) {
+    const wordWidths = words.map((word) => ctx.measureText(word).width);
+    const longest = Math.max(...wordWidths);
+    const multiFs = ideal * (maxWidth / longest);
+    const singleFs = ideal * (maxWidth / singleW);
+    if (multiFs > singleFs * 1.18) {
+      lines = words;
+      fontSize = multiFs;
+    } else {
+      fontSize = singleFs;
+    }
+  } else if (singleW > maxWidth) {
+    fontSize = ideal * (maxWidth / singleW);
+  }
+
+  ctx.font = `bold ${fontSize}px "Courier New", monospace`;
+  let widest = Math.max(...lines.map((line) => ctx.measureText(line).width));
+  if (widest > maxWidth) {
+    fontSize *= maxWidth / widest;
     ctx.font = `bold ${fontSize}px "Courier New", monospace`;
+    widest = Math.max(...lines.map((line) => ctx.measureText(line).width));
   }
 
   const maskScale = CONFIG.nameMaskScale;
-  const pad = fontSize * 0.6;
-  const maskW = Math.max(2, Math.ceil(measured + pad * 2));
-  const maskH = Math.max(2, Math.ceil(fontSize * 1.6));
+  const pad = fontSize * 0.5;
+  const maskW = Math.max(2, Math.ceil(widest + pad * 2));
+  const lineH = fontSize * 1.4;
+  const maskH = Math.max(2, Math.ceil(lineH * lines.length + pad));
   const mask = document.createElement("canvas");
   mask.width = Math.ceil(maskW * maskScale);
   mask.height = Math.ceil(maskH * maskScale);
@@ -92,7 +116,10 @@ function buildNameMask(
   mctx.fillStyle = "#fff";
   mctx.textAlign = "center";
   mctx.textBaseline = "middle";
-  mctx.fillText(name, maskW / 2, maskH / 2);
+  const centerY = maskH / 2;
+  lines.forEach((line, i) => {
+    mctx.fillText(line, maskW / 2, centerY + (i - (lines.length - 1) / 2) * lineH);
+  });
   const img = mctx.getImageData(0, 0, mask.width, mask.height);
   const data = img.data;
 
