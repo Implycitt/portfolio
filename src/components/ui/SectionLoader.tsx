@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 const SECTION_NAMES = [
   { id: "about", file: "about.md" },
+  { id: "misc", file: "interests.md" },
   { id: "socials", file: "socials.md" },
-  { id: "misc", file: "bits-and-pieces.md" },
 ];
 
 interface Flash {

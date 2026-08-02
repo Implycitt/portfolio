@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 const CMD = "./enter --content";
-const SECTIONS = ["about.md", "bits-and-pieces.md", "socials.md"];
+const SECTIONS = ["about.md", "interests.md", "socials.md"];
 const LINES = [
   "> mounting ascii://blackhole.scene ... ok",
   "> loading ui/header ............ ok",

@@ -46,7 +46,7 @@ export default function MiscSection() {
       <div className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 mx-auto h-[400px] w-[720px] rounded-full bg-gradient-to-tr from-cyan/10 via-violet/10 to-mauve/10 blur-[130px]" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
-        <SectionHeading prompt="ls ./interests" title="Bits & Pieces" />
+        <SectionHeading prompt="ls ./interests" title="Interests" />
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {INTERESTS.map((item) => (

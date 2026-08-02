@@ -81,27 +81,6 @@ const TOOLS = [
   "zsh",
 ];
 
-const CONTACT = [
-  {
-    label: "email",
-    value: "qborde1@lsu.edu",
-    href: "mailto:qborde1@lsu.edu",
-    cmd: "sendmail -t < message.txt",
-  },
-  {
-    label: "github",
-    value: "github.com/Implycitt",
-    href: "https://github.com/Implycitt",
-    cmd: "git clone github.com/Implycitt",
-  },
-  {
-    label: "linkedin",
-    value: "in/quentinbordelon",
-    href: "https://www.linkedin.com/in/quentinbordelon",
-    cmd: "curl linkedin.com/in/quentinbordelon",
-  },
-];
-
 function Section({
   title,
   items,
@@ -215,30 +194,6 @@ export default function Resume() {
             </div>
           </TerminalCard>
 
-          <TerminalCard path="./contact" accent="violet">
-            <h3 className="mb-5 flex items-center gap-3 font-mono text-xs tracking-[0.25em] uppercase text-mauve">
-              <span className="text-white/40">##</span> Contact
-              <span className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
-            </h3>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {CONTACT.map((c) => (
-                <a
-                  key={c.label}
-                  href={c.href}
-                  target={c.href.startsWith("http") ? "_blank" : undefined}
-                  rel={c.href.startsWith("http") ? "noreferrer noopener" : undefined}
-                  className="group flex flex-col gap-2 rounded-lg border border-white/10 bg-white/[0.02] p-4 transition-all duration-300 hover:border-mauve/40 hover:bg-white/[0.04] hover:shadow-[0_0_24px_-8px_rgba(199,125,255,0.5)]"
-                >
-                  <span className="font-mono text-[10px] tracking-widest uppercase text-white/40">
-                    <span className="text-cyan">$</span> {c.cmd}
-                  </span>
-                  <span className="font-mono text-sm font-bold text-white group-hover:text-mauve transition-colors">
-                    {c.value}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </TerminalCard>
         </div>
       </div>
     </main>

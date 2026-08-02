@@ -1,14 +1,42 @@
 import SectionHeading from "@/components/ui/SectionHeading";
 import TerminalCard from "@/components/ui/TerminalCard";
+import { fetchGitHubStats, fetchGitHubPullRequests } from "@/lib/github-stats";
 
-const STATS = [
-  { key: "LOC / day", value: "~800", note: "mostly imports" },
-  { key: "caffeine", value: "∞", note: "terminal fuel" },
-  { key: "stack depth", value: "ok", note: "no segfaults yet" },
-  { key: "uptime", value: "2023", note: "LSU CS & Physics" },
-];
+const USERNAME = process.env.GITHUB_USERNAME ?? "Implycitt";
 
-export default function AboutSection() {
+function fmt(n: number): string {
+  return n.toLocaleString("en-US");
+}
+
+export default async function AboutSection() {
+  const [stats, prs] = await Promise.all([
+    fetchGitHubStats(USERNAME),
+    fetchGitHubPullRequests(USERNAME),
+  ]);
+
+  const STATS = [
+    {
+      key: "stars",
+      value: stats ? fmt(stats.total_stars) : "--",
+      note: "across public repos",
+    },
+    {
+      key: "followers",
+      value: stats ? fmt(stats.followers) : "--",
+      note: "on github",
+    },
+    {
+      key: "public repos",
+      value: stats ? fmt(stats.public_repos) : "--",
+      note: "and counting",
+    },
+    {
+      key: "PRs merged",
+      value: prs !== null ? fmt(prs) : "--",
+      note: "authored",
+    },
+  ];
+
   return (
     <section id="about" className="relative min-h-screen snap-center flex items-center justify-center overflow-hidden py-16 sm:py-20">
       <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-gradient-to-tr from-cyan/10 via-violet/10 to-mauve/10 blur-[120px]" />
@@ -49,7 +77,7 @@ export default function AboutSection() {
 
           <TerminalCard path="stats" accent="violet" className="h-fit">
             <div className="space-y-4 font-mono">
-              <p className="text-xs tracking-widest text-white/45 uppercase">// live stats</p>
+              <p className="text-xs tracking-widest text-white/45 uppercase">// live from github</p>
               {STATS.map((s) => (
                 <div
                   key={s.key}

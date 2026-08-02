@@ -45,14 +45,14 @@ export default function SocialsSection() {
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
         <SectionHeading prompt="ls ./socials" title="Socials" />
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+        <div className="mt-12 flex flex-wrap justify-center gap-4">
           {SOCIALS.map((s) => (
             <a
               key={s.name}
               href={s.href}
               target={s.href.startsWith("http") ? "_blank" : undefined}
               rel={s.href.startsWith("http") ? "noreferrer noopener" : undefined}
-              className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-cyan/40 hover:bg-white/[0.04] hover:shadow-[0_0_30px_-8px_rgba(46,223,229,0.4)] hover-lift"
+              className="group relative w-full overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-cyan/40 hover:bg-white/[0.04] hover:shadow-[0_0_30px_-8px_rgba(46,223,229,0.4)] hover-lift sm:w-[calc(50%-0.5rem)]"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">

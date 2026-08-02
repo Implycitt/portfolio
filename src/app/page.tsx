@@ -21,11 +21,11 @@ export default function Home() {
         </Reveal>
 
         <Reveal variant="pop" delay={80}>
-          <SocialsSection />
+          <MiscSection />
         </Reveal>
 
         <Reveal variant="pop" delay={160}>
-          <MiscSection />
+          <SocialsSection />
         </Reveal>
 
         <Reveal variant="pop" delay={120}>

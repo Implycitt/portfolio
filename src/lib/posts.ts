@@ -6,6 +6,7 @@ export interface PostMeta {
   date: string;
   tag: string;
   excerpt: string;
+  category: string;
 }
 
 export interface Post extends PostMeta {
@@ -80,6 +81,7 @@ function buildPost(slug: string, raw: string): Post {
     date: data.date ?? "1970-01-01",
     tag: data.tag ?? "note",
     excerpt: data.excerpt ?? "",
+    category: slug.includes("/") ? slug.split("/")[0] : "notes",
     readMinutes: estimateReadTime(body),
     content: body,
   };
@@ -97,17 +99,24 @@ function githubHeaders(): Record<string, string> {
 
 async function listGithubSlugs(): Promise<string[] | null> {
   try {
-    const url = `https://api.github.com/repos/${BLOG_REPO}/contents/${encodeURIComponent(BLOG_PATH)}?ref=${BLOG_BRANCH}`;
+    const url = `https://api.github.com/repos/${BLOG_REPO}/git/trees/${BLOG_BRANCH}?recursive=1`;
     const res = await fetch(url, {
       headers: githubHeaders(),
       next: { revalidate: REVALIDATE },
     });
     if (!res.ok) return null;
-    const items = (await res.json()) as { name: string; type: string }[];
-    if (!Array.isArray(items)) return null;
-    return items
-      .filter((i) => i.type === "file" && i.name.endsWith(".md"))
-      .map((i) => i.name.slice(0, -3));
+    const tree = (await res.json()) as { tree?: { path: string; type: string }[] };
+    if (!tree.tree) return null;
+
+    const prefix = BLOG_PATH ? `${BLOG_PATH}/` : "";
+    return tree.tree
+      .filter(
+        (item) =>
+          item.type === "blob" &&
+          item.path.startsWith(prefix) &&
+          item.path.endsWith(".md")
+      )
+      .map((item) => item.path.slice(prefix.length, -3));
   } catch {
     return null;
   }
@@ -116,7 +125,8 @@ async function listGithubSlugs(): Promise<string[] | null> {
 async function fetchGithubRaw(slug: string): Promise<string | null> {
   try {
     const base = [BLOG_REPO, BLOG_BRANCH, BLOG_PATH].filter(Boolean).join("/");
-    const url = `https://raw.githubusercontent.com/${base}/${encodeURIComponent(slug)}.md`;
+    const encoded = slug.split("/").map(encodeURIComponent).join("/");
+    const url = `https://raw.githubusercontent.com/${base}/${encoded}.md`;
     const res = await fetch(url, { next: { revalidate: REVALIDATE } });
     if (!res.ok) return null;
     return await res.text();
@@ -140,7 +150,7 @@ async function getAllGithubPosts(): Promise<Post[] | null> {
 }
 
 async function readPostFile(slug: string): Promise<Post | null> {
-  const filePath = path.join(LOCAL_DIR, `${slug}.md`);
+  const filePath = path.join(LOCAL_DIR, ...slug.split("/")) + ".md";
   try {
     const raw = await fs.readFile(filePath, "utf8");
     return buildPost(slug, raw);
@@ -150,13 +160,15 @@ async function readPostFile(slug: string): Promise<Post | null> {
 }
 
 async function getAllLocalPosts(): Promise<Post[]> {
-  let files: string[];
+  let entries: string[];
   try {
-    files = await fs.readdir(LOCAL_DIR);
+    entries = await fs.readdir(LOCAL_DIR, { recursive: true });
   } catch {
     return [];
   }
-  const slugs = files.filter((f) => f.endsWith(".md")).map((f) => f.slice(0, -3));
+  const slugs = entries
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => f.slice(0, -3));
   const posts = (await Promise.all(slugs.map(readPostFile))).filter(
     (p): p is Post => p !== null
   );

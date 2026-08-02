@@ -13,13 +13,9 @@ export interface GitHubStatsData {
   updated_at: string;
 }
 
-export interface GitHubRepoInfo {
+export interface GitHubLanguageData {
   name: string;
-  description: string;
-  html_url: string;
-  stars: number;
-  forks: number;
-  language: string | null;
+  bytes: number;
 }
 
 export interface GitHubStreakData {
@@ -131,23 +127,45 @@ export async function fetchGitHubStats(
   };
 }
 
-export async function fetchGitHubRepos(username: string): Promise<GitHubRepoInfo[] | null> {
+export async function fetchGitHubPullRequests(username: string): Promise<number | null> {
+  const data = await fetchJson<{ total_count?: number }>(
+    `https://api.github.com/search/issues?q=author:${encodeURIComponent(username)}+type:pr+is:merged&per_page=1`
+  );
+  if (!data) return null;
+  return data.total_count ?? 0;
+}
+
+export async function fetchGitHubLanguageBytes(
+  username: string
+): Promise<GitHubLanguageData[] | null> {
   const repos = await fetchJson<GitHubRepo[]>(
     `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`
   );
   if (!repos) return null;
-  return repos
-    .filter((repo) => !repo.fork)
-    .sort((a, b) => (b.stargazers_count ?? 0) - (a.stargazers_count ?? 0))
-    .slice(0, 6)
-    .map((repo) => ({
-      name: repo.name,
-      description: repo.description ?? "no description",
-      html_url: repo.html_url,
-      stars: repo.stargazers_count ?? 0,
-      forks: repo.forks_count ?? 0,
-      language: repo.language,
-    }));
+
+  const owned = repos.filter((repo) => !repo.fork);
+  const results = await Promise.allSettled(
+    owned.map((repo) =>
+      fetch(`https://api.github.com/repos/${username}/${repo.name}/languages`, {
+        headers: githubHeaders(),
+      }).then(async (res) => {
+        if (!res.ok) return null;
+        return (await res.json()) as Record<string, number>;
+      })
+    )
+  );
+
+  const totals: Record<string, number> = {};
+  for (const result of results) {
+    if (result.status !== "fulfilled" || !result.value) continue;
+    for (const [language, bytes] of Object.entries(result.value)) {
+      totals[language] = (totals[language] ?? 0) + bytes;
+    }
+  }
+
+  return Object.entries(totals)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, bytes]) => ({ name, bytes }));
 }
 
 export async function fetchGitHubStreak(username: string): Promise<GitHubStreakData | null> {

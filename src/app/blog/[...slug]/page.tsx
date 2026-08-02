@@ -6,18 +6,18 @@ import SynthwaveBackground from "@/components/blog/SynthwaveBackground";
 import { getAllPosts, getPostBySlug, formatDate } from "@/lib/posts";
 
 interface BlogPostPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string[] }>;
 }
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
-  return posts.map((post) => ({ slug: post.slug }));
+  return posts.map((post) => ({ slug: post.slug.split("/") }));
 }
 
 export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const slug = (await params).slug.join("/");
   const post = await getPostBySlug(slug);
   return {
     title: post ? `${post.title} — Quentin Bordelon` : "Blog — Quentin Bordelon",
@@ -25,7 +25,7 @@ export async function generateMetadata({
 }
 
 export default async function BlogPost({ params }: BlogPostPageProps) {
-  const { slug } = await params;
+  const slug = (await params).slug.join("/");
   const post = await getPostBySlug(slug);
   if (!post) notFound();
 
@@ -48,6 +48,8 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
           <span className="text-neon-cyan neon-cyan">#{post.date}</span>
           <span className="text-white/35">·</span>
           <span className="text-neon-pink neon-pink">[{post.tag}]</span>
+          <span className="text-white/35">·</span>
+          <span className="text-mauve">~/blog/{post.category}</span>
           <span className="text-white/35">·</span>
           <span className="text-white/45">{formatDate(post.date)}</span>
           <span className="text-white/35">·</span>

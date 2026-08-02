@@ -10,6 +10,13 @@ export const metadata: Metadata = {
 export default async function Blog() {
   const posts = await getAllPosts();
 
+  const groups: Record<string, typeof posts> = {};
+  for (const post of posts) {
+    groups[post.category] = groups[post.category] ?? [];
+    groups[post.category].push(post);
+  }
+  const categories = Object.keys(groups).sort();
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <SynthwaveBackground />
@@ -41,50 +48,61 @@ export default async function Blog() {
 
         <div className="mt-6 mb-16 h-px w-full bg-gradient-to-r from-neon-cyan/60 via-neon-pink/60 to-transparent" />
 
-        {posts.length === 0 ? (
+        {categories.length === 0 ? (
           <p className="font-mono text-sm text-white/50">
             <span className="text-neon-pink neon-pink">$</span> ls ./feed.log
             <br />
-            // no posts yet — push a .md file to{" "}
+            // no posts yet — drop .md files into{" "}
             {blogSource.type === "github"
-              ? `${blogSource.repo}/${blogSource.path}/`
+              ? `${blogSource.repo}/${blogSource.path}/{category}/`
               : blogSource.label}
           </p>
         ) : (
-          <div className="space-y-5">
-            {posts.map((post) => (
-              <Link
-                key={post.slug}
-                href={`/blog/${post.slug}`}
-                className="group relative block overflow-hidden rounded-lg border border-white/10 bg-black/40 p-5 backdrop-blur-sm transition-all duration-300 hover:border-neon-pink/50 hover:bg-black/55 hover:shadow-[0_0_40px_-10px_rgba(255,42,109,0.5)] sm:p-6"
-              >
-                <span className="absolute left-0 top-0 h-full w-0.5 bg-gradient-to-b from-neon-cyan via-neon-pink to-neon-purple opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
-
-                <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] tracking-widest uppercase">
-                  <span className="text-neon-cyan neon-cyan">#{post.date}</span>
-                  <span className="text-white/35">·</span>
-                  <span className="text-neon-pink neon-pink">[{post.tag}]</span>
-                  <span className="text-white/35">·</span>
-                  <span className="text-white/45">{formatDate(post.date)}</span>
-                  <span className="ml-auto hidden text-white/35 sm:inline">
-                    {post.readMinutes} read
-                  </span>
+          <div className="space-y-14">
+            {categories.map((category) => (
+              <section key={category} className="space-y-5">
+                <div className="flex items-center gap-3 font-mono text-xs tracking-widest uppercase">
+                  <span className="text-neon-pink neon-pink">▚</span>
+                  <span className="text-white/70">~/blog/{category}</span>
+                  <span className="text-white/35">({groups[category].length})</span>
+                  <span className="h-px flex-1 bg-gradient-to-r from-neon-pink/40 to-transparent" />
                 </div>
 
-                <h2 className="mt-3 font-mono text-lg font-bold text-white transition-all duration-300 group-hover:text-neon-cyan sm:text-2xl">
-                  <span className="mr-2 text-neon-pink/70">▸</span>
-                  {post.title}
-                </h2>
+                {groups[category].map((post) => (
+                  <Link
+                    key={post.slug}
+                    href={`/blog/${post.slug}`}
+                    className="group relative block overflow-hidden rounded-lg border border-white/10 bg-black/40 p-5 backdrop-blur-sm transition-all duration-300 hover:border-neon-pink/50 hover:bg-black/55 hover:shadow-[0_0_40px_-10px_rgba(255,42,109,0.5)] sm:p-6"
+                  >
+                    <span className="absolute left-0 top-0 h-full w-0.5 bg-gradient-to-b from-neon-cyan via-neon-pink to-neon-purple opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
 
-                <p className="mt-2 font-mono text-sm leading-relaxed text-white/55">
-                  {post.excerpt}
-                </p>
+                    <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] tracking-widest uppercase">
+                      <span className="text-neon-cyan neon-cyan">#{post.date}</span>
+                      <span className="text-white/35">·</span>
+                      <span className="text-neon-pink neon-pink">[{post.tag}]</span>
+                      <span className="text-white/35">·</span>
+                      <span className="text-white/45">{formatDate(post.date)}</span>
+                      <span className="ml-auto hidden text-white/35 sm:inline">
+                        {post.readMinutes} read
+                      </span>
+                    </div>
 
-                <p className="mt-4 font-mono text-xs tracking-widest text-white/40 transition-colors duration-300 group-hover:text-neon-pink">
-                  $ cat {post.slug}.md{" "}
-                  <span className="terminal-caret inline-block h-3 w-1.5 bg-neon-cyan align-middle" />
-                </p>
-              </Link>
+                    <h2 className="mt-3 font-mono text-lg font-bold text-white transition-all duration-300 group-hover:text-neon-cyan sm:text-2xl">
+                      <span className="mr-2 text-neon-pink/70">▸</span>
+                      {post.title}
+                    </h2>
+
+                    <p className="mt-2 font-mono text-sm leading-relaxed text-white/55">
+                      {post.excerpt}
+                    </p>
+
+                    <p className="mt-4 font-mono text-xs tracking-widest text-white/40 transition-colors duration-300 group-hover:text-neon-pink">
+                      $ cat {post.slug}.md{" "}
+                      <span className="terminal-caret inline-block h-3 w-1.5 bg-neon-cyan align-middle" />
+                    </p>
+                  </Link>
+                ))}
+              </section>
             ))}
           </div>
         )}
