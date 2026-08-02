@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import localFont from 'next/font/local';
-import { Header } from "@/components/ui/Header";
-import { ParticleCursor } from "@/components/ui/ParticleCursor";
+import Header from "@/components/ui/Header";
 
 const firaCodeNerd = localFont({
   src: [
@@ -34,7 +33,6 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Header />
-        <ParticleCursor />
         {children}
       </body>
     </html>
