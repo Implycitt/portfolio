@@ -7,6 +7,9 @@ site:
 - `GET /api/stats` — JSON
 - `GET /api/stats/card` — an SVG card (drop it straight into your README as
   an `<img>`)
+- `GET /api/stats/streak` — an SVG contribution-streak card (current streak,
+  longest streak, yearly commits, mini heatmap)
+- `GET /api/stats/repos` — an SVG showcase card of your top-6 starred repos
 
 Both are **intentionally not linked anywhere in the UI** — no header link,
 no page, no sitemap. `public/robots.txt` disallows `/api/stats` so search
@@ -48,7 +51,23 @@ about every 5 minutes.
 
 ```markdown
 ![GitHub stats](https://quentinb.dev/api/stats/card)
+![Streak](https://quentinb.dev/api/stats/streak)
+![Top repos](https://quentinb.dev/api/stats/repos)
 ```
+
+## Streak card
+
+`GET /api/stats/streak` renders current streak, longest streak, and yearly
+total commits with a last-26-weeks contribution heatmap. It requires
+`GITHUB_TOKEN` (contribution data only exists behind the authenticated
+GraphQL API) and renders a graceful "streak temporarily unavailable" card
+when the token is missing or the API is unreachable.
+
+## Repos card
+
+`GET /api/stats/repos` renders your top 6 public repos (by stars) as a
+terminal-styled grid with name, description, language, stars, and forks.
+Falls back gracefully when the API is unreachable.
 
 ## Configuration
 

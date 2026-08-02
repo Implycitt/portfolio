@@ -13,6 +13,23 @@ export interface GitHubStatsData {
   updated_at: string;
 }
 
+export interface GitHubRepoInfo {
+  name: string;
+  description: string;
+  html_url: string;
+  stars: number;
+  forks: number;
+  language: string | null;
+}
+
+export interface GitHubStreakData {
+  username: string;
+  currentStreak: number;
+  longestStreak: number;
+  totalContributions: number;
+  days: { count: number }[];
+}
+
 interface GitHubUser {
   login: string;
   name: string | null;
@@ -24,10 +41,27 @@ interface GitHubUser {
 }
 
 interface GitHubRepo {
+  name: string;
+  description: string | null;
+  html_url: string;
+  fork: boolean;
   stargazers_count: number;
   forks_count: number;
   watchers_count: number;
   language: string | null;
+}
+
+interface GraphQLResponse {
+  data?: {
+    user?: {
+      contributionsCollection?: {
+        contributionCalendar?: {
+          totalContributions?: number;
+          weeks: { contributionDays: { date: string; contributionCount: number }[] }[];
+        };
+      };
+    };
+  };
 }
 
 const TOKEN = process.env.GITHUB_TOKEN;
@@ -95,4 +129,95 @@ export async function fetchGitHubStats(
     top_languages: topLanguages,
     updated_at: new Date().toISOString(),
   };
+}
+
+export async function fetchGitHubRepos(username: string): Promise<GitHubRepoInfo[] | null> {
+  const repos = await fetchJson<GitHubRepo[]>(
+    `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`
+  );
+  if (!repos) return null;
+  return repos
+    .filter((repo) => !repo.fork)
+    .sort((a, b) => (b.stargazers_count ?? 0) - (a.stargazers_count ?? 0))
+    .slice(0, 6)
+    .map((repo) => ({
+      name: repo.name,
+      description: repo.description ?? "no description",
+      html_url: repo.html_url,
+      stars: repo.stargazers_count ?? 0,
+      forks: repo.forks_count ?? 0,
+      language: repo.language,
+    }));
+}
+
+export async function fetchGitHubStreak(username: string): Promise<GitHubStreakData | null> {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return null;
+
+  const query = `query($login: String!) {
+    user(login: $login) {
+      contributionsCollection {
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              date
+              contributionCount
+            }
+          }
+        }
+      }
+    }
+  }`;
+
+  try {
+    const res = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "User-Agent": "qb-portfolio-stats",
+      },
+      body: JSON.stringify({ query, variables: { login: username } }),
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as GraphQLResponse;
+    const calendar = json.data?.user?.contributionsCollection?.contributionCalendar;
+    if (!calendar) return null;
+
+    const days = calendar.weeks.flatMap((week) =>
+      week.contributionDays.map((day) => day.contributionCount)
+    );
+
+    let idx = days.length - 1;
+    if (idx >= 0 && days[idx] === 0) idx -= 1;
+    let currentStreak = 0;
+    while (idx >= 0 && days[idx] > 0) {
+      currentStreak++;
+      idx--;
+    }
+
+    let longestStreak = 0;
+    let run = 0;
+    for (const count of days) {
+      if (count > 0) {
+        run++;
+        if (run > longestStreak) longestStreak = run;
+      } else {
+        run = 0;
+      }
+    }
+
+    return {
+      username,
+      currentStreak,
+      longestStreak,
+      totalContributions: calendar.totalContributions ?? 0,
+      days: days.map((count) => ({ count })),
+    };
+  } catch {
+    return null;
+  }
 }
