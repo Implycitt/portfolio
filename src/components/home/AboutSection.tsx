@@ -38,7 +38,7 @@ export default async function AboutSection() {
   ];
 
   return (
-    <section id="about" className="relative min-h-screen snap-center flex items-center justify-center overflow-hidden py-16 sm:py-20">
+    <section id="about" data-lenis-snap className="relative min-h-screen flex items-center justify-center overflow-hidden py-16 sm:py-20">
       <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-gradient-to-tr from-cyan/10 via-violet/10 to-mauve/10 blur-[120px]" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">

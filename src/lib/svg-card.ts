@@ -38,9 +38,7 @@ export function svgDocument(W: number, H: number, title: string, body: string): 
   <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="12" fill="#0d0b0a" stroke="#ffffff" stroke-opacity="0.14"/>
   <rect x="0" y="0" width="${W}" height="34" rx="12" fill="#ffffff" fill-opacity="0.05"/>
   <rect x="0" y="17" width="${W}" height="17" fill="#ffffff" fill-opacity="0.05"/>
-  <text x="16" y="22" font-family="${SVG_FONT}" font-size="12" fill="${SVG_CYAN}">▚</text>
-  <text x="34" y="22" font-family="${SVG_FONT}" font-size="12" fill="#ffffff" opacity="0.55">${esc(title)}</text>
-  <rect x="${W - 50}" y="10" width="8" height="14" fill="${SVG_CYAN}" fill-opacity="0.9"/>
+  <text x="16" y="22" font-family="${SVG_FONT}" font-size="12" fill="#ffffff" opacity="0.55">${esc(title)}</text>
   <rect x="0" y="34" width="${W}" height="2" fill="url(#accent)"/>
   ${body}
 </svg>`;

@@ -66,7 +66,6 @@ export default function BootSequence() {
         >
           <div className="rounded-lg border border-white/10 bg-black/60 backdrop-blur-sm">
             <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5 text-[11px] tracking-wider text-white/50">
-              <span className="text-cyan">▚</span>
               <span className="truncate">~/enter.sh — bash — tty1</span>
               <span className="terminal-caret ml-auto inline-block h-3 w-1.5 bg-cyan" />
             </div>

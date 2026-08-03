@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import localFont from 'next/font/local';
 import Header from "@/components/ui/Header";
+import PageTransition from "@/components/ui/PageTransition";
+import SmoothScroll from "@/components/ui/SmoothScroll";
 
 const firaCodeNerd = localFont({
   src: [
@@ -33,7 +36,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Header />
-        {children}
+        <SmoothScroll>
+          <PageTransition>{children}</PageTransition>
+        </SmoothScroll>
       </body>
     </html>
   );

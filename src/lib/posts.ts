@@ -15,11 +15,19 @@ export interface Post extends PostMeta {
   content: string;
 }
 
-const BLOG_REPO = process.env.BLOG_REPO;
+const REVALIDATE = 60;
+
+function normalizeRepo(repo: string | undefined): string | undefined {
+  if (!repo) return repo;
+  const trimmed = repo.trim().replace(/\/+$/, "");
+  const match = trimmed.match(/(?:github\.com\/)?([^/]+\/[^/]+?)(?:\.git)?$/);
+  return match ? match[1] : trimmed;
+}
+
+const BLOG_REPO = normalizeRepo(process.env.BLOG_REPO);
 const BLOG_PATH = (process.env.BLOG_PATH ?? "posts").replace(/^\/+|\/+$/g, "");
 const BLOG_BRANCH = process.env.BLOG_BRANCH ?? "main";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const REVALIDATE = 3600;
 
 export const blogSource: { type: "github"; repo: string; path: string; branch: string } | {
   type: "local";

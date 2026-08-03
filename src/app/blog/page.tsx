@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: "Blog — Quentin Bordelon",
 };
 
+export const revalidate = 60;
+
 export default async function Blog() {
   const posts = await getAllPosts();
 
@@ -62,7 +64,6 @@ export default async function Blog() {
             {categories.map((category) => (
               <section key={category} className="space-y-5">
                 <div className="flex items-center gap-3 font-mono text-xs tracking-widest uppercase">
-                  <span className="text-neon-pink neon-pink">▚</span>
                   <span className="text-white/70">~/blog/{category}</span>
                   <span className="text-white/35">({groups[category].length})</span>
                   <span className="h-px flex-1 bg-gradient-to-r from-neon-pink/40 to-transparent" />

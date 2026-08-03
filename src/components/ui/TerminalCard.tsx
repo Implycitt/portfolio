@@ -26,9 +26,6 @@ export default function TerminalCard({
       className={`group relative overflow-hidden rounded-lg border border-white/10 bg-black/40 backdrop-blur-sm transition-all duration-300 hover-lift ${ACCENT_RINGS[accent]} ${className}`}
     >
       <div className="flex items-center gap-2 border-b border-white/10 bg-gradient-to-r from-white/[0.04] to-transparent px-4 py-2.5 font-mono text-[11px] text-white/50">
-        <span className="text-cyan" aria-hidden>
-          ▚
-        </span>
         <span className="truncate tracking-wider">
           <span className="text-white/35">~/$ </span>
           <span className="text-white/80">{path ? path : title ?? "terminal"}</span>

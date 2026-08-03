@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { marked } from "marked";
 import SynthwaveBackground from "@/components/blog/SynthwaveBackground";
 import { getAllPosts, getPostBySlug, formatDate } from "@/lib/posts";
+import { renderMarkdown } from "@/lib/markdown";
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string[] }>;
 }
+
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -29,7 +31,7 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
   const post = await getPostBySlug(slug);
   if (!post) notFound();
 
-  const html = await marked.parse(post.content);
+  const html = renderMarkdown(post.content);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background text-foreground">

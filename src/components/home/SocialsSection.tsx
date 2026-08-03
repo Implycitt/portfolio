@@ -39,7 +39,7 @@ const SOCIALS = [
 
 export default function SocialsSection() {
   return (
-    <section id="socials" className="relative min-h-screen snap-center flex items-center justify-center overflow-hidden py-16 sm:py-20">
+    <section id="socials" data-lenis-snap className="relative min-h-screen flex items-center justify-center overflow-hidden py-16 sm:py-20">
       <div className="pointer-events-none absolute inset-x-0 top-1/3 -z-10 mx-auto h-[380px] w-[680px] rounded-full bg-gradient-to-tr from-violet/10 to-mauve/10 blur-[120px]" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
