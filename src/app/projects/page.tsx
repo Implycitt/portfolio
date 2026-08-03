@@ -21,7 +21,7 @@ interface Project {
 
 const PROJECTS: Project[] = [
   {
-    id: "01",
+    id: "00",
     name: "AveResearch2026",
     desc: "Research project on birds (Aves) and urbanization. An API ingestion layer for a 600k+ record dataset, WorldPop raster density modeling with latitude corrected spherical trigonometry, and chi squared + regression analysis to isolate urbanization effects by taxon.",
     tags: ["python", "numpy", "scipy", "research"],
@@ -29,7 +29,7 @@ const PROJECTS: Project[] = [
     accent: "violet",
   },
   {
-    id: "02",
+    id: "01",
     name: "PrintIt",
     desc: "Label printing software for an active retail business. A JavaFX desktop app with a searchable, categorized SQLite backed label catalog that cut printing time by ~50% for non technical staff.",
     tags: ["java", "javafx", "maven", "sqlite"],
@@ -37,7 +37,7 @@ const PROJECTS: Project[] = [
     accent: "cyan",
   },
   {
-    id: "03",
+    id: "02",
     name: "gdsclsu",
     desc: "Fullstack platform for LSU's Google Developer Student Club - event checkins, member tracking, and workshop tooling for a 100+ member community across 20+ events.",
     tags: ["web", "fullstack", "community"],
@@ -45,7 +45,31 @@ const PROJECTS: Project[] = [
     accent: "mauve",
   },
   {
+    id: "03",
+    name: "pytorch",
+    desc: "Contributing to PyTorch - tensors and dynamic neural networks in Python with strong GPU acceleration.",
+    tags: ["python", "c++", "ml", "cuda"],
+    links: { code: "https://github.com/Implycitt/pytorch" },
+    accent: "cyan",
+  },
+  {
     id: "04",
+    name: "LightsOut",
+    desc: "Lights Out puzzle game with a math twist - solve the classic grid toggle puzzle using Galois field (GF(2)) linear algebra via the galois library, with a windowed UI and a solver backend.",
+    tags: ["python", "galois", "math", "game"],
+    links: { code: "https://github.com/Implycitt/LightsOut" },
+    accent: "violet",
+  },
+  {
+    id: "05",
+    name: "dotfiles",
+    desc: "My dotfiles as I go - alacritty, nvim, tmux, and zsh configs, kept live as I keep tuning the setup.",
+    tags: ["lua", "neovim", "tmux", "zsh"],
+    links: { code: "https://github.com/Implycitt/dotfiles" },
+    accent: "mauve",
+  },
+  {
+    id: "06",
     name: "portfolio",
     desc: "My portfolio site.",
     tags: ["next.js", "typescript", "canvas", "raymarching"],
@@ -53,7 +77,7 @@ const PROJECTS: Project[] = [
     accent: "cyan",
   },
   {
-    id: "05",
+    id: "07",
     name: "Guardium",
     desc: "A 2D tower defense game built in Rust with Bevy - defend a tower from incoming projectiles, built as the final project for Computer Science Principles.",
     tags: ["rust", "bevy", "gamedev"],
@@ -61,13 +85,13 @@ const PROJECTS: Project[] = [
     accent: "violet",
   },
   {
-    id: "06",
+    id: "08",
     name: "OpenMeteo",
     desc: "Weather app with 3D models showing current, low, and high temperatures, wind speed, precipitation, and more for any location. An updated version of a CAC 2023 submission.",
     tags: ["javascript", "3d", "weather", "api"],
     links: { code: "https://github.com/Implycitt/OpenMeteo" },
     accent: "mauve",
-  },
+  }
 ];
 
 const BANNER = String.raw`
@@ -111,9 +135,7 @@ export default function Projects() {
         </div>
 
         <p className="max-w-2xl font-mono text-sm leading-relaxed text-white/55">
-          <span className="text-mauve">//</span> A working directory of things I've shipped - 
-          experiments in rendering, platforms for student clubs, and a healthy dose of systems
-          programming.
+          <span className="text-mauve">//</span> A working directory of things I've shipped.
         </p>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2">
