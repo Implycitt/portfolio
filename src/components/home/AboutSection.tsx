@@ -55,7 +55,7 @@ export default async function AboutSection() {
                 <span className="text-white font-bold">Quentin Bordelon</span> — a{" "}
                 <span className="text-cyan">Computer Science</span> and{" "}
                 <span className="text-mauve">Physics</span> undergraduate at Louisiana State
-                University, working at the intersection of software engineering and physics.
+                University, interested in the intersection of software engineering and physics.
               </p>
               <p>
                 Beyond the classroom I serve as the{" "}
@@ -67,10 +67,6 @@ export default async function AboutSection() {
                 I'm currently a software engineering intern at{" "}
                 <span className="text-white">FAST Enterprises</span> and the{" "}
                 <span className="text-white">Illinois Department of Revenue</span>.
-              </p>
-              <p className="text-white/50 text-xs">
-                <span className="text-mauve">//</span> status: compiling dreams, one commit at a
-                time
               </p>
             </div>
           </TerminalCard>

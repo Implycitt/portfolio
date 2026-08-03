@@ -23,7 +23,7 @@ const PROJECTS: Project[] = [
   {
     id: "01",
     name: "AveResearch2026",
-    desc: "Research project on birds (Aves) and urbanization. An API ingestion layer for a 600k+ record dataset, WorldPop raster density modeling with latitude-corrected spherical trigonometry, and chi-squared + regression analysis to isolate urbanization effects by taxon.",
+    desc: "Research project on birds (Aves) and urbanization. An API ingestion layer for a 600k+ record dataset, WorldPop raster density modeling with latitude corrected spherical trigonometry, and chi squared + regression analysis to isolate urbanization effects by taxon.",
     tags: ["python", "numpy", "scipy", "research"],
     links: { code: "https://github.com/Implycitt/AveResearch2026" },
     accent: "violet",
@@ -31,7 +31,7 @@ const PROJECTS: Project[] = [
   {
     id: "02",
     name: "PrintIt",
-    desc: "Label printing software for an active retail business. A JavaFX desktop app with a searchable, categorized SQLite-backed label catalog that cut printing time by ~50% for non-technical staff.",
+    desc: "Label printing software for an active retail business. A JavaFX desktop app with a searchable, categorized SQLite backed label catalog that cut printing time by ~50% for non technical staff.",
     tags: ["java", "javafx", "maven", "sqlite"],
     links: { code: "https://github.com/Implycitt/PrintIt" },
     accent: "cyan",
@@ -39,7 +39,7 @@ const PROJECTS: Project[] = [
   {
     id: "03",
     name: "gdsclsu",
-    desc: "Full-stack platform for LSU's Google Developer Student Club — event check-ins, member tracking, and workshop tooling for a 100+ member community across 20+ events.",
+    desc: "Fullstack platform for LSU's Google Developer Student Club - event checkins, member tracking, and workshop tooling for a 100+ member community across 20+ events.",
     tags: ["web", "fullstack", "community"],
     links: { code: "https://github.com/Implycitt/gdsclsu" },
     accent: "mauve",
@@ -47,7 +47,7 @@ const PROJECTS: Project[] = [
   {
     id: "04",
     name: "portfolio",
-    desc: "This site. A raymarched ASCII black hole, a scroll-driven cinematic intro, a boot sequence, and a terminal-first aesthetic — dogfooding everything I enjoy building.",
+    desc: "My portfolio site.",
     tags: ["next.js", "typescript", "canvas", "raymarching"],
     links: { live: "https://quentinb.dev", code: "https://github.com/Implycitt/portfolio" },
     accent: "cyan",
@@ -55,7 +55,7 @@ const PROJECTS: Project[] = [
   {
     id: "05",
     name: "Guardium",
-    desc: "A 2D tower-defense game built in Rust with Bevy — defend a tower from incoming projectiles, built as the final project for Computer Science Principles.",
+    desc: "A 2D tower defense game built in Rust with Bevy - defend a tower from incoming projectiles, built as the final project for Computer Science Principles.",
     tags: ["rust", "bevy", "gamedev"],
     links: { code: "https://github.com/Implycitt/Guardium" },
     accent: "violet",
@@ -111,7 +111,7 @@ export default function Projects() {
         </div>
 
         <p className="max-w-2xl font-mono text-sm leading-relaxed text-white/55">
-          <span className="text-mauve">//</span> A working directory of things I've shipped —
+          <span className="text-mauve">//</span> A working directory of things I've shipped - 
           experiments in rendering, platforms for student clubs, and a healthy dose of systems
           programming.
         </p>

@@ -81,12 +81,12 @@ function estimateReadTime(markdown: string): string {
   return `${minutes} min`;
 }
 
-function buildPost(slug: string, raw: string): Post {
+function buildPost(slug: string, raw: string, fallbackDate?: string): Post {
   const { data, body } = parseFrontmatter(raw);
   return {
     slug,
     title: data.title ?? slug,
-    date: data.date ?? "1970-01-01",
+    date: data.date ?? fallbackDate ?? "1970-01-01",
     tag: data.tag ?? "note",
     excerpt: data.excerpt ?? "",
     category: slug.includes("/") ? slug.split("/")[0] : "notes",
@@ -143,6 +143,33 @@ async function fetchGithubRaw(slug: string): Promise<string | null> {
   }
 }
 
+async function fetchGithubCommitDate(slug: string): Promise<string | null> {
+  try {
+    const filePath = [BLOG_PATH, slug].filter(Boolean).join("/") + ".md";
+    const url = `https://api.github.com/repos/${BLOG_REPO}/commits?path=${encodeURIComponent(filePath)}&sha=${encodeURIComponent(BLOG_BRANCH)}&per_page=1`;
+    const res = await fetch(url, {
+      headers: githubHeaders(),
+      next: { revalidate: REVALIDATE },
+    });
+    if (!res.ok) return null;
+    const commits = (await res.json()) as {
+      commit?: { author?: { date?: string } };
+    }[];
+    return commits[0]?.commit?.author?.date?.slice(0, 10) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchPostWithDate(
+  slug: string,
+  raw: string
+): Promise<Post> {
+  const { data } = parseFrontmatter(raw);
+  const fallbackDate = data.date ? undefined : (await fetchGithubCommitDate(slug)) ?? undefined;
+  return buildPost(slug, raw, fallbackDate);
+}
+
 async function getAllGithubPosts(): Promise<Post[] | null> {
   const slugs = await listGithubSlugs();
   if (!slugs) return null;
@@ -150,7 +177,7 @@ async function getAllGithubPosts(): Promise<Post[] | null> {
     await Promise.all(
       slugs.map(async (slug) => {
         const raw = await fetchGithubRaw(slug);
-        return raw ? buildPost(slug, raw) : null;
+        return raw ? fetchPostWithDate(slug, raw) : null;
       })
     )
   ).filter((p): p is Post => p !== null);
@@ -194,7 +221,7 @@ export async function getAllPosts(): Promise<Post[]> {
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   if (BLOG_REPO) {
     const raw = await fetchGithubRaw(slug);
-    if (raw) return buildPost(slug, raw);
+    if (raw) return fetchPostWithDate(slug, raw);
   }
   return readPostFile(slug);
 }

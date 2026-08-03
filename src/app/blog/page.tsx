@@ -44,7 +44,7 @@ export default async function Blog() {
         <p className="mt-4 max-w-xl font-mono text-sm leading-relaxed text-white/60">
           <span className="text-neon-pink neon-pink">$</span> cat ./feed.log
           <br />
-          A signal line of notes on graphics, physics, and shipping software. Rendered at 88% CRT
+          A signal line of notes on math, physics, software, and whatever crosses my mind. Rendered at 88% CRT
           nostalgia.
         </p>
 

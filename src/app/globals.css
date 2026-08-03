@@ -38,7 +38,9 @@ html {
 }
 
 .page-enter {
-  animation: page-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* backwards: never retain the animated transform after the pop-in, so
+     .page-enter never becomes a containing block for fixed descendants. */
+  animation: page-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 /* CRT power-on flash — replays on every navigation via PageTransition */
@@ -84,7 +86,9 @@ html {
       transparent 55%,
       rgba(0, 0, 0, 0.35) 100%
     );
-  animation: crt-flash 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* backwards: do not retain the animated opacity/transform, keeping this
+     overlay strictly viewport-fixed (no scroll contribution). */
+  animation: crt-flash 1.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .crt-flash::after {
@@ -101,7 +105,8 @@ html {
     rgba(255, 42, 109, 0.16),
     transparent
   );
-  animation: crt-roll 1.1s linear both;
+  /* backwards: don't keep the roll line translated 420% below the fold. */
+  animation: crt-roll 1.1s linear backwards;
 }
 
 html::-webkit-scrollbar {
