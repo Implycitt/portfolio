@@ -4,7 +4,7 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import ResumeDownload from "@/components/ui/ResumeDownload";
 
 export const metadata: Metadata = {
-  title: "Resume — Quentin Bordelon",
+  title: "Resume - Quentin Bordelon",
 };
 
 export const dynamic = "force-dynamic";
@@ -13,12 +13,12 @@ const EXPERIENCE = [
   {
     role: "Implementation Consultant Intern",
     org: "FAST Enterprises",
-    period: "May 2026 — Aug 2026",
+    period: "May 2026 - Aug 2026",
     points: [
       "Configured, tested, and deployed software solutions for government agency clients, tailoring core system workflows to meet specific regulatory requirements and operational needs.",
-      "Supported an active rollout on the production support team, maintaining the GenTax environment to minimize errors for user-facing services.",
+      "Supported an active rollout on the production support team, maintaining the GenTax environment to minimize errors for user facing services.",
       "Architected and optimized complex SQL queries across 1M+ row taxpayer tables to ensure seamless integration and functionality across various tax subsystems.",
-      "Engineered custom features and modernized legacy codebases by rewriting core VB.NET services into high-performance C#, improving maintainability and execution speed across enterprise modules.",
+      "Engineered custom features and modernized legacy codebases by rewriting core VB.NET services into high performance C#, improving maintainability and execution speed across enterprise modules.",
     ],
   },
 ];
@@ -38,8 +38,8 @@ const EDUCATION = [
   {
     role: "B.S. Computer Science & Physics",
     org: "Louisiana State University",
-    period: "Aug 2025 — May 2029",
-    points: ["Concentration on the intersection of software engineering and physics."],
+    period: "Aug 2025 - May 2029",
+    points: ["Concentration in Software Engineering."],
   },
 ];
 
@@ -47,10 +47,10 @@ const LEADERSHIP = [
   {
     role: "Webmaster",
     org: "LSU Google Developer Student Club",
-    period: "Aug 2025 — present",
+    period: "Aug 2025 - present",
     points: [
-      "Engineered and maintained full-stack web applications for a community of 100+ members, automating event check-ins and member tracking across 20+ technical workshops and events.",
-      "Co-organized campus-wide hackathons with organizations like SASE, leading event logistics, venue scheduling, and developer marketing for 100+ student attendees.",
+      "Engineered and maintained fullstack web applications for a community of 100+ members, automating event checkins and member tracking across 20+ technical workshops and events.",
+      "Co-organized campus wide hackathons with organizations like SASE, leading event logistics, venue scheduling, and developer marketing for 100+ student attendees.",
       "Mentored and collaborated with CS students to build proficiency in modern developer tools, frameworks, and Google technologies.",
     ],
   },
@@ -59,7 +59,7 @@ const LEADERSHIP = [
 const SUMMARY = [
   "CS & Physics undergrad at LSU building software at the intersection of engineering and physics.",
   "Implementation Consultant Intern at FAST Enterprises, supporting GenTax active rollout for the Illinois Department of Revenue.",
-  "Webmaster for LSU's Google Developer Student Club — full-stack platform tooling, hackathons, and mentorship.",
+  "Webmaster for LSU's Google Developer Student Club - full-stack platform tooling, hackathons, and mentorship.",
 ];
 
 const TOOLS = [
@@ -131,7 +131,7 @@ export default function Resume() {
 
         <p className="mt-6 max-w-2xl font-mono text-sm leading-relaxed text-white/55 print:hidden">
           <span className="text-mauve">//</span> A structured summary of education, experience, and
-          skills. Headers double as terminal prompts because I can't help myself.
+          skills. 
         </p>
 
         <div className="mt-12 space-y-10 print:mt-0">
