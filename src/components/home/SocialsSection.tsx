@@ -43,7 +43,7 @@ export default function SocialsSection() {
       <div className="pointer-events-none absolute inset-x-0 top-1/3 -z-10 mx-auto h-[380px] w-[680px] rounded-full bg-gradient-to-tr from-violet/10 to-mauve/10 blur-[120px]" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
-        <SectionHeading prompt="ls ./socials" title="Socials" />
+        <SectionHeading prompt="cat ./sections/socials.md" title="Socials" />
 
         <div className="mt-12 flex flex-wrap justify-center gap-4">
           {SOCIALS.map((s) => (

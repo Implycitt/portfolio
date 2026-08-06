@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 const CMD = "./enter --content";
-const SECTIONS = ["about.md", "interests.md", "socials.md"];
+const SECTIONS = ["ABOUT.md", "INTERESTS.md", "SOCIALS.md"];
 const LINES = [
   "> mounting ascii://blackhole.scene ... ok",
   "> loading ui/header ............ ok",
@@ -88,7 +88,7 @@ export default function BootSequence() {
           style={{ opacity: listing }}
         >
           <p className="text-white/90">
-            <span className="text-cyan">$</span> <span className="text-white">ls ./sections</span>
+            <span className="text-cyan">$</span> <span className="text-white">ls ./SECTIONS</span>
           </p>
           <p className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-white/80">
             {SECTIONS.map((f) => (

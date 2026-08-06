@@ -42,7 +42,7 @@ export default async function AboutSection() {
       <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-gradient-to-tr from-cyan/10 via-violet/10 to-mauve/10 blur-[120px]" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
-        <SectionHeading prompt="cat ./about.txt" title="About" />
+        <SectionHeading prompt="cat ./sections/about.md" title="About" />
 
         <div className="mt-12 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
           <TerminalCard path="whoami" accent="cyan" className="h-fit">
