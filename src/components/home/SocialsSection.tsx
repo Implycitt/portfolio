@@ -14,8 +14,8 @@ const SOCIALS = [
   },
   {
     name: "linkedin",
-    href: "https://www.linkedin.com",
-    handle: "in/quentin-bordelon",
+    href: "https://www.linkedin.com/in/quentinbordelon",
+    handle: "in/quentinbordelon",
     cmd: "curl linkedin.com/in/quentin-bordelon",
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
