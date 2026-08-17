@@ -202,6 +202,7 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
     let lastTime = 0;
     let nameSeen = false;
     let corruptScratch: boolean[] = [];
+    let running = true;
 
     const measureFont = () => {
       context.font = `${CONFIG.fontSize}px "Courier New", monospace`;
@@ -233,7 +234,10 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
     const resize = () => {
       viewW = window.innerWidth;
       viewH = window.innerHeight;
-      const dpr = window.devicePixelRatio || 1;
+      const rawDpr = window.devicePixelRatio || 1;
+      // Cap DPR to cut per-frame pixel cost: 1.5 on phones/small viewports,
+      // 2 on larger screens. ASCII glyphs need no more than this.
+      const dpr = Math.min(rawDpr, viewW < 768 ? 1.5 : 2);
       node.width = Math.round(viewW * dpr);
       node.height = Math.round(viewH * dpr);
       node.style.width = `${viewW}px`;
@@ -270,7 +274,8 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
       }
       const total = cols * rows;
       if (zbuf.length !== total) zbuf = new Float32Array(total);
-      buffer = new Array(total).fill(" ");
+      if (buffer.length !== total) buffer = new Array(total);
+      buffer.fill(" ");
       zbuf.fill(-Infinity);
 
       const scrollProgress = Math.min(
@@ -494,16 +499,13 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
         }
       }
 
-      context.fillStyle = "#000000";
-      context.fillRect(0, 0, viewW, viewH);
+      context.clearRect(0, 0, viewW, viewH);
       context.save();
       context.beginPath();
       context.rect(0, 0, cols * charWidth, rows * charHeight);
       context.clip();
       context.font = `${CONFIG.fontSize}px "Courier New", monospace`;
       context.fillStyle = CONFIG.color;
-      context.shadowColor = CONFIG.color;
-      context.shadowBlur = CONFIG.glow;
       context.textBaseline = "top";
       for (let row = 0; row < rows; row++) {
         const line = buffer.slice(row * cols, row * cols + cols).join("");
@@ -512,14 +514,31 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
       }
       context.restore();
 
+      if (document.hidden || window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 2)) {
+        running = false;
+        return;
+      }
+      frameId = requestAnimationFrame(render);
+    };
+
+    const resumeIfNeeded = () => {
+      if (running) return;
+      if (document.hidden) return;
+      if (window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 2)) return;
+      running = true;
+      lastTime = 0;
       frameId = requestAnimationFrame(render);
     };
 
     frameId = requestAnimationFrame(render);
+    document.addEventListener("visibilitychange", resumeIfNeeded);
+    window.addEventListener("scroll", resumeIfNeeded, { passive: true });
 
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", resumeIfNeeded);
+      window.removeEventListener("scroll", resumeIfNeeded);
     };
   }, [name, mounted]);
 
@@ -545,7 +564,13 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
             pointerEvents: "none",
           }}
         >
-          <canvas ref={canvasRef} style={{ display: "block" }} />
+          <canvas
+            ref={canvasRef}
+            style={{
+              display: "block",
+              filter: `drop-shadow(0 0 ${CONFIG.glow}px rgba(255, 255, 255, 0.85))`,
+            }}
+          />
         </div>,
         document.body
       )}

@@ -64,8 +64,8 @@ export default async function AboutSection() {
                 technical student workshops.
               </p>
               <p>
-                I'm currently a software engineering intern at{" "}
-                <span className="text-white">FAST Enterprises</span> and the{" "}
+                I recently completed a software engineering internship at{" "}
+                <span className="text-white">FAST Enterprises</span>, working with the{" "}
                 <span className="text-white">Illinois Department of Revenue</span>.
               </p>
             </div>

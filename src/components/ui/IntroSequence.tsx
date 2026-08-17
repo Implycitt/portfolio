@@ -34,7 +34,7 @@ export default function IntroSequence() {
   const overlay = (
     <div
       aria-hidden
-      className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-background transition-all duration-[900ms]"
+      className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-background transition-[opacity,transform] duration-[900ms]"
       style={{
         transform: isFading ? "translateY(100%)" : "translateY(0%)",
         opacity: isFading ? 0 : 1,

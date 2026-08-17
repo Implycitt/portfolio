@@ -58,7 +58,7 @@ const LEADERSHIP = [
 
 const SUMMARY = [
   "CS & Physics undergrad at LSU building software at the intersection of engineering and physics.",
-  "Implementation Consultant Intern at FAST Enterprises, supporting GenTax active rollout for the Illinois Department of Revenue.",
+  "Completed an Implementation Consultant internship at FAST Enterprises, supporting the GenTax active rollout for the Illinois Department of Revenue.",
   "Webmaster for LSU's Google Developer Student Club - full-stack platform tooling, hackathons, and mentorship.",
 ];
 
