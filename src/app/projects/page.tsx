@@ -1,98 +1,51 @@
 import type { Metadata } from "next";
-import TerminalCard from "@/components/ui/TerminalCard";
+import {
+  fetchGitHubRepos,
+  fetchGitHubOrgs,
+  fetchGitHubContributions,
+} from "@/lib/github-repos";
+import ProjectCard from "@/components/ui/ProjectCard";
+import OrgCard from "@/components/ui/OrgCard";
 
 export const metadata: Metadata = {
   title: "Projects — Quentin Bordelon",
 };
 
-interface ProjectLinks {
-  live?: string;
-  code?: string;
-}
+export const revalidate = 3600;
 
-interface Project {
-  id: string;
-  name: string;
-  desc: string;
-  tags: string[];
-  links: ProjectLinks;
-  accent: "cyan" | "violet" | "mauve";
-}
-
-const PROJECTS: Project[] = [
-  {
-    id: "00",
-    name: "AveResearch2026",
-    desc: "Research project on birds (Aves) and urbanization. An API ingestion layer for a 600k+ record dataset, WorldPop raster density modeling with latitude corrected spherical trigonometry, and chi squared + regression analysis to isolate urbanization effects by taxon.",
-    tags: ["python", "numpy", "scipy", "research"],
-    links: { code: "https://github.com/Implycitt/AveResearch2026" },
-    accent: "violet",
-  },
-  {
-    id: "01",
-    name: "PrintIt",
-    desc: "Label printing software for an active retail business. A JavaFX desktop app with a searchable, categorized SQLite backed label catalog that cut printing time by ~50% for non technical staff.",
-    tags: ["java", "javafx", "maven", "sqlite"],
-    links: { code: "https://github.com/Implycitt/PrintIt" },
-    accent: "cyan",
-  },
-  {
-    id: "02",
-    name: "gdsclsu",
-    desc: "Fullstack platform for LSU's Google Developer Student Club - event checkins, member tracking, and workshop tooling for a 100+ member community across 20+ events.",
-    tags: ["web", "fullstack", "community"],
-    links: { code: "https://github.com/Implycitt/gdsclsu" },
-    accent: "mauve",
-  },
-  {
-    id: "03",
-    name: "pytorch",
-    desc: "Contributing to PyTorch - tensors and dynamic neural networks in Python with strong GPU acceleration.",
-    tags: ["python", "c++", "ml", "cuda"],
-    links: { code: "https://github.com/Implycitt/pytorch" },
-    accent: "cyan",
-  },
-  {
-    id: "04",
-    name: "LightsOut",
-    desc: "Lights Out puzzle game with a math twist - solve the classic grid toggle puzzle using Galois field (GF(2)) linear algebra via the galois library, with a windowed UI and a solver backend.",
-    tags: ["python", "galois", "math", "game"],
-    links: { code: "https://github.com/Implycitt/LightsOut" },
-    accent: "violet",
-  },
-  {
-    id: "05",
-    name: "dotfiles",
-    desc: "My dotfiles as I go - alacritty, nvim, tmux, and zsh configs, kept live as I keep tuning the setup.",
-    tags: ["lua", "neovim", "tmux", "zsh"],
-    links: { code: "https://github.com/Implycitt/dotfiles" },
-    accent: "mauve",
-  },
-  {
-    id: "06",
-    name: "portfolio",
-    desc: "My portfolio site.",
-    tags: ["next.js", "typescript", "canvas", "raymarching"],
-    links: { live: "https://quentinb.dev", code: "https://github.com/Implycitt/portfolio" },
-    accent: "cyan",
-  },
-  {
-    id: "07",
-    name: "Guardium",
-    desc: "A 2D tower defense game built in Rust with Bevy - defend a tower from incoming projectiles, built as the final project for Computer Science Principles.",
-    tags: ["rust", "bevy", "gamedev"],
-    links: { code: "https://github.com/Implycitt/Guardium" },
-    accent: "violet",
-  },
-  {
-    id: "08",
-    name: "OpenMeteo",
-    desc: "Weather app with 3D models showing current, low, and high temperatures, wind speed, precipitation, and more for any location. An updated version of a CAC 2023 submission.",
-    tags: ["javascript", "3d", "weather", "api"],
-    links: { code: "https://github.com/Implycitt/OpenMeteo" },
-    accent: "mauve",
-  }
+const EXCLUDED = [
+  "Implycitt",
+  "School",
+  "GameDev",
+  "CSPGame",
 ];
+
+const GITHUB_USER = process.env.GITHUB_USERNAME ?? "Implycitt";
+
+const TAG_MAP: Record<string, string[]> = {
+  PrintIt: ["javafx", "maven", "sqlite", "desktop"],
+  portfolio: ["next.js", "react", "tailwindcss", "typescript", "three.js"],
+  quickView: ["electron", "latex", "typst", "pdf"],
+  tools: ["cli"],
+  dotfiles: ["neovim", "tmux", "zsh", "alacritty"],
+  LightsOut: ["galois", "math", "game", "puzzle"],
+  AveResearch2026: ["numpy", "scipy", "research", "data-science", "pandas"],
+  Guardium: ["bevy", "gamedev", "tower-defense", "2d"],
+  OpenMeteo: ["3d", "weather", "api", "three.js"],
+  Zenithly: ["hackathon", "web", "mapbox"],
+  CurrencyConverter: ["swing", "desktop", "gui"],
+  ValentinesDay: ["animation", "web", "frontend"],
+  DesktopPet: ["pygame", "desktop", "gui"],
+  Orderbook: ["trading", "wip", "finance"],
+  "competitive-programming": ["algorithms", "data-structures", "problem-solving"],
+  blog: ["markdown", "next.js"],
+  gdsclsu: ["svelte", "gdsc", "club-site"],
+  hackGrader: ["django", "grading", "gdsc"],
+  WebDevWorkshop: ["workshop", "gdsc", "web"],
+  GeauxHack: ["gdsc", "hackathon"],
+  "saselsu.github.io": ["sasel", "club-site"],
+  Voyago: ["hackathon", "travel", "group-project"],
+};
 
 const BANNER = String.raw`
   _ __   __ _ _ __   ___ _ __
@@ -102,7 +55,45 @@ const BANNER = String.raw`
  |_|    |___/|_|
 `.replaceAll("\\`", "`");
 
-export default function Projects() {
+function SectionHeading({
+  prompt,
+  title,
+  blurb,
+}: {
+  prompt: string;
+  title: string;
+  blurb: string;
+}) {
+  return (
+    <div className="mt-20">
+      <div className="mb-2 flex items-center gap-3 font-mono text-xs text-white/40">
+        <span className="text-cyan">$</span>
+        <span className="text-white/60">{prompt}</span>
+        <span className="terminal-caret inline-block h-3.5 w-2 bg-cyan" />
+      </div>
+      <h2 className="font-mono text-2xl font-bold text-white">{title}</h2>
+      <p className="mt-2 font-mono text-sm leading-relaxed text-white/55">
+        <span className="text-mauve">//</span> {blurb}
+      </p>
+    </div>
+  );
+}
+
+export default async function Projects() {
+  const [repos, data] = await Promise.all([
+    fetchGitHubRepos(GITHUB_USER, EXCLUDED),
+    fetchGitHubContributions(GITHUB_USER),
+  ]);
+  const { contributions: contributed, orgs } = data;
+
+  const orgStats: Record<string, { commits: number; repos: number }> = {};
+  for (const c of contributed ?? []) {
+    const owner = c.repo.full_name.split("/")[0];
+    const s = (orgStats[owner] ??= { commits: 0, repos: 0 });
+    s.commits += c.commits;
+    s.repos += 1;
+  }
+
   return (
     <main className="relative min-h-screen bg-background text-foreground overflow-hidden">
       <div className="terminal-grid-bg pointer-events-none absolute inset-0" />
@@ -120,7 +111,7 @@ export default function Projects() {
         }}
       />
 
-      <div className="relative mx-auto w-full max-w-6xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36">
+      <div className="relative mx-auto w-full max-w-4xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36">
         <pre
           aria-hidden
           className="select-none overflow-hidden font-mono text-[9px] leading-tight text-cyan/50 sm:text-xs sm:text-cyan/60"
@@ -130,71 +121,94 @@ export default function Projects() {
 
         <div className="mb-8 flex items-center gap-3 font-mono text-xs text-white/40">
           <span className="text-cyan">$</span>
-          <span className="text-white/60">ls ./projects --color=always</span>
+          <span className="text-white/60">
+            gh repo list {GITHUB_USER} --source --limit 100
+          </span>
           <span className="terminal-caret inline-block h-3.5 w-2 bg-cyan" />
         </div>
 
         <p className="max-w-2xl font-mono text-sm leading-relaxed text-white/55">
-          <span className="text-mauve">//</span> A working directory of things I've shipped.
+          <span className="text-mauve">//</span> A working directory of things I've
+          shipped, the groups I build with, and the repos I've touched outside my
+          own account.
         </p>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
-          {PROJECTS.map((p) => (
-            <TerminalCard key={p.id} path={`projects/${p.name}`} accent={p.accent} className="h-full">
-              <div className="flex flex-col gap-4 font-mono">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] tracking-widest text-white/40"># {p.id}</p>
-                    <h3 className="mt-1 text-xl font-bold text-white transition-colors group-hover:text-cyan">
-                      {p.name}
-                    </h3>
-                  </div>
-                </div>
+        {repos === null && (
+          <div className="mt-16 font-mono text-sm text-amber-400/70">
+            <span className="text-amber-400">!</span> Could not reach GitHub — try
+            again in a moment.
+          </div>
+        )}
 
-                <p className="text-sm leading-relaxed text-white/60">{p.desc}</p>
+        {repos !== null && (
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            {repos.map((repo, i) => (
+              <ProjectCard
+                key={repo.id}
+                repo={repo}
+                index={i}
+                owner={GITHUB_USER}
+                extraTags={TAG_MAP[repo.name] ?? []}
+              />
+            ))}
+          </div>
+        )}
 
-                <div className="mt-auto flex flex-wrap gap-2">
-                  {p.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[11px] text-white/55 transition-colors group-hover:border-cyan/30 group-hover:text-cyan/80"
-                    >
-                      [{t}]
-                    </span>
-                  ))}
-                </div>
+        {repos !== null && (
+          <p className="mt-16 font-mono text-xs tracking-widest text-white/35">
+            <span className="text-cyan">$</span> gh repo list | wc -l
+            <span className="terminal-caret ml-1 inline-block h-3 w-1.5 bg-cyan align-middle" />
+          </p>
+        )}
 
-                {(p.links.live || p.links.code) && (
-                  <div className="flex gap-4 border-t border-white/5 pt-3 text-xs text-white/45">
-                    {p.links.live && (
-                      <a
-                        href={p.links.live}
-                        className="transition-colors hover:text-cyan"
-                      >
-                        ./run_demo.sh →
-                      </a>
-                    )}
-                    {p.links.code && (
-                      <a
-                        href={p.links.code}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className="transition-colors hover:text-cyan"
-                      >
-                        $ git clone ←
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
-            </TerminalCard>
-          ))}
-        </div>
+        <SectionHeading
+          prompt={`gh org list ${GITHUB_USER}`}
+          title="organizations"
+          blurb="The groups I'm active in and build for."
+        />
+        {orgs === null ? (
+          <div className="mt-6 font-mono text-sm text-amber-400/70">
+            <span className="text-amber-400">!</span> Could not reach GitHub — try
+            again in a moment.
+          </div>
+        ) : (
+          <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            {orgs.map((org, i) => (
+              <OrgCard
+                key={org.login}
+                org={org}
+                index={i}
+                stats={orgStats[org.login]}
+              />
+            ))}
+          </div>
+        )}
 
-        <p className="mt-16 font-mono text-xs tracking-widest text-white/35">
-          <span className="text-cyan">$</span> ls ./projects | wc -l
-          <span className="terminal-caret ml-1 inline-block h-3 w-1.5 bg-cyan align-middle" />
-        </p>
+        <SectionHeading
+          prompt={`gh search commits --author=${GITHUB_USER} --json repository`}
+          title="contributions"
+          blurb="Repos I've helped build, even when they live outside my account. Auto-discovered from my commit history."
+        />
+        {contributed === null ? (
+          <div className="mt-6 font-mono text-sm text-amber-400/70">
+            <span className="text-amber-400">!</span> Could not reach GitHub — try
+            again in a moment.
+          </div>
+        ) : (
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            {contributed.map((c, i) => (
+              <ProjectCard
+                key={c.repo.id}
+                repo={c.repo}
+                index={i}
+                extraTags={TAG_MAP[c.repo.name] ?? []}
+                owner={c.repo.full_name.split("/")[0]}
+                role={c.role}
+                commits={c.commits}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
