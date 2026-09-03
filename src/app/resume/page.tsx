@@ -23,15 +23,37 @@ const EXPERIENCE = [
   },
 ];
 
-const SKILLS = [
-  ["C++", "90%"],
-  ["Python", "85%"],
-  ["Java", "80%"],
-  ["Rust", "80%"],
-  ["TypeScript", "85%"],
-  ["C#", "75%"],
-  ["SQL (SQL Server)", "85%"],
-  ["Go", "70%"],
+const LANGUAGES = [
+  "C++",
+  "Python",
+  "Java",
+  "Rust",
+  "TypeScript",
+  "C#",
+  "SQL (SQL Server)",
+  "Go",
+];
+
+const FRAMEWORKS = [
+  "Svelte",
+  "Node.js",
+  "React",
+  "Three.js",
+  "Firebase",
+  "PyTorch",
+  "NumPy",
+  "PyQt6",
+  "Matplotlib",
+];
+
+const TOOLS = [
+  "Git",
+  "Docker",
+  "Unix",
+  "Bash",
+  "PowerShell",
+  "Tmux",
+  "zsh",
 ];
 
 const EDUCATION = [
@@ -62,23 +84,10 @@ const SUMMARY = [
   "Webmaster for LSU's Google Developer Student Club - full-stack platform tooling, hackathons, and mentorship.",
 ];
 
-const TOOLS = [
-  "Svelte",
-  "Node.js",
-  "React",
-  "Three.js",
-  "Firebase",
-  "PyTorch",
-  "NumPy",
-  "PyQt6",
-  "Matplotlib",
-  "Git",
-  "Docker",
-  "Unix",
-  "Bash",
-  "PowerShell",
-  "Tmux",
-  "zsh",
+const SKILL_GROUPS = [
+  { title: "Languages", items: LANGUAGES, hover: "hover:border-violet/40 hover:text-mauve" },
+  { title: "Frameworks", items: FRAMEWORKS, hover: "hover:border-cyan/40 hover:text-cyan" },
+  { title: "Tools", items: TOOLS, hover: "hover:border-mauve/40 hover:text-mauve" },
 ];
 
 function Section({
@@ -154,42 +163,24 @@ export default function Resume() {
           </TerminalCard>
 
           <TerminalCard path="skills" accent="violet">
-            <h3 className="mb-5 flex items-center gap-3 font-mono text-xs tracking-[0.25em] uppercase text-mauve">
-              <span className="text-white/40">##</span> Skills
-              <span className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
-            </h3>
-            <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
-              {SKILLS.map(([skill, level]) => {
-                const pct = parseInt(level, 10);
-                return (
-                  <div key={skill} className="font-mono">
-                    <div className="flex items-baseline justify-between text-sm">
-                      <span className="text-white/80">{skill}</span>
-                      <span className="text-[11px] text-white/40">{level}</span>
-                    </div>
-                    <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/5">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-cyan via-violet to-mauve"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
+            <div className="space-y-8">
+              {SKILL_GROUPS.map((group) => (
+                <div key={group.title}>
+                  <h3 className="mb-4 flex items-center gap-3 font-mono text-xs tracking-[0.25em] uppercase text-mauve">
+                    <span className="text-white/40">##</span> {group.title}
+                    <span className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {group.items.map((item) => (
+                      <span
+                        key={item}
+                        className={`rounded border border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-sm text-white/80 transition-colors duration-200 ${group.hover}`}
+                      >
+                        {item}
+                      </span>
+                    ))}
                   </div>
-                );
-              })}
-            </div>
-
-            <h3 className="mb-4 mt-8 flex items-center gap-3 font-mono text-xs tracking-[0.25em] uppercase text-mauve">
-              <span className="text-white/40">##</span> Toolchain
-              <span className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
-            </h3>
-            <div className="flex flex-wrap justify-center gap-2">
-              {TOOLS.map((tool) => (
-                <span
-                  key={tool}
-                  className="rounded border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-xs text-white/70 transition-colors duration-200 hover:border-cyan/40 hover:text-cyan"
-                >
-                  {tool}
-                </span>
+                </div>
               ))}
             </div>
           </TerminalCard>

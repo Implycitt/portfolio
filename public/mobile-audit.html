@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>390px Mobile Audit</title>
+<style>
+	body { margin: 0; background: #111; color: #eee; font-family: monospace; }
+	.row { display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; align-items: flex-start; }
+	.frame { width: 390px; flex: 0 0 390px; }
+	.frame h2 { font-size: 14px; margin: 0 0 8px; color: #7b2cbf; }
+	iframe { width: 390px; height: 844px; border: 1px solid #444; background: #0a0908; }
+	.msg { font-size: 12px; color: #888; margin-left: 8px; font-weight: 400; }
+</style>
+</head>
+<body>
+	<div class="row">
+		<div class="frame"><h2 id="h-home">/ (home)</h2><iframe id="f-home" src="/"></iframe></div>
+		<div class="frame"><h2 id="h-resume">/resume</h2><iframe id="f-resume" src="/resume"></iframe></div>
+		<div class="frame"><h2 id="h-projects">/projects</h2><iframe id="f-projects" src="/projects"></iframe></div>
+		<div class="frame"><h2 id="h-blog">/blog</h2><iframe id="f-blog" src="/blog"></iframe></div>
+	</div>
+</body>
+</html>
