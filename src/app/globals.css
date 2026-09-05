@@ -25,7 +25,6 @@ html {
   -ms-overflow-style: none;
 }
 
-/* Route pop-in transition — replayed on every navigation via PageTransition */
 @keyframes page-enter {
   from {
     opacity: 0;
@@ -38,12 +37,9 @@ html {
 }
 
 .page-enter {
-  /* backwards: never retain the animated transform after the pop-in, so
-     .page-enter never becomes a containing block for fixed descendants. */
   animation: page-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
-/* CRT power-on flash — replays on every navigation via PageTransition */
 @keyframes crt-flash {
   0% {
     opacity: 0;
@@ -86,8 +82,6 @@ html {
       transparent 55%,
       rgba(0, 0, 0, 0.35) 100%
     );
-  /* backwards: do not retain the animated opacity/transform, keeping this
-     overlay strictly viewport-fixed (no scroll contribution). */
   animation: crt-flash 1.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
@@ -105,7 +99,6 @@ html {
     rgba(255, 42, 109, 0.16),
     transparent
   );
-  /* backwards: don't keep the roll line translated 420% below the fold. */
   animation: crt-roll 1.1s linear backwards;
 }
 
@@ -133,7 +126,11 @@ body::-webkit-scrollbar {
     linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 3.5rem 3.5rem;
-  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 60%, transparent 100%);
+  mask-image: radial-gradient(
+    ellipse 90% 70% at 50% 0%,
+    #000 60%,
+    transparent 100%
+  );
 }
 
 @keyframes caret-blink {
@@ -294,14 +291,13 @@ body::-webkit-scrollbar {
 }
 
 .synth-sky {
-  background:
-    radial-gradient(
-      ellipse 140% 90% at 50% 0%,
-      #0b0218 0%,
-      #1a0533 40%,
-      #2d0b4f 70%,
-      #12021f 100%
-    );
+  background: radial-gradient(
+    ellipse 140% 90% at 50% 0%,
+    #0b0218 0%,
+    #1a0533 40%,
+    #2d0b4f 70%,
+    #12021f 100%
+  );
 }
 
 @keyframes synth-grid-scroll {
@@ -397,11 +393,24 @@ body::-webkit-scrollbar {
   margin: 1rem 0;
 }
 
+.md-body img {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+}
+
+.md-body p.md-img-center {
+  text-align: center;
+}
+
 .md-body a {
   color: var(--color-neon-cyan);
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 0.2s ease, text-shadow 0.2s ease;
+  transition:
+    color 0.2s ease,
+    text-shadow 0.2s ease;
 }
 
 .md-body a:hover {
@@ -499,7 +508,6 @@ body::-webkit-scrollbar {
   font-size: 1.05em;
 }
 
-/* highlight.js tokens — synthwave terminal palette */
 .md-body .hljs-comment,
 .md-body .hljs-quote {
   color: rgba(255, 255, 255, 0.38);
@@ -576,7 +584,6 @@ body::-webkit-scrollbar {
   border-radius: 8px;
 }
 
-/* GitHub-style alert callouts */
 .md-body .md-alert {
   margin: 1.25rem 0;
   padding: 0.85rem 1.1rem;
@@ -630,7 +637,6 @@ body::-webkit-scrollbar {
   color: var(--color-neon-pink);
 }
 
-/* Block math rendered from ```math fences */
 .md-body .md-math-block {
   margin: 1.25rem 0;
   padding: 1rem 1.15rem;
@@ -645,7 +651,6 @@ body::-webkit-scrollbar {
   margin: 0;
 }
 
-/* Tables */
 .md-body table {
   margin: 1.25rem 0;
   width: 100%;
@@ -672,7 +677,6 @@ body::-webkit-scrollbar {
   color: rgba(255, 255, 255, 0.7);
 }
 
-/* Task lists */
 .md-body ul:has(input[type="checkbox"]),
 .md-body ul.task-list {
   list-style: none;

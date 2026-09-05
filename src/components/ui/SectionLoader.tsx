@@ -19,9 +19,9 @@ export default function SectionLoader() {
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const sections = SECTION_NAMES.map((s) => document.getElementById(s.id)).filter(
-      (el): el is HTMLElement => el !== null
-    );
+    const sections = SECTION_NAMES.map((s) =>
+      document.getElementById(s.id),
+    ).filter((el): el is HTMLElement => el !== null);
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -42,7 +42,7 @@ export default function SectionLoader() {
         setFlash({ file: info.file, index: SECTION_NAMES.indexOf(info) });
         timerRef.current = window.setTimeout(() => setFlash(null), 1200);
       },
-      { threshold: [0.2, 0.45, 0.7] }
+      { threshold: [0.2, 0.45, 0.7] },
     );
 
     sections.forEach((el) => observer.observe(el));

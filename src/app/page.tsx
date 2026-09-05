@@ -16,7 +16,10 @@ export default function Home() {
       <BootSequence />
 
       <div className="relative z-10 bg-background">
-        <div aria-hidden className="terminal-grid-bg pointer-events-none absolute inset-0" />
+        <div
+          aria-hidden
+          className="terminal-grid-bg pointer-events-none absolute inset-0"
+        />
 
         <Reveal variant="pop" delay={0}>
           <AboutSection />
@@ -31,10 +34,14 @@ export default function Home() {
         </Reveal>
 
         <Reveal variant="pop" delay={120}>
-          <footer data-lenis-snap className="relative min-h-[40vh] flex items-center justify-center border-t border-white/5 py-10">
+          <footer
+            data-lenis-snap
+            className="relative min-h-[40vh] flex items-center justify-center border-t border-white/5 py-10"
+          >
             <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 font-mono text-xs tracking-widest text-white/40 sm:flex-row sm:px-10">
               <p>
-                <span className="text-cyan">$</span> qb@portfolio:~$ echo "exit 0"
+                <span className="text-cyan">$</span> qb@portfolio:~$ echo "exit
+                0"
               </p>
               <p className="uppercase tracking-[0.25em]">
                 © 2026 Quentin Bordelon · compiled in the terminal

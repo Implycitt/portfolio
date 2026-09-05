@@ -33,15 +33,15 @@ export async function GET(request: Request) {
        <line x1="20" y1="102" x2="${W - 20}" y2="102" stroke="#ffffff" stroke-opacity="0.1"/>
        <text x="20" y="132" font-family="${SVG_FONT}" font-size="10" fill="#ffffff" opacity="0.45">CURRENT STREAK</text>
        <text x="20" y="158" font-family="${SVG_FONT}" font-size="26" font-weight="700" fill="${SVG_CYAN}">${number(
-         streak.currentStreak
+         streak.currentStreak,
        )}<tspan font-size="12" fill="#ffffff" opacity="0.55"> days</tspan></text>
        <text x="185" y="132" font-family="${SVG_FONT}" font-size="10" fill="#ffffff" opacity="0.45">LONGEST STREAK</text>
        <text x="185" y="158" font-family="${SVG_FONT}" font-size="26" font-weight="700" fill="${SVG_VIOLET}">${number(
-         streak.longestStreak
+         streak.longestStreak,
        )}<tspan font-size="12" fill="#ffffff" opacity="0.55"> days</tspan></text>
        <text x="350" y="132" font-family="${SVG_FONT}" font-size="10" fill="#ffffff" opacity="0.45">LAST 365 DAYS</text>
        <text x="350" y="158" font-family="${SVG_FONT}" font-size="26" font-weight="700" fill="${SVG_MAUVE}">${number(
-         streak.totalContributions
+         streak.totalContributions,
        )}<tspan font-size="12" fill="#ffffff" opacity="0.55"> commits</tspan></text>
        <line x1="20" y1="190" x2="${W - 20}" y2="190" stroke="#ffffff" stroke-opacity="0.1"/>
        <text x="20" y="218" font-family="${SVG_FONT}" font-size="10" fill="#ffffff" opacity="0.45">ACTIVE DAYS · ${number(activeDays)}/365</text>

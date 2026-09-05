@@ -33,7 +33,7 @@ function fmtBytes(bytes: number): string {
 }
 
 function languagePercent(
-  languages: Record<string, number>
+  languages: Record<string, number>,
 ): { name: string; pct: number }[] {
   const total = Object.values(languages).reduce((s, b) => s + b, 0);
   if (total === 0) return [];
@@ -59,7 +59,13 @@ export default async function ProjectDetail({ params }: Props) {
 
   if (!repo) notFound();
 
-  const readmeHtml = repo.readme ? renderMarkdown(repo.readme) : null;
+  const readmeHtml = repo.readme
+    ? renderMarkdown(
+        repo.readme,
+        `https://raw.githubusercontent.com/${owner}/${repo.name}/${repo.default_branch ?? "HEAD"}`,
+        `https://github.com/${owner}/${repo.name}/blob/${repo.default_branch ?? "HEAD"}`,
+      )
+    : null;
   const langs = languagePercent(repo.languages);
   const isOwn = owner.toLowerCase() === GITHUB_USER.toLowerCase();
 
@@ -106,8 +112,8 @@ export default async function ProjectDetail({ params }: Props) {
                 />
               ) : (
                 <div className="py-12 text-center font-mono text-sm text-white/35">
-                  <span className="text-amber-400/70">!</span> No README found
-                  — this repo might be sparse.
+                  <span className="text-amber-400/70">!</span> No README found —
+                  this repo might be sparse.
                 </div>
               )}
             </div>
@@ -129,7 +135,9 @@ export default async function ProjectDetail({ params }: Props) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-white/40">commits</span>
-                      <span className="text-cyan/80">{contribution.commits}</span>
+                      <span className="text-cyan/80">
+                        {contribution.commits}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-white/40">contributors</span>
@@ -155,7 +163,9 @@ export default async function ProjectDetail({ params }: Props) {
                   )}
                   <div className="flex justify-between">
                     <span className="text-white/40">stars</span>
-                    <span className="text-yellow-400/80">★ {repo.stargazers_count}</span>
+                    <span className="text-yellow-400/80">
+                      ★ {repo.stargazers_count}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/40">forks</span>
@@ -167,17 +177,23 @@ export default async function ProjectDetail({ params }: Props) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/40">open issues</span>
-                    <span className="text-white/60">{repo.open_issues_count}</span>
+                    <span className="text-white/60">
+                      {repo.open_issues_count}
+                    </span>
                   </div>
                   {repo.license && (
                     <div className="flex justify-between">
                       <span className="text-white/40">license</span>
-                      <span className="text-white/60">{repo.license.spdx_id}</span>
+                      <span className="text-white/60">
+                        {repo.license.spdx_id}
+                      </span>
                     </div>
                   )}
                   <div className="flex justify-between">
                     <span className="text-white/40">size</span>
-                    <span className="text-white/60">{fmtBytes(repo.size * 1024)}</span>
+                    <span className="text-white/60">
+                      {fmtBytes(repo.size * 1024)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -189,15 +205,21 @@ export default async function ProjectDetail({ params }: Props) {
                 <div className="space-y-3 font-mono text-xs">
                   <div className="flex justify-between">
                     <span className="text-white/40">created</span>
-                    <span className="text-white/60">{fmtDate(repo.created_at)}</span>
+                    <span className="text-white/60">
+                      {fmtDate(repo.created_at)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/40">updated</span>
-                    <span className="text-white/60">{fmtDate(repo.updated_at)}</span>
+                    <span className="text-white/60">
+                      {fmtDate(repo.updated_at)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/40">pushed</span>
-                    <span className="text-white/60">{fmtDate(repo.pushed_at)}</span>
+                    <span className="text-white/60">
+                      {fmtDate(repo.pushed_at)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -209,15 +231,22 @@ export default async function ProjectDetail({ params }: Props) {
                   </h3>
                   <div className="space-y-2">
                     {langs.map((l) => (
-                      <div key={l.name} className="flex items-center gap-2 font-mono text-[10px]">
-                        <span className="min-w-[5.5rem] text-white/50">{l.name}</span>
+                      <div
+                        key={l.name}
+                        className="flex items-center gap-2 font-mono text-[10px]"
+                      >
+                        <span className="min-w-[5.5rem] text-white/50">
+                          {l.name}
+                        </span>
                         <div className="h-1.5 flex-1 rounded-full bg-white/5">
                           <div
                             className="h-full rounded-full bg-gradient-to-r from-cyan to-violet"
                             style={{ width: `${Math.max(l.pct, 3)}%` }}
                           />
                         </div>
-                        <span className="w-8 text-right text-white/30">{l.pct}%</span>
+                        <span className="w-8 text-right text-white/30">
+                          {l.pct}%
+                        </span>
                       </div>
                     ))}
                   </div>

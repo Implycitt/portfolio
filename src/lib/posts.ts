@@ -29,10 +29,12 @@ const BLOG_PATH = (process.env.BLOG_PATH ?? "posts").replace(/^\/+|\/+$/g, "");
 const BLOG_BRANCH = process.env.BLOG_BRANCH ?? "main";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
-export const blogSource: { type: "github"; repo: string; path: string; branch: string } | {
-  type: "local";
-  label: string;
-} = BLOG_REPO
+export const blogSource:
+  | { type: "github"; repo: string; path: string; branch: string }
+  | {
+      type: "local";
+      label: string;
+    } = BLOG_REPO
   ? {
       type: "github",
       repo: BLOG_REPO,
@@ -65,7 +67,10 @@ function parseFrontmatter(raw: string): { data: Frontmatter; body: string } {
     const sep = line.indexOf(":");
     if (sep === -1) continue;
     const key = line.slice(0, sep).trim() as keyof Frontmatter;
-    const value = line.slice(sep + 1).trim().replace(/^["']|["']$/g, "");
+    const value = line
+      .slice(sep + 1)
+      .trim()
+      .replace(/^["']|["']$/g, "");
     if (value) data[key] = value;
   }
   return { data, body: match[2] };
@@ -113,7 +118,9 @@ async function listGithubSlugs(): Promise<string[] | null> {
       next: { revalidate: REVALIDATE },
     });
     if (!res.ok) return null;
-    const tree = (await res.json()) as { tree?: { path: string; type: string }[] };
+    const tree = (await res.json()) as {
+      tree?: { path: string; type: string }[];
+    };
     if (!tree.tree) return null;
 
     const prefix = BLOG_PATH ? `${BLOG_PATH}/` : "";
@@ -122,7 +129,7 @@ async function listGithubSlugs(): Promise<string[] | null> {
         (item) =>
           item.type === "blob" &&
           item.path.startsWith(prefix) &&
-          item.path.endsWith(".md")
+          item.path.endsWith(".md"),
       )
       .map((item) => item.path.slice(prefix.length, -3));
   } catch {
@@ -161,12 +168,11 @@ async function fetchGithubCommitDate(slug: string): Promise<string | null> {
   }
 }
 
-async function fetchPostWithDate(
-  slug: string,
-  raw: string
-): Promise<Post> {
+async function fetchPostWithDate(slug: string, raw: string): Promise<Post> {
   const { data } = parseFrontmatter(raw);
-  const fallbackDate = data.date ? undefined : (await fetchGithubCommitDate(slug)) ?? undefined;
+  const fallbackDate = data.date
+    ? undefined
+    : ((await fetchGithubCommitDate(slug)) ?? undefined);
   return buildPost(slug, raw, fallbackDate);
 }
 
@@ -178,7 +184,7 @@ async function getAllGithubPosts(): Promise<Post[] | null> {
       slugs.map(async (slug) => {
         const raw = await fetchGithubRaw(slug);
         return raw ? fetchPostWithDate(slug, raw) : null;
-      })
+      }),
     )
   ).filter((p): p is Post => p !== null);
   return posts.sort((a, b) => b.date.localeCompare(a.date));
@@ -205,7 +211,7 @@ async function getAllLocalPosts(): Promise<Post[]> {
     .filter((f) => f.endsWith(".md"))
     .map((f) => f.slice(0, -3));
   const posts = (await Promise.all(slugs.map(readPostFile))).filter(
-    (p): p is Post => p !== null
+    (p): p is Post => p !== null,
   );
   return posts.sort((a, b) => b.date.localeCompare(a.date));
 }

@@ -1,4 +1,5 @@
-export const SVG_FONT = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+export const SVG_FONT =
+  "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 export const SVG_CYAN = "#2EDFE5";
 export const SVG_VIOLET = "#7B2CBF";
 export const SVG_MAUVE = "#C77DFF";
@@ -26,7 +27,12 @@ export function chip(x: number, y: number, label: string): string {
   return `<rect x="${x}" y="${y - 12}" width="${w}" height="18" rx="4" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/><text x="${x + 6}" y="${y}" font-family="${SVG_FONT}" font-size="11" fill="${SVG_MAUVE}">${esc(label)}</text>`;
 }
 
-export function svgDocument(W: number, H: number, title: string, body: string): string {
+export function svgDocument(
+  W: number,
+  H: number,
+  title: string,
+  body: string,
+): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="GitHub stats">
   <defs>
     <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
@@ -48,7 +54,8 @@ export function svgResponse(svg: string): Response {
   return new Response(svg, {
     headers: {
       "Content-Type": "image/svg+xml; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+      "Cache-Control":
+        "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
       "X-Robots-Tag": "noindex, nofollow",
     },
   });

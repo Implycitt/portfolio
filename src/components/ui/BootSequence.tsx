@@ -71,7 +71,8 @@ export default function BootSequence() {
             </div>
             <div className="space-y-2 px-5 py-4">
               <p className="text-white/90">
-                <span className="text-cyan">$</span> <span className="text-white">{typed}</span>
+                <span className="text-cyan">$</span>{" "}
+                <span className="text-white">{typed}</span>
                 <span className="terminal-caret ml-1 inline-block h-3.5 w-2 bg-cyan" />
               </p>
               {LINES.slice(0, linesVisible).map((line) => (
@@ -88,7 +89,8 @@ export default function BootSequence() {
           style={{ opacity: listing }}
         >
           <p className="text-white/90">
-            <span className="text-cyan">$</span> <span className="text-white">ls ./SECTIONS</span>
+            <span className="text-cyan">$</span>{" "}
+            <span className="text-white">ls ./SECTIONS</span>
           </p>
           <p className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-white/80">
             {SECTIONS.map((f) => (

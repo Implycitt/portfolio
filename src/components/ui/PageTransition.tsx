@@ -8,7 +8,10 @@ export default function PageTransition({ children }: { children: ReactNode }) {
 
   return (
     <div key={pathname} className="page-enter flex-1 w-full">
-      <div className="crt-flash pointer-events-none fixed inset-0 z-[80]" aria-hidden="true" />
+      <div
+        className="crt-flash pointer-events-none fixed inset-0 z-[80]"
+        aria-hidden="true"
+      />
       {children}
     </div>
   );

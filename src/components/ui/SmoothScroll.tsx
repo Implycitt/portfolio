@@ -6,7 +6,11 @@ import Lenis from "lenis";
 import Snap from "lenis/snap";
 import "lenis/dist/lenis.css";
 
-export default function SmoothScroll({ children }: { children: React.ReactNode }) {
+export default function SmoothScroll({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const lenisRef = useRef<Lenis | null>(null);
   const snapRef = useRef<Snap | null>(null);
@@ -17,7 +21,8 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     const lenis = new Lenis({
       autoRaf: true,
-      duration: 1.1,
+      duration: 1.6,
+      easing: (t) => 1 - Math.pow(1 - t, 4),
       anchors: true,
       allowNestedScroll: true,
       stopInertiaOnNavigate: true,
@@ -45,16 +50,19 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     snapRef.current?.destroy();
     snapRef.current = null;
 
-    const targets = Array.from(document.querySelectorAll<HTMLElement>("[data-lenis-snap]"));
+    const targets = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-lenis-snap]"),
+    );
     if (targets.length === 0) return;
 
     const snap = new Snap(lenis, {
       type: "proximity",
-      duration: 0.9,
+      duration: 1.7,
+      easing: (t) => 1 - Math.pow(1 - t, 4),
     });
     snapRef.current = snap;
     removeSnapTargetsRef.current = targets.map((el) =>
-      snap.addElement(el, { align: "start", ignoreTransform: true })
+      snap.addElement(el, { align: "start", ignoreTransform: true }),
     );
   }, [pathname]);
 

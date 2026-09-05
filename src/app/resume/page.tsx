@@ -46,15 +46,7 @@ const FRAMEWORKS = [
   "Matplotlib",
 ];
 
-const TOOLS = [
-  "Git",
-  "Docker",
-  "Unix",
-  "Bash",
-  "PowerShell",
-  "Tmux",
-  "zsh",
-];
+const TOOLS = ["Git", "Docker", "Unix", "Bash", "PowerShell", "Tmux", "zsh"];
 
 const EDUCATION = [
   {
@@ -85,9 +77,21 @@ const SUMMARY = [
 ];
 
 const SKILL_GROUPS = [
-  { title: "Languages", items: LANGUAGES, hover: "hover:border-violet/40 hover:text-mauve" },
-  { title: "Frameworks", items: FRAMEWORKS, hover: "hover:border-cyan/40 hover:text-cyan" },
-  { title: "Tools", items: TOOLS, hover: "hover:border-mauve/40 hover:text-mauve" },
+  {
+    title: "Languages",
+    items: LANGUAGES,
+    hover: "hover:border-violet/40 hover:text-mauve",
+  },
+  {
+    title: "Frameworks",
+    items: FRAMEWORKS,
+    hover: "hover:border-cyan/40 hover:text-cyan",
+  },
+  {
+    title: "Tools",
+    items: TOOLS,
+    hover: "hover:border-mauve/40 hover:text-mauve",
+  },
 ];
 
 function Section({
@@ -114,7 +118,10 @@ function Section({
             </div>
             <ul className="mt-2 space-y-1.5">
               {item.points.map((pt) => (
-                <li key={pt} className="flex gap-2 font-mono text-sm text-white/60">
+                <li
+                  key={pt}
+                  className="flex gap-2 font-mono text-sm text-white/60"
+                >
                   <span className="text-cyan/70">▸</span>
                   <span>{pt}</span>
                 </li>
@@ -133,14 +140,35 @@ export default function Resume() {
       <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-[380px] w-[760px] rounded-full bg-gradient-to-tr from-cyan/10 via-violet/10 to-mauve/10 blur-[130px]" />
 
       <div className="relative mx-auto w-full max-w-5xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36 print:max-w-none print:px-0 print:py-0">
-        <div className="flex flex-wrap items-end justify-between gap-6 print:hidden">
-          <SectionHeading prompt="cat ./resume.txt" title="Resume" />
-          <ResumeDownload />
+        <div className="flex flex-col items-center gap-6 print:hidden">
+          <SectionHeading
+            prompt="cat ./resume.txt"
+            title="Resume"
+            className="text-center"
+          />
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="https://www.linkedin.com/in/quentinbordelon"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="group inline-flex items-center gap-2 rounded-lg border border-mauve/30 bg-mauve/5 px-5 py-2.5 font-mono text-xs tracking-wider text-white transition-all duration-300 hover:border-mauve/60 hover:bg-mauve/10 hover:text-white hover:shadow-[0_0_24px_-6px_rgba(199,125,255,0.5)]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="h-4 w-4 text-white/60 transition-colors group-hover:text-mauve"
+              >
+                <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0Z" />
+              </svg>
+              linkedin.com/in/quentinbordelon
+            </a>
+            <ResumeDownload />
+          </div>
         </div>
 
         <p className="mt-6 max-w-2xl font-mono text-sm leading-relaxed text-white/55 print:hidden">
-          <span className="text-mauve">//</span> A structured summary of education, experience, and
-          skills. 
+          <span className="text-mauve">//</span> A structured summary of
+          education, experience, and skills.
         </p>
 
         <div className="mt-12 space-y-10 print:mt-0">
@@ -148,7 +176,8 @@ export default function Resume() {
             <div className="space-y-3 font-mono text-sm leading-relaxed text-white/75">
               {SUMMARY.map((line) => (
                 <p key={line}>
-                  <span className="text-mauve">▸</span> <span className="ml-2">{line}</span>
+                  <span className="text-mauve">▸</span>{" "}
+                  <span className="ml-2">{line}</span>
                 </p>
               ))}
             </div>
@@ -184,7 +213,6 @@ export default function Resume() {
               ))}
             </div>
           </TerminalCard>
-
         </div>
       </div>
     </main>

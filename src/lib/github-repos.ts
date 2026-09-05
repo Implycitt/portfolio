@@ -52,41 +52,71 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
 }
 
+async function fetchCommitCount(
+  owner: string,
+  repo: string,
+): Promise<number | null> {
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/commits?per_page=1`,
+      {
+        headers: githubHeaders(),
+        next: { revalidate: 3600 },
+      },
+    );
+    if (!res.ok) return null;
+    const link = res.headers.get("link") ?? "";
+    const match = /&page=(\d+)>; rel="last"/.exec(link);
+    return match ? parseInt(match[1], 10) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchGitHubRepos(
   username: string,
-  exclusions: string[] = []
+  exclusions: string[] = [],
 ): Promise<GitHubRepoData[] | null> {
   const repos = await fetchJson<GitHubRepoData[]>(
-    `https://api.github.com/users/${username}/repos?per_page=100&sort=pushed&type=owner`
+    `https://api.github.com/users/${username}/repos?per_page=100&sort=pushed&type=owner`,
   );
   if (!repos) return null;
 
   const exclude = new Set(exclusions.map((n) => n.toLowerCase()));
+  const filtered = repos.filter(
+    (repo) =>
+      !repo.fork && !repo.archived && !exclude.has(repo.name.toLowerCase()),
+  );
 
-  return repos
-    .filter(
-      (repo) =>
-        !repo.fork &&
-        !repo.archived &&
-        !exclude.has(repo.name.toLowerCase())
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime()
-    );
+  const withCounts = await Promise.all(
+    filtered.map(
+      async (repo) =>
+        [repo, await fetchCommitCount(username, repo.name)] as const,
+    ),
+  );
+
+  return withCounts
+    .sort((a, b) => {
+      const byCommits = (b[1] ?? -1) - (a[1] ?? -1);
+      if (byCommits !== 0) return byCommits;
+      return (
+        new Date(b[0].pushed_at).getTime() - new Date(a[0].pushed_at).getTime()
+      );
+    })
+    .map(([repo]) => repo);
 }
 
 export async function fetchGitHubRepoDetail(
   owner: string,
-  repoName: string
+  repoName: string,
 ): Promise<GitHubRepoDetail | null> {
   const [repo, readme, languages] = await Promise.all([
     fetchJson<GitHubRepoData>(
-      `https://api.github.com/repos/${owner}/${repoName}`
+      `https://api.github.com/repos/${owner}/${repoName}`,
     ),
     fetchReadme(owner, repoName),
     fetchJson<Record<string, number>>(
-      `https://api.github.com/repos/${owner}/${repoName}/languages`
+      `https://api.github.com/repos/${owner}/${repoName}/languages`,
     ),
   ]);
 
@@ -102,10 +132,10 @@ export async function fetchGitHubRepoDetail(
 export async function fetchGitHubContribution(
   owner: string,
   repoName: string,
-  username: string
+  username: string,
 ): Promise<GitHubContribution | null> {
   const repo = await fetchJson<GitHubRepoData>(
-    `https://api.github.com/repos/${owner}/${repoName}`
+    `https://api.github.com/repos/${owner}/${repoName}`,
   );
   if (!repo) return null;
   const counts = await fetchContributorCounts(`${owner}/${repoName}`, username);
@@ -120,7 +150,7 @@ export async function fetchGitHubContribution(
 
 async function fetchReadme(
   owner: string,
-  repoName: string
+  repoName: string,
 ): Promise<string | null> {
   try {
     const res = await fetch(
@@ -131,7 +161,7 @@ async function fetchReadme(
           Accept: "application/vnd.github.raw+json",
         },
         next: { revalidate: 3600 },
-      }
+      },
     );
     if (!res.ok) return null;
     return await res.text();
@@ -151,9 +181,6 @@ export interface GitHubOrgData {
   public_repos: number;
 }
 
-// Orgs the public memberships API doesn't surface (private membership).
-// Merged with whatever /users/{username}/orgs actually returns, so new
-// public memberships show up automatically.
 const KNOWN_ORGS = ["Google-Developers-Student-Club-LSU", "SASELSU"];
 
 function orgRank(login: string): number {
@@ -174,7 +201,7 @@ export function sortOrgs(orgs: GitHubOrgData[]): GitHubOrgData[] {
 }
 
 export async function fetchOrgProfiles(
-  logins: string[]
+  logins: string[],
 ): Promise<GitHubOrgData[]> {
   const profiles = await Promise.all(
     logins.map(async (login) => {
@@ -200,18 +227,15 @@ export async function fetchOrgProfiles(
         html_url: p.html_url,
         public_repos: p.public_repos ?? 0,
       } as GitHubOrgData;
-    })
+    }),
   );
 
   return profiles.filter((p): p is GitHubOrgData => p !== null);
 }
 
 export async function fetchGitHubOrgs(
-  username: string
+  username: string,
 ): Promise<GitHubOrgData[] | null> {
-  // With a token, /user/orgs returns ALL memberships (including private
-  // orgs). Without one, only public memberships are visible, so fall back
-  // to the curated KNOWN_ORGS list.
   const orgsUrl = TOKEN
     ? "https://api.github.com/user/orgs?per_page=100"
     : `https://api.github.com/users/${username}/orgs`;
@@ -236,21 +260,18 @@ export interface GitHubContribution {
 
 function contributionRole(
   commits: number,
-  totalContributors: number
+  totalContributors: number,
 ): GitHubContribution["role"] {
   if (totalContributors <= 1) return "sole-author";
   if (commits >= Math.ceil(totalContributors / 2)) return "lead";
   return "contributor";
 }
 
-// Search commits authored by the user, returning the repos they touch.
-// Catches contributions on default branches. Used per-org so results are
-// never crowded out by other repos in the global ranking.
 async function searchCommitRepos(query: string): Promise<string[]> {
   try {
     const res = await fetch(
       `https://api.github.com/search/commits?q=${encodeURIComponent(
-        query
+        query,
       )}&per_page=100`,
       {
         headers: {
@@ -258,7 +279,7 @@ async function searchCommitRepos(query: string): Promise<string[]> {
           Accept: "application/vnd.github+json",
         },
         next: { revalidate: 3600 },
-      }
+      },
     );
     if (!res.ok) return [];
     const data = (await res.json()) as {
@@ -277,11 +298,13 @@ async function searchCommitRepos(query: string): Promise<string[]> {
 
 async function fetchContributorCounts(
   fullName: string,
-  username: string
+  username: string,
 ): Promise<{ commits: number; totalContributors: number } | null> {
   const data = await fetchJson<
     { login: string; contributions: number }[] | null
-  >(`https://api.github.com/repos/${fullName}/contributors?per_page=100&anon=0`);
+  >(
+    `https://api.github.com/repos/${fullName}/contributors?per_page=100&anon=0`,
+  );
   if (!Array.isArray(data)) return null;
   const me = data.find((c) => c?.login === username);
   if (!me) return null;
@@ -293,16 +316,8 @@ export interface GitHubContributionsData {
   orgs: GitHubOrgData[] | null;
 }
 
-// Auto-discover repos the user contributed to outside their own account:
-// 1. Commit searches (global + per org) surface repos on default branches.
-// 2. User-account orgs (like SASELSU) get their repos scanned and verified
-//    against each repo's contributors list.
-// Every candidate gets repo data + contributor counts fetched, which gives
-// the commit count and role for the badge and drops anything unverifiable.
-// The owners of discovered repos are folded into the org list so the
-// organizations section grows on its own.
 export async function fetchGitHubContributions(
-  username: string
+  username: string,
 ): Promise<GitHubContributionsData> {
   const orgs = await fetchGitHubOrgs(username);
   const candidates = new Map<string, boolean>();
@@ -325,11 +340,10 @@ export async function fetchGitHubContributions(
     for (const n of names) addCandidate(n, true);
   }
 
-  // User-account orgs can't be queried with `org:`, so scan their repos.
   for (const org of orgs ?? []) {
     if (org.type === "Organization") continue;
     const repos = await fetchJson<GitHubRepoData[]>(
-      `https://api.github.com/users/${org.login}/repos?per_page=100`
+      `https://api.github.com/users/${org.login}/repos?per_page=100`,
     );
     for (const r of repos ?? []) {
       if (r.fork) continue;
@@ -353,7 +367,7 @@ export async function fetchGitHubContributions(
           ? contributionRole(counts.commits, counts.totalContributors)
           : "contributor",
       } as GitHubContribution;
-    })
+    }),
   );
 
   const list = results
@@ -361,15 +375,12 @@ export async function fetchGitHubContributions(
     .sort(
       (a, b) =>
         new Date(b.repo.pushed_at).getTime() -
-        new Date(a.repo.pushed_at).getTime()
+        new Date(a.repo.pushed_at).getTime(),
     );
 
-  // Fold newly discovered repo owners into the org list.
   const knownLogins = new Set((orgs ?? []).map((o) => o.login));
   const extraLogins = [
-    ...new Set(
-      list.map((c) => c.repo.full_name.split("/")[0]).filter(Boolean)
-    ),
+    ...new Set(list.map((c) => c.repo.full_name.split("/")[0]).filter(Boolean)),
   ].filter((l) => !knownLogins.has(l));
   const allOrgs = sortOrgs([
     ...(orgs ?? []),

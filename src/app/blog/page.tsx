@@ -43,9 +43,8 @@ export default async function Blog() {
 
         <p className="mt-4 max-w-xl font-mono text-sm leading-relaxed text-white/60">
           <span className="text-neon-pink neon-pink">$</span> cat ./feed.log
-          <br />
-          A signal line of notes on math, physics, software, and whatever crosses my mind. Rendered at 88% CRT
-          nostalgia.
+          <br />A signal line of notes on math, physics, software, and whatever
+          crosses my mind. Rendered at 88% CRT nostalgia.
         </p>
 
         <div className="mt-6 mb-16 h-px w-full bg-gradient-to-r from-neon-cyan/60 via-neon-pink/60 to-transparent" />
@@ -65,7 +64,9 @@ export default async function Blog() {
               <section key={category} className="space-y-5">
                 <div className="flex items-center gap-3 font-mono text-xs tracking-widest uppercase">
                   <span className="text-white/70">~/blog/{category}</span>
-                  <span className="text-white/35">({groups[category].length})</span>
+                  <span className="text-white/35">
+                    ({groups[category].length})
+                  </span>
                   <span className="h-px flex-1 bg-gradient-to-r from-neon-pink/40 to-transparent" />
                 </div>
 
@@ -78,11 +79,17 @@ export default async function Blog() {
                     <span className="absolute left-0 top-0 h-full w-0.5 bg-gradient-to-b from-neon-cyan via-neon-pink to-neon-purple opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
 
                     <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] tracking-widest uppercase">
-                      <span className="text-neon-cyan neon-cyan">#{post.date}</span>
+                      <span className="text-neon-cyan neon-cyan">
+                        #{post.date}
+                      </span>
                       <span className="text-white/35">·</span>
-                      <span className="text-neon-pink neon-pink">[{post.tag}]</span>
+                      <span className="text-neon-pink neon-pink">
+                        [{post.tag}]
+                      </span>
                       <span className="text-white/35">·</span>
-                      <span className="text-white/45">{formatDate(post.date)}</span>
+                      <span className="text-white/45">
+                        {formatDate(post.date)}
+                      </span>
                       <span className="ml-auto hidden text-white/35 sm:inline">
                         {post.readMinutes} read
                       </span>

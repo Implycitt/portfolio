@@ -5,7 +5,10 @@ interface LogoProps {
   isAnimating?: boolean;
 }
 
-export default function Logo({ className = "w-24 h-24", isAnimating = true }: LogoProps) {
+export default function Logo({
+  className = "w-24 h-24",
+  isAnimating = true,
+}: LogoProps) {
   return (
     <>
       <style>{`
@@ -38,9 +41,20 @@ export default function Logo({ className = "w-24 h-24", isAnimating = true }: Lo
         }
       `}</style>
 
-      <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        viewBox="0 0 100 100"
+        className={className}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <defs>
-          <filter id="qb-white-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <filter
+            id="qb-white-glow"
+            x="-30%"
+            y="-30%"
+            width="160%"
+            height="160%"
+          >
             <feGaussianBlur stdDeviation="2.5" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>

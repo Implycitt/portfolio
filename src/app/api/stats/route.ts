@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   if (!stats) {
     return NextResponse.json(
       { error: "GitHub user not found or API rate limited" },
-      { status: 502 }
+      { status: 502 },
     );
   }
 

@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import SynthwaveBackground from "@/components/blog/SynthwaveBackground";
-import { getAllPosts, getPostBySlug, formatDate } from "@/lib/posts";
+import {
+  getAllPosts,
+  getPostBySlug,
+  formatDate,
+  blogSource,
+} from "@/lib/posts";
 import { renderMarkdown } from "@/lib/markdown";
 
 interface BlogPostPageProps {
@@ -22,7 +27,9 @@ export async function generateMetadata({
   const slug = (await params).slug.join("/");
   const post = await getPostBySlug(slug);
   return {
-    title: post ? `${post.title} — Quentin Bordelon` : "Blog — Quentin Bordelon",
+    title: post
+      ? `${post.title} — Quentin Bordelon`
+      : "Blog — Quentin Bordelon",
   };
 }
 
@@ -31,18 +38,33 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
   const post = await getPostBySlug(slug);
   if (!post) notFound();
 
-  const html = renderMarkdown(post.content);
+  const postDir = post.slug.includes("/")
+    ? post.slug.slice(0, post.slug.lastIndexOf("/"))
+    : "";
+  const repoBase =
+    blogSource.type === "github"
+      ? [blogSource.repo, blogSource.branch, blogSource.path, postDir]
+          .filter(Boolean)
+          .join("/")
+      : null;
+  const html = renderMarkdown(
+    post.content,
+    repoBase ? `https://raw.githubusercontent.com/${repoBase}` : undefined,
+    repoBase ? `https://github.com/${repoBase}` : undefined,
+  );
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <SynthwaveBackground />
 
-      <div className="relative z-10 mx-auto w-full max-w-3xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36">
+      <div className="relative z-10 mx-auto w-full max-w-4xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36">
         <Link
           href="/blog"
           className="group inline-flex items-center gap-2 font-mono text-xs tracking-[0.25em] uppercase text-white/50 transition-colors hover:text-neon-cyan"
         >
-          <span className="transition-transform duration-200 group-hover:-translate-x-1">←</span>
+          <span className="transition-transform duration-200 group-hover:-translate-x-1">
+            ←
+          </span>
           ~/blog
         </Link>
 
@@ -73,10 +95,12 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
 
         <div className="mt-6 mb-12 h-px w-full bg-gradient-to-r from-neon-cyan/60 via-neon-pink/60 to-transparent" />
 
-        <article
-          className="md-body font-mono"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <div className="rounded-lg border border-white/10 bg-black/35 p-6 shadow-[0_0_40px_rgba(0,0,0,0.35)] backdrop-blur-md sm:p-10">
+          <article
+            className="md-body font-mono"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </div>
 
         <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-8 font-mono text-xs tracking-widest uppercase text-white/40 sm:flex-row sm:items-center">
           <p>

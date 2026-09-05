@@ -19,7 +19,6 @@ const MAX_ROWS = 8;
 const BAR_X = 150;
 const BAR_W = 280;
 
-// C# / ASP.NET skew the chart (boilerplate-heavy generated code); drop them.
 const EXCLUDED_LANGUAGES = new Set(["C#", "ASP.NET"]);
 
 function formatBytes(bytes: number): string {
@@ -39,7 +38,8 @@ function rows(languages: { name: string; bytes: number }[]): string {
       const y = 112 + i * 25;
       const pct = (lang.bytes / total) * 100;
       const barW = Math.max(3, (lang.bytes / total) * BAR_W);
-      const label = lang.name.length > 18 ? `${lang.name.slice(0, 16)}…` : lang.name;
+      const label =
+        lang.name.length > 18 ? `${lang.name.slice(0, 16)}…` : lang.name;
       return `
     <text x="20" y="${y}" font-family="${SVG_FONT}" font-size="12" fill="${SVG_MAUVE}">${esc(label)}</text>
     <rect x="${BAR_X}" y="${y - 8}" width="${BAR_W}" height="8" rx="4" fill="#ffffff" fill-opacity="0.06"/>
@@ -52,8 +52,8 @@ function rows(languages: { name: string; bytes: number }[]): string {
     restBytes > 0
       ? `
     <text x="20" y="${112 + shown.length * 25}" font-family="${SVG_FONT}" font-size="11" fill="#ffffff" opacity="0.5">… and ${formatBytes(
-          restBytes
-        )} across ${rest.length} more language${rest.length === 1 ? "" : "s"}</text>`
+      restBytes,
+    )} across ${rest.length} more language${rest.length === 1 ? "" : "s"}</text>`
       : "";
 
   return bars + restLine;
@@ -64,7 +64,9 @@ export async function GET(request: Request) {
   const username = searchParams.get("username") ?? DEFAULT_USERNAME;
   const fetched = await fetchGitHubLanguageBytes(username);
   const languages =
-    fetched === null ? null : fetched.filter((lang) => !EXCLUDED_LANGUAGES.has(lang.name));
+    fetched === null
+      ? null
+      : fetched.filter((lang) => !EXCLUDED_LANGUAGES.has(lang.name));
 
   const body =
     languages === null

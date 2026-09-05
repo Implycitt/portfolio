@@ -53,7 +53,9 @@ interface GraphQLResponse {
       contributionsCollection?: {
         contributionCalendar?: {
           totalContributions?: number;
-          weeks: { contributionDays: { date: string; contributionCount: number }[] }[];
+          weeks: {
+            contributionDays: { date: string; contributionCount: number }[];
+          }[];
         };
       };
     };
@@ -86,19 +88,27 @@ async function fetchJson<T>(url: string): Promise<T | null> {
 }
 
 export async function fetchGitHubStats(
-  username: string
+  username: string,
 ): Promise<GitHubStatsData | null> {
-  const user = await fetchJson<GitHubUser>(`https://api.github.com/users/${username}`);
+  const user = await fetchJson<GitHubUser>(
+    `https://api.github.com/users/${username}`,
+  );
   if (!user) return null;
 
   const repos = await fetchJson<GitHubRepo[]>(
-    `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`
+    `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`,
   );
 
   const emptyRepos = repos ?? [];
-  const totalStars = emptyRepos.reduce((s, r) => s + (r.stargazers_count ?? 0), 0);
+  const totalStars = emptyRepos.reduce(
+    (s, r) => s + (r.stargazers_count ?? 0),
+    0,
+  );
   const totalForks = emptyRepos.reduce((s, r) => s + (r.forks_count ?? 0), 0);
-  const totalWatchers = emptyRepos.reduce((s, r) => s + (r.watchers_count ?? 0), 0);
+  const totalWatchers = emptyRepos.reduce(
+    (s, r) => s + (r.watchers_count ?? 0),
+    0,
+  );
 
   const languageCounts: Record<string, number> = {};
   for (const repo of emptyRepos) {
@@ -127,19 +137,21 @@ export async function fetchGitHubStats(
   };
 }
 
-export async function fetchGitHubPullRequests(username: string): Promise<number | null> {
+export async function fetchGitHubPullRequests(
+  username: string,
+): Promise<number | null> {
   const data = await fetchJson<{ total_count?: number }>(
-    `https://api.github.com/search/issues?q=author:${encodeURIComponent(username)}+type:pr+is:merged&per_page=1`
+    `https://api.github.com/search/issues?q=author:${encodeURIComponent(username)}+type:pr+is:merged&per_page=1`,
   );
   if (!data) return null;
   return data.total_count ?? 0;
 }
 
 export async function fetchGitHubLanguageBytes(
-  username: string
+  username: string,
 ): Promise<GitHubLanguageData[] | null> {
   const repos = await fetchJson<GitHubRepo[]>(
-    `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`
+    `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`,
   );
   if (!repos) return null;
 
@@ -151,8 +163,8 @@ export async function fetchGitHubLanguageBytes(
       }).then(async (res) => {
         if (!res.ok) return null;
         return (await res.json()) as Record<string, number>;
-      })
-    )
+      }),
+    ),
   );
 
   const totals: Record<string, number> = {};
@@ -168,7 +180,9 @@ export async function fetchGitHubLanguageBytes(
     .map(([name, bytes]) => ({ name, bytes }));
 }
 
-export async function fetchGitHubStreak(username: string): Promise<GitHubStreakData | null> {
+export async function fetchGitHubStreak(
+  username: string,
+): Promise<GitHubStreakData | null> {
   const token = process.env.GITHUB_TOKEN;
   if (!token) return null;
 
@@ -202,11 +216,12 @@ export async function fetchGitHubStreak(username: string): Promise<GitHubStreakD
     });
     if (!res.ok) return null;
     const json = (await res.json()) as GraphQLResponse;
-    const calendar = json.data?.user?.contributionsCollection?.contributionCalendar;
+    const calendar =
+      json.data?.user?.contributionsCollection?.contributionCalendar;
     if (!calendar) return null;
 
     const days = calendar.weeks.flatMap((week) =>
-      week.contributionDays.map((day) => day.contributionCount)
+      week.contributionDays.map((day) => day.contributionCount),
     );
 
     let idx = days.length - 1;

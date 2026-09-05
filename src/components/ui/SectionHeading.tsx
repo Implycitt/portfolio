@@ -4,10 +4,14 @@ interface SectionHeadingProps {
   className?: string;
 }
 
-export default function SectionHeading({ prompt, title, className = "" }: SectionHeadingProps) {
+export default function SectionHeading({
+  prompt,
+  title,
+  className = "",
+}: SectionHeadingProps) {
   return (
     <div className={`font-mono ${className}`}>
-      <p className="mb-2 flex items-center gap-2 text-xs sm:text-sm tracking-[0.2em] uppercase text-white/45">
+      <p className="mb-2 inline-flex items-center gap-2 text-xs sm:text-sm tracking-[0.2em] uppercase text-white/45">
         <span className="text-cyan">$</span>
         <span className="text-white/60">{prompt}</span>
         <span className="terminal-caret inline-block h-3.5 w-2 bg-white/70" />

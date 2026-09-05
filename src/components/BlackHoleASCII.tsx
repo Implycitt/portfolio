@@ -64,7 +64,7 @@ function buildNameMask(
   w: number,
   h: number,
   charWidth: number,
-  charHeight: number
+  charHeight: number,
 ): { cells: NameCell[]; rowMin: number; rowMax: number } {
   const words = name.trim().split(/\s+/).filter(Boolean);
   const maxWidth = w * CONFIG.nameMaxWidthRatio;
@@ -118,7 +118,11 @@ function buildNameMask(
   mctx.textBaseline = "middle";
   const centerY = maskH / 2;
   lines.forEach((line, i) => {
-    mctx.fillText(line, maskW / 2, centerY + (i - (lines.length - 1) / 2) * lineH);
+    mctx.fillText(
+      line,
+      maskW / 2,
+      centerY + (i - (lines.length - 1) / 2) * lineH,
+    );
   });
   const img = mctx.getImageData(0, 0, mask.width, mask.height);
   const data = img.data;
@@ -127,19 +131,37 @@ function buildNameMask(
   const boxTop = h / 2 - maskH / 2;
   const cells: NameCell[] = [];
   const firstCol = Math.max(0, Math.floor(boxLeft / charWidth));
-  const lastCol = Math.min(Math.floor(w / charWidth) - 1, Math.floor((boxLeft + maskW) / charWidth));
+  const lastCol = Math.min(
+    Math.floor(w / charWidth) - 1,
+    Math.floor((boxLeft + maskW) / charWidth),
+  );
   const firstRow = Math.max(0, Math.floor(boxTop / charHeight));
-  const lastRow = Math.min(Math.floor(h / charHeight) - 1, Math.floor((boxTop + maskH) / charHeight));
+  const lastRow = Math.min(
+    Math.floor(h / charHeight) - 1,
+    Math.floor((boxTop + maskH) / charHeight),
+  );
 
   let rowMin = Infinity;
   let rowMax = -Infinity;
 
   for (let row = firstRow; row <= lastRow; row++) {
     for (let col = firstCol; col <= lastCol; col++) {
-      const x0 = Math.max(0, Math.round((col * charWidth - boxLeft) * maskScale));
-      const y0 = Math.max(0, Math.round((row * charHeight - boxTop) * maskScale));
-      const x1 = Math.min(mask.width, Math.round((col * charWidth + charWidth - boxLeft) * maskScale));
-      const y1 = Math.min(mask.height, Math.round((row * charHeight + charHeight - boxTop) * maskScale));
+      const x0 = Math.max(
+        0,
+        Math.round((col * charWidth - boxLeft) * maskScale),
+      );
+      const y0 = Math.max(
+        0,
+        Math.round((row * charHeight - boxTop) * maskScale),
+      );
+      const x1 = Math.min(
+        mask.width,
+        Math.round((col * charWidth + charWidth - boxLeft) * maskScale),
+      );
+      const y1 = Math.min(
+        mask.height,
+        Math.round((row * charHeight + charHeight - boxTop) * maskScale),
+      );
       if (x1 <= x0 || y1 <= y0) continue;
       let sum = 0;
       let count = 0;
@@ -167,12 +189,18 @@ interface BlackHoleASCIIProps {
   className?: string;
 }
 
-export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIProps) {
+export default function BlackHoleASCII({
+  name,
+  className = "",
+}: BlackHoleASCIIProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+    if (
+      typeof window !== "undefined" &&
+      "scrollRestoration" in window.history
+    ) {
       window.history.scrollRestoration = "manual";
     }
     window.scrollTo(0, 0);
@@ -212,7 +240,8 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
 
     const initStars = () => {
       stars = [];
-      const halfDiag = Math.sqrt((cols * charWidth) ** 2 + (rows * charHeight) ** 2) / 2;
+      const halfDiag =
+        Math.sqrt((cols * charWidth) ** 2 + (rows * charHeight) ** 2) / 2;
       const maxR = halfDiag * 1.08;
       for (let i = 0; i < CONFIG.starCount; i++) {
         const r = Math.sqrt(Math.random()) * maxR;
@@ -235,8 +264,6 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
       viewW = window.innerWidth;
       viewH = window.innerHeight;
       const rawDpr = window.devicePixelRatio || 1;
-      // Cap DPR to cut per-frame pixel cost: 1.5 on phones/small viewports,
-      // 2 on larger screens. ASCII glyphs need no more than this.
       const dpr = Math.min(rawDpr, viewW < 768 ? 1.5 : 2);
       node.width = Math.round(viewW * dpr);
       node.height = Math.round(viewH * dpr);
@@ -248,7 +275,14 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
       rows = Math.max(1, Math.floor(viewH / charHeight));
       initStars();
       initCellRandom();
-      const mask = buildNameMask(context, name, viewW, viewH, charWidth, charHeight);
+      const mask = buildNameMask(
+        context,
+        name,
+        viewW,
+        viewH,
+        charWidth,
+        charHeight,
+      );
       nameCells = mask.cells;
       nameRowMin = mask.rowMin;
       nameRowMax = mask.rowMax;
@@ -280,18 +314,32 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
 
       const scrollProgress = Math.min(
         1,
-        Math.max(0, window.scrollY / (window.innerHeight * CONFIG.scrollDistanceVh))
+        Math.max(
+          0,
+          window.scrollY / (window.innerHeight * CONFIG.scrollDistanceVh),
+        ),
       );
       const fillAmount =
-        smoothstep(scrollProgress, CONFIG.fillProgressRange[0], CONFIG.fillProgressRange[1]) *
-        CONFIG.fillMaxDensity;
+        smoothstep(
+          scrollProgress,
+          CONFIG.fillProgressRange[0],
+          CONFIG.fillProgressRange[1],
+        ) * CONFIG.fillMaxDensity;
       const dissolveAmount = smoothstep(
         scrollProgress,
         CONFIG.dissolveProgressRange[0],
-        CONFIG.dissolveProgressRange[1]
+        CONFIG.dissolveProgressRange[1],
       );
-      const clearAmount = smoothstep(scrollProgress, CONFIG.clearProgressRange[0], CONFIG.clearProgressRange[1]);
-      const nameProgress = smoothstep(scrollProgress, CONFIG.nameProgressRange[0], CONFIG.nameProgressRange[1]);
+      const clearAmount = smoothstep(
+        scrollProgress,
+        CONFIG.clearProgressRange[0],
+        CONFIG.clearProgressRange[1],
+      );
+      const nameProgress = smoothstep(
+        scrollProgress,
+        CONFIG.nameProgressRange[0],
+        CONFIG.nameProgressRange[1],
+      );
 
       const cx = cols / 2;
       const cy = rows / 2;
@@ -317,7 +365,7 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
           const twinkle = 0.5 + 0.5 * Math.sin(t * s.twinkleSpeed + s.seed);
           const level = Math.min(
             CONFIG.starRamp.length - 1,
-            Math.floor(twinkle * CONFIG.starRamp.length)
+            Math.floor(twinkle * CONFIG.starRamp.length),
           );
           buffer[idx] = CONFIG.starRamp[level];
           zbuf[idx] = -99999;
@@ -349,7 +397,8 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
         }
       }
 
-      const tilt = CONFIG.tiltBase + CONFIG.tiltAmplitude * Math.sin(t * CONFIG.tiltSpeed);
+      const tilt =
+        CONFIG.tiltBase + CONFIG.tiltAmplitude * Math.sin(t * CONFIG.tiltSpeed);
       const cosT = Math.cos(tilt);
       const sinT = Math.sin(tilt);
 
@@ -375,11 +424,21 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
           const idx = row * cols + col;
           if (z <= zbuf[idx]) continue;
 
-          const heat = Math.pow(Math.max(0, 1 - (rho - innerR) / (outerR - innerR)), 1.2);
-          const flicker = 0.8 + 0.2 * Math.sin(rho * 0.15 + theta * 4 + t * 1.3);
+          const heat = Math.pow(
+            Math.max(0, 1 - (rho - innerR) / (outerR - innerR)),
+            1.2,
+          );
+          const flicker =
+            0.8 + 0.2 * Math.sin(rho * 0.15 + theta * 4 + t * 1.3);
           const lighting = 0.35 + 0.65 * Math.abs(-sinT * 0.6 + cosT * 0.8);
-          const brightness = Math.min(1, Math.max(0, heat * flicker * lighting));
-          const level = Math.min(ramp.length - 1, Math.floor(brightness * ramp.length));
+          const brightness = Math.min(
+            1,
+            Math.max(0, heat * flicker * lighting),
+          );
+          const level = Math.min(
+            ramp.length - 1,
+            Math.floor(brightness * ramp.length),
+          );
 
           buffer[idx] = ramp[level];
           zbuf[idx] = z;
@@ -395,7 +454,9 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
           const dx = cc * charWidth;
           const dy = rr * charHeight;
           const norm = (dx * dx) / (Rs * Rs) + (dy * dy) / (RsY * RsY);
-          const outerNorm = (dx * dx) / ((Rs * 1.18) * (Rs * 1.18)) + (dy * dy) / ((RsY * 1.18) * (RsY * 1.18));
+          const outerNorm =
+            (dx * dx) / (Rs * 1.18 * (Rs * 1.18)) +
+            (dy * dy) / (RsY * 1.18 * (RsY * 1.18));
           if (norm <= 1 || outerNorm > 1) continue;
           const idx = row * cols + col;
           if (buffer[idx] !== " ") continue;
@@ -411,7 +472,10 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
           const rv = cellRandom[idx];
           if (rv < fillAmount) {
             const flicker = 0.5 + 0.5 * Math.sin(t * 1.5 + rv * 30);
-            const level = Math.min(ramp.length - 2, Math.max(1, Math.floor(flicker * (ramp.length - 2))));
+            const level = Math.min(
+              ramp.length - 2,
+              Math.max(1, Math.floor(flicker * (ramp.length - 2))),
+            );
             buffer[idx] = ramp[level];
           }
         }
@@ -422,7 +486,10 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
           const rv = cellRandom[idx];
           if (rv < dissolveAmount) {
             const flicker = 0.5 + 0.5 * Math.sin(t * 1.7 + rv * 40);
-            const level = Math.min(ramp.length - 1, Math.max(1, Math.floor(flicker * (ramp.length - 1))));
+            const level = Math.min(
+              ramp.length - 1,
+              Math.max(1, Math.floor(flicker * (ramp.length - 1))),
+            );
             buffer[idx] = ramp[level];
           }
         }
@@ -441,7 +508,8 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
           nextGlitchAt = t + 0.8 + Math.random() * 1.5;
         }
         const glitching = glitchTimer > 0;
-        let sliceBands: { rowStart: number; rowEnd: number; shift: number }[] = [];
+        const sliceBands: { rowStart: number; rowEnd: number; shift: number }[] =
+          [];
         let corrupt: boolean[] | null = null;
 
         if (glitching) {
@@ -449,11 +517,16 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
           for (let i = 0; i < bandCount; i++) {
             const bandLen = 1 + Math.floor(Math.random() * 3);
             const rowStart =
-              nameRowMin + Math.floor(Math.random() * Math.max(1, nameRowMax - nameRowMin + 1));
+              nameRowMin +
+              Math.floor(
+                Math.random() * Math.max(1, nameRowMax - nameRowMin + 1),
+              );
             sliceBands.push({
               rowStart,
               rowEnd: rowStart + bandLen - 1,
-              shift: (Math.random() < 0.5 ? -1 : 1) * (1 + Math.floor(Math.random() * 3)),
+              shift:
+                (Math.random() < 0.5 ? -1 : 1) *
+                (1 + Math.floor(Math.random() * 3)),
             });
           }
           if (corruptScratch.length !== nameCells.length) {
@@ -462,7 +535,9 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
             corruptScratch.fill(false);
           }
           corrupt = corruptScratch;
-          const corruptCount = Math.floor(nameCells.length * (0.06 + Math.random() * 0.12));
+          const corruptCount = Math.floor(
+            nameCells.length * (0.06 + Math.random() * 0.12),
+          );
           for (let i = 0; i < corruptCount; i++) {
             corruptScratch[Math.floor(Math.random() * nameCells.length)] = true;
           }
@@ -472,7 +547,7 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
 
         for (let ci = 0; ci < nameCells.length; ci++) {
           const cell = nameCells[ci];
-          let row = cell.row;
+          const row = cell.row;
           let col = cell.col;
 
           if (sliceBands.length > 0) {
@@ -485,15 +560,23 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
           }
           if (col < 0 || col >= cols) continue;
 
-          let brightness = cell.brightness * nameProgress * flicker;
+          const brightness = cell.brightness * nameProgress * flicker;
           if (brightness < CONFIG.nameThreshold) continue;
           const level = Math.min(
             ramp.length - 1,
-            Math.max(0, Math.floor(brightness * (ramp.length - 1) + (cell.seed - 0.5) * 1.4))
+            Math.max(
+              0,
+              Math.floor(
+                brightness * (ramp.length - 1) + (cell.seed - 0.5) * 1.4,
+              ),
+            ),
           );
           let ch = ramp[level];
           if (corrupt && corrupt[ci]) {
-            ch = CONFIG.nameGlitchChars[Math.floor(Math.random() * CONFIG.nameGlitchChars.length)];
+            ch =
+              CONFIG.nameGlitchChars[
+                Math.floor(Math.random() * CONFIG.nameGlitchChars.length)
+              ];
           }
           buffer[row * cols + col] = ch;
         }
@@ -514,7 +597,10 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
       }
       context.restore();
 
-      if (document.hidden || window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 2)) {
+      if (
+        document.hidden ||
+        window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 2)
+      ) {
         running = false;
         return;
       }
@@ -524,7 +610,8 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
     const resumeIfNeeded = () => {
       if (running) return;
       if (document.hidden) return;
-      if (window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 2)) return;
+      if (window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 2))
+        return;
       running = true;
       lastTime = 0;
       frameId = requestAnimationFrame(render);
@@ -546,7 +633,10 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
 
   return (
     <>
-      <div aria-hidden style={{ height: `${(CONFIG.scrollDistanceVh + 1) * 100}vh` }} />
+      <div
+        aria-hidden
+        style={{ height: `${(CONFIG.scrollDistanceVh + 1) * 100}vh` }}
+      />
       {createPortal(
         <div
           className={className}
@@ -572,7 +662,7 @@ export default function BlackHoleASCII({ name, className = "" }: BlackHoleASCIIP
             }}
           />
         </div>,
-        document.body
+        document.body,
       )}
     </>
   );

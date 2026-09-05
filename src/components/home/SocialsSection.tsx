@@ -25,11 +25,17 @@ const SOCIALS = [
   },
   {
     name: "email",
-    href: "mailto:hello@quentinb.dev",
-    handle: "hello@quentinb.dev",
+    href: "mailto:qgbordelon@gmail.com",
+    handle: "qgbordelon@gmail.com",
     cmd: "sendmail -t < message.txt",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        className="h-5 w-5"
+      >
         <rect x="2" y="4" width="20" height="16" rx="2" />
         <path d="m2 7 10 6 10-6" />
       </svg>
@@ -39,7 +45,11 @@ const SOCIALS = [
 
 export default function SocialsSection() {
   return (
-    <section id="socials" data-lenis-snap className="relative min-h-screen flex items-center justify-center overflow-hidden py-16 sm:py-20">
+    <section
+      id="socials"
+      data-lenis-snap
+      className="relative min-h-screen flex items-center justify-center overflow-hidden py-16 sm:py-20"
+    >
       <div className="pointer-events-none absolute inset-x-0 top-1/3 -z-10 mx-auto h-[380px] w-[680px] rounded-full bg-gradient-to-tr from-violet/10 to-mauve/10 blur-[120px]" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
@@ -51,7 +61,9 @@ export default function SocialsSection() {
               key={s.name}
               href={s.href}
               target={s.href.startsWith("http") ? "_blank" : undefined}
-              rel={s.href.startsWith("http") ? "noreferrer noopener" : undefined}
+              rel={
+                s.href.startsWith("http") ? "noreferrer noopener" : undefined
+              }
               className="group relative w-full overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-cyan/40 hover:bg-white/[0.04] hover:shadow-[0_0_30px_-8px_rgba(46,223,229,0.4)] hover-lift sm:w-[calc(50%-0.5rem)]"
             >
               <div className="flex items-start justify-between gap-4">
@@ -65,7 +77,9 @@ export default function SocialsSection() {
                     </span>
                     {s.name}
                   </p>
-                  <p className="mt-1 font-mono text-xs text-white/50">{s.handle}</p>
+                  <p className="mt-1 font-mono text-xs text-white/50">
+                    {s.handle}
+                  </p>
                 </div>
                 <span className="font-mono text-white/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-cyan">
                   →_

@@ -68,8 +68,7 @@ marked.use({
             displayMode: true,
           };
         }
-        const inline =
-          /^\$([^\s$](?:[^$\n]*[^\s$])?)\$(?!\$)/.exec(src);
+        const inline = /^\$([^\s$](?:[^$\n]*[^\s$])?)\$(?!\$)/.exec(src);
         if (inline) {
           return {
             type: "math",
@@ -93,9 +92,10 @@ marked.use({
         return match ? match.index : -1;
       },
       tokenizer(src: string): AlertToken | undefined {
-        const match = /^\s*>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?([\s\S]*?)(?=\n\s*\n|$)/i.exec(
-          src
-        );
+        const match =
+          /^\s*>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?([\s\S]*?)(?=\n\s*\n|$)/i.exec(
+            src,
+          );
         if (!match) return undefined;
         const kind = match[1].toLowerCase();
         if (!ALERT_KINDS.includes(kind)) return undefined;
@@ -115,13 +115,21 @@ marked.use({
         const alert = token as unknown as AlertToken;
         return `<div class="md-alert md-alert-${alert.kind}"><div class="md-alert-title">[!${alert.kind.toUpperCase()}]</div>${marked.parse(
           alert.body,
-          { async: false }
+          { async: false },
         )}</div>`;
       },
     },
   ],
   renderer: {
-    code({ text, lang, escaped }: { text: string; lang?: string; escaped?: boolean }): string {
+    code({
+      text,
+      lang,
+      escaped,
+    }: {
+      text: string;
+      lang?: string;
+      escaped?: boolean;
+    }): string {
       const language = (lang || "").trim().split(/\s+/)[0] || "";
       const raw = escaped ? unescapeHtml(text) : text;
 
@@ -148,6 +156,57 @@ marked.use({
   },
 });
 
-export function renderMarkdown(markdown: string): string {
-  return marked.parse(markdown, { async: false }) as string;
+const ABSOLUTE_SRC = /^(?:https?:)?\/\//i;
+const DATA_SRC = /^data:/i;
+
+function resolveUrl(value: string, baseUrl: string): string {
+  if (!value) return value;
+  if (
+    ABSOLUTE_SRC.test(value) ||
+    DATA_SRC.test(value) ||
+    value.startsWith("#")
+  ) {
+    return value;
+  }
+  const repoRelative = value.replace(/^\/(?!\/)/, "");
+  let resolved: string;
+  try {
+    resolved = new URL(repoRelative, baseUrl).href;
+  } catch {
+    return value;
+  }
+  return ABSOLUTE_SRC.test(resolved) ? resolved : value;
+}
+
+export function renderMarkdown(
+  markdown: string,
+  imageBaseUrl?: string,
+  linkBaseUrl?: string,
+): string {
+  let html = marked.parse(markdown, { async: false }) as string;
+  if (imageBaseUrl) {
+    const base = imageBaseUrl.endsWith("/") ? imageBaseUrl : `${imageBaseUrl}/`;
+    html = html.replace(
+      /(<img\b[^>]*\bsrc=)(["'])([^"']*)\2/gi,
+      (_match, prefix: string, quote: string, src: string) =>
+        `${prefix}${quote}${resolveUrl(src, base)}${quote}`,
+    );
+  }
+  if (linkBaseUrl) {
+    const base = linkBaseUrl.endsWith("/") ? linkBaseUrl : `${linkBaseUrl}/`;
+    html = html.replace(
+      /(<a\b[^>]*\bhref=)(["'])([^"']*)\2/gi,
+      (_match, prefix: string, quote: string, href: string) =>
+        `${prefix}${quote}${resolveUrl(href, base)}${quote}`,
+    );
+  }
+  html = html.replace(
+    /<a\b[^>]*\bhref\s*=\s*(?:""|'')\s*>\s*(<img[^>]*>)\s*<\/a>/gi,
+    "$1",
+  );
+  html = html.replace(
+    /<p>(\s*(?:<a\s[^>]*>)?<img[^>]*>(?:<\/a>)?\s*)<\/p>/gi,
+    '<p class="md-img-center">$1</p>',
+  );
+  return html;
 }
