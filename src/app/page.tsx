@@ -3,17 +3,28 @@ import AboutSection from "@/components/home/AboutSection";
 import SocialsSection from "@/components/home/SocialsSection";
 import MiscSection from "@/components/home/MiscSection";
 import Reveal from "@/components/ui/Reveal";
-import BootSequence from "@/components/ui/BootSequence";
 import SectionLoader from "@/components/ui/SectionLoader";
 import IntroSequence from "@/components/ui/IntroSequence";
+import ScrollPrompt from "@/components/ui/ScrollPrompt";
 
 export default function Home() {
   return (
     <main className="relative min-h-screen text-foreground">
       <IntroSequence />
+      <ScrollPrompt />
       <BlackHoleASCII name="Quentin Bordelon" />
 
-      <BootSequence />
+      <section
+        aria-hidden
+        data-lenis-snap
+        className="relative flex h-[60vh] flex-col items-center justify-center gap-5"
+      >
+        <div className="h-12 w-px bg-gradient-to-b from-transparent via-cyan/60 to-transparent" />
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
+          scroll to enter
+        </p>
+        <p className="animate-bounce font-mono text-sm text-cyan/70">▾</p>
+      </section>
 
       <div className="relative z-10 bg-background">
         <div
