@@ -16,7 +16,6 @@ export default function Home() {
 
       <section
         aria-hidden
-        data-lenis-snap
         className="relative flex h-[60vh] flex-col items-center justify-center gap-5"
       >
         <div className="h-12 w-px bg-gradient-to-b from-transparent via-cyan/60 to-transparent" />

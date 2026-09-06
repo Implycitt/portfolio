@@ -84,7 +84,7 @@ export default function ProjectCard({
         className="absolute inset-0 z-0"
       />
 
-      <div className="relative z-10 flex flex-1 flex-col">
+      <div className="pointer-events-none relative z-10 flex flex-1 flex-col">
         {owner && (
           <div className="mb-1 font-mono text-[10px] tracking-[0.12em] text-mauve/50">
             {owner} /
@@ -123,7 +123,7 @@ export default function ProjectCard({
               target="_blank"
               rel="noreferrer noopener"
               aria-label={`Open ${repo.name} on GitHub`}
-              className="rounded-md border border-white/10 bg-black/40 p-1.5 text-white/50 transition-all duration-300 hover:border-cyan/50 hover:text-cyan hover:shadow-[0_0_14px_-2px_rgba(46,223,229,0.4)]"
+              className="pointer-events-auto rounded-md border border-white/10 bg-black/40 p-1.5 text-white/50 transition-all duration-300 hover:border-cyan/50 hover:text-cyan hover:shadow-[0_0_14px_-2px_rgba(46,223,229,0.4)]"
             >
               <svg
                 viewBox="0 0 24 24"

@@ -24,12 +24,12 @@ const CONFIG = {
   starDrift: 0.015,
   lensStrength: 900,
 
-  scrollDistanceVh: 3,
+  scrollDistanceVh: 2,
   fillProgressRange: [0.0, 0.35] as [number, number],
   fillMaxDensity: 0.85,
   dissolveProgressRange: [0.3, 0.6] as [number, number],
   clearProgressRange: [0.55, 0.85] as [number, number],
-  nameProgressRange: [0.58, 1.0] as [number, number],
+  nameProgressRange: [0.5, 1.0] as [number, number],
 
   nameFontRatio: 0.09,
   nameMaxWidthRatio: 0.82,
@@ -194,6 +194,7 @@ export default function BlackHoleASCII({
   className = "",
 }: BlackHoleASCIIProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -597,9 +598,20 @@ export default function BlackHoleASCII({
       }
       context.restore();
 
+      const rawProgress =
+        window.scrollY / (window.innerHeight * CONFIG.scrollDistanceVh);
+      const fadeAlpha = 1 - smoothstep(rawProgress, 1.0, 1.3);
+      const wrapper = wrapperRef.current;
+      if (wrapper) {
+        const nextOpacity = fadeAlpha.toFixed(3);
+        if (wrapper.style.opacity !== nextOpacity) {
+          wrapper.style.opacity = nextOpacity;
+        }
+      }
+
       if (
         document.hidden ||
-        window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 2)
+        window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 1)
       ) {
         running = false;
         return;
@@ -610,7 +622,7 @@ export default function BlackHoleASCII({
     const resumeIfNeeded = () => {
       if (running) return;
       if (document.hidden) return;
-      if (window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 2))
+      if (window.scrollY >= window.innerHeight * (CONFIG.scrollDistanceVh + 1))
         return;
       running = true;
       lastTime = 0;
@@ -639,6 +651,7 @@ export default function BlackHoleASCII({
       />
       {createPortal(
         <div
+          ref={wrapperRef}
           className={className}
           style={{
             position: "fixed",
@@ -652,6 +665,7 @@ export default function BlackHoleASCII({
             backgroundColor: "#000",
             zIndex: -10,
             pointerEvents: "none",
+            opacity: 1,
           }}
         >
           <canvas
