@@ -101,9 +101,10 @@ export default async function AboutSection() {
                 src={`/${HEADSHOT_FILE}`}
                 alt="Quentin Bordelon"
                 fill
-                sizes="(min-width: 1024px) 400px, 300px"
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px"
                 className="object-cover"
                 quality={100}
+                priority
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
