@@ -15,10 +15,10 @@ const EXPERIENCE = [
     org: "FAST Enterprises",
     period: "May 2026 - Aug 2026",
     points: [
-      "Configured, tested, and deployed software solutions for government agency clients, tailoring core system workflows to meet specific regulatory requirements and operational needs.",
-      "Supported an active rollout on the production support team, maintaining the GenTax environment to minimize errors for user facing services.",
-      "Architected and optimized complex SQL queries across 1M+ row taxpayer tables to ensure seamless integration and functionality across various tax subsystems.",
-      "Engineered custom features and modernized legacy codebases by rewriting core VB.NET services into high performance C#, improving maintainability and execution speed across enterprise modules.",
+      "Architected and optimized complex SQL queries across 100M+ row taxpayer tables, improving query execution performance by over 90% across various tax subsystems.",
+      "Engineered custom features for tax subsystems as well as modernized legacy codebases by rewriting 20+ core VB.NET services into high-performance C#, improving maintainability and system execution speed across enterprise modules.",
+      "Maintained the GenTax environment during an active production support rollout, isolating and resolving 20+ bugs across return, mailing, and account/customer subsystems, alongside one critical Core GenTax defect.",
+      "Configured, tested, and deployed software solutions for the Illinois government agency, tailoring core system workflows to meet specific regulatory requirements and operational needs."
     ],
   },
 ];
