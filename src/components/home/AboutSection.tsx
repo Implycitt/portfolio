@@ -96,7 +96,6 @@ export default async function AboutSection() {
           <div
             className={`relative mx-auto w-full max-w-[260px] overflow-hidden rounded-lg border bg-black/30 aspect-[4/5] sm:max-w-[300px] lg:max-w-none ${HEADSHOT_FILE ? "border-white/10" : "border-dashed border-white/15"}`}
           >
-            {" "}
             {HEADSHOT_FILE ? (
               <Image
                 src={`/${HEADSHOT_FILE}`}
@@ -104,6 +103,7 @@ export default async function AboutSection() {
                 fill
                 sizes="(min-width: 1024px) 400px, 300px"
                 className="object-cover"
+                quality={100}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
