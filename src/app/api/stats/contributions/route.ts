@@ -1,5 +1,5 @@
-import { fetchGitHubStreak } from "@/lib/github-stats";
-import { streakCardContent } from "@/lib/stats-cards";
+import { fetchGitHubContributionTotals } from "@/lib/github-stats";
+import { contributionsCardContent } from "@/lib/stats-cards";
 import { svgCardResponse } from "@/lib/svg-card";
 
 export const runtime = "nodejs";
@@ -11,5 +11,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const username = searchParams.get("username") ?? DEFAULT_USERNAME;
 
-  return svgCardResponse(streakCardContent(await fetchGitHubStreak(username)));
+  return svgCardResponse(
+    contributionsCardContent(await fetchGitHubContributionTotals(username)),
+  );
 }

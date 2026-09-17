@@ -1,3 +1,5 @@
+import { cached } from "@/lib/ttl-cache";
+
 export interface GitHubStatsData {
   username: string;
   name: string;
@@ -26,6 +28,16 @@ export interface GitHubStreakData {
   days: { count: number }[];
 }
 
+export interface GitHubContributionTotalsData {
+  username: string;
+  commits: number;
+  repositories: number;
+  pullRequests: number;
+  issues: number;
+  reviews: number;
+  mergedPullRequests: number | null;
+}
+
 interface GitHubUser {
   login: string;
   name: string | null;
@@ -51,6 +63,11 @@ interface GraphQLResponse {
   data?: {
     user?: {
       contributionsCollection?: {
+        totalCommitContributions?: number;
+        totalIssueContributions?: number;
+        totalPullRequestContributions?: number;
+        totalPullRequestReviewContributions?: number;
+        totalRepositoryContributions?: number;
         contributionCalendar?: {
           totalContributions?: number;
           weeks: {
@@ -60,6 +77,16 @@ interface GraphQLResponse {
       };
     };
   };
+}
+
+interface ContributionCalendar {
+  totalContributions: number;
+  days: number[];
+  commits: number;
+  issues: number;
+  pullRequests: number;
+  reviews: number;
+  repositories: number;
 }
 
 const TOKEN = process.env.GITHUB_TOKEN;
@@ -87,7 +114,39 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
 }
 
-export async function fetchGitHubStats(
+async function githubGraphQL<T>(
+  query: string,
+  variables: Record<string, unknown>,
+): Promise<T | null> {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return null;
+
+  try {
+    const res = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "User-Agent": "qb-portfolio-stats",
+      },
+      body: JSON.stringify({ query, variables }),
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+export function fetchGitHubStats(
+  username: string,
+): Promise<GitHubStatsData | null> {
+  return cached(`stats:${username}`, () => loadGitHubStats(username));
+}
+
+async function loadGitHubStats(
   username: string,
 ): Promise<GitHubStatsData | null> {
   const user = await fetchJson<GitHubUser>(
@@ -137,17 +196,90 @@ export async function fetchGitHubStats(
   };
 }
 
-export async function fetchGitHubPullRequests(
+export function fetchGitHubPullRequests(
   username: string,
 ): Promise<number | null> {
-  const data = await fetchJson<{ total_count?: number }>(
-    `https://api.github.com/search/issues?q=author:${encodeURIComponent(username)}+type:pr+is:merged&per_page=1`,
-  );
-  if (!data) return null;
-  return data.total_count ?? 0;
+  return cached(`merged-prs:${username}`, async () => {
+    const data = await fetchJson<{ total_count?: number }>(
+      `https://api.github.com/search/issues?q=author:${encodeURIComponent(username)}+type:pr+is:merged&per_page=1`,
+    );
+    if (!data) return null;
+    return data.total_count ?? 0;
+  });
 }
 
-export async function fetchGitHubLanguageBytes(
+interface LanguageRepositoriesPage {
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
+  nodes: {
+    languages: { edges: { size: number; node: { name: string } }[] };
+  }[];
+}
+
+interface LanguagesGraphQLResponse {
+  data?: { user?: { repositories?: LanguageRepositoriesPage } };
+}
+
+const LANGUAGES_QUERY = `query($login: String!, $cursor: String) {
+  user(login: $login) {
+    repositories(first: 100, isFork: false, ownerAffiliations: OWNER, after: $cursor) {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        languages(first: 100, orderBy: { field: SIZE, direction: DESC }) {
+          edges { size node { name } }
+        }
+      }
+    }
+  }
+}`;
+
+const MAX_LANGUAGE_PAGES = 10;
+
+export function fetchGitHubLanguageBytes(
+  username: string,
+): Promise<GitHubLanguageData[] | null> {
+  return cached(`languages:${username}`, () =>
+    loadGitHubLanguageBytes(username),
+  );
+}
+
+async function loadGitHubLanguageBytes(
+  username: string,
+): Promise<GitHubLanguageData[] | null> {
+  if (!process.env.GITHUB_TOKEN) return loadLanguageBytesRest(username);
+
+  const totals: Record<string, number> = {};
+  let cursor: string | null = null;
+
+  for (let page = 0; page < MAX_LANGUAGE_PAGES; page++) {
+    const json: LanguagesGraphQLResponse | null =
+      await githubGraphQL<LanguagesGraphQLResponse>(LANGUAGES_QUERY, {
+        login: username,
+        cursor,
+      });
+    const repositories: LanguageRepositoriesPage | undefined =
+      json?.data?.user?.repositories;
+    if (!repositories) return null;
+
+    for (const repo of repositories.nodes) {
+      for (const edge of repo.languages?.edges ?? []) {
+        totals[edge.node.name] = (totals[edge.node.name] ?? 0) + edge.size;
+      }
+    }
+
+    if (!repositories.pageInfo.hasNextPage) break;
+    cursor = repositories.pageInfo.endCursor;
+  }
+
+  return sortLanguages(totals);
+}
+
+function sortLanguages(totals: Record<string, number>): GitHubLanguageData[] {
+  return Object.entries(totals)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, bytes]) => ({ name, bytes }));
+}
+
+async function loadLanguageBytesRest(
   username: string,
 ): Promise<GitHubLanguageData[] | null> {
   const repos = await fetchJson<GitHubRepo[]>(
@@ -160,6 +292,7 @@ export async function fetchGitHubLanguageBytes(
     owned.map((repo) =>
       fetch(`https://api.github.com/repos/${username}/${repo.name}/languages`, {
         headers: githubHeaders(),
+        next: { revalidate: 3600 },
       }).then(async (res) => {
         if (!res.ok) return null;
         return (await res.json()) as Record<string, number>;
@@ -175,20 +308,28 @@ export async function fetchGitHubLanguageBytes(
     }
   }
 
-  return Object.entries(totals)
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, bytes]) => ({ name, bytes }));
+  return sortLanguages(totals);
 }
 
-export async function fetchGitHubStreak(
+function fetchContributionCalendar(
   username: string,
-): Promise<GitHubStreakData | null> {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) return null;
+): Promise<ContributionCalendar | null> {
+  return cached(`contributions:${username}`, () =>
+    requestContributionCalendar(username),
+  );
+}
 
+async function requestContributionCalendar(
+  username: string,
+): Promise<ContributionCalendar | null> {
   const query = `query($login: String!) {
     user(login: $login) {
       contributionsCollection {
+        totalCommitContributions
+        totalIssueContributions
+        totalPullRequestContributions
+        totalPullRequestReviewContributions
+        totalRepositoryContributions
         contributionCalendar {
           totalContributions
           weeks {
@@ -202,55 +343,79 @@ export async function fetchGitHubStreak(
     }
   }`;
 
-  try {
-    const res = await fetch("https://api.github.com/graphql", {
-      method: "POST",
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        "User-Agent": "qb-portfolio-stats",
-      },
-      body: JSON.stringify({ query, variables: { login: username } }),
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return null;
-    const json = (await res.json()) as GraphQLResponse;
-    const calendar =
-      json.data?.user?.contributionsCollection?.contributionCalendar;
-    if (!calendar) return null;
+  const json = await githubGraphQL<GraphQLResponse>(query, { login: username });
+  const collection = json?.data?.user?.contributionsCollection;
+  const calendar = collection?.contributionCalendar;
+  if (!collection || !calendar) return null;
 
-    const days = calendar.weeks.flatMap((week) =>
-      week.contributionDays.map((day) => day.contributionCount),
-    );
+  const days = calendar.weeks.flatMap((week) =>
+    week.contributionDays.map((day) => day.contributionCount),
+  );
 
-    let idx = days.length - 1;
-    if (idx >= 0 && days[idx] === 0) idx -= 1;
-    let currentStreak = 0;
-    while (idx >= 0 && days[idx] > 0) {
-      currentStreak++;
-      idx--;
-    }
+  return {
+    totalContributions: calendar.totalContributions ?? 0,
+    days,
+    commits: collection.totalCommitContributions ?? 0,
+    issues: collection.totalIssueContributions ?? 0,
+    pullRequests: collection.totalPullRequestContributions ?? 0,
+    reviews: collection.totalPullRequestReviewContributions ?? 0,
+    repositories: collection.totalRepositoryContributions ?? 0,
+  };
+}
 
-    let longestStreak = 0;
-    let run = 0;
-    for (const count of days) {
-      if (count > 0) {
-        run++;
-        if (run > longestStreak) longestStreak = run;
-      } else {
-        run = 0;
-      }
-    }
-
-    return {
-      username,
-      currentStreak,
-      longestStreak,
-      totalContributions: calendar.totalContributions ?? 0,
-      days: days.map((count) => ({ count })),
-    };
-  } catch {
-    return null;
+function streaksFrom(days: number[]): {
+  currentStreak: number;
+  longestStreak: number;
+} {
+  let idx = days.length - 1;
+  if (idx >= 0 && days[idx] === 0) idx -= 1;
+  let currentStreak = 0;
+  while (idx >= 0 && days[idx] > 0) {
+    currentStreak++;
+    idx--;
   }
+
+  let longestStreak = 0;
+  let run = 0;
+  for (const count of days) {
+    if (count > 0) {
+      run++;
+      if (run > longestStreak) longestStreak = run;
+    } else {
+      run = 0;
+    }
+  }
+
+  return { currentStreak, longestStreak };
+}
+
+export async function fetchGitHubStreak(
+  username: string,
+): Promise<GitHubStreakData | null> {
+  const calendar = await fetchContributionCalendar(username);
+  if (!calendar) return null;
+
+  return {
+    username,
+    ...streaksFrom(calendar.days),
+    totalContributions: calendar.totalContributions,
+    days: calendar.days.map((count) => ({ count })),
+  };
+}
+
+export async function fetchGitHubContributionTotals(
+  username: string,
+): Promise<GitHubContributionTotalsData | null> {
+  const calendar = await fetchContributionCalendar(username);
+  if (!calendar) return null;
+
+  return {
+    username,
+    commits: calendar.commits,
+    repositories: calendar.repositories,
+    pullRequests: calendar.pullRequests,
+    issues: calendar.issues,
+    reviews: calendar.reviews,
+    mergedPullRequests: await fetchGitHubPullRequests(username),
+  };
 }

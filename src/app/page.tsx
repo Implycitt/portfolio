@@ -3,7 +3,6 @@ import AboutSection from "@/components/home/AboutSection";
 import SocialsSection from "@/components/home/SocialsSection";
 import MiscSection from "@/components/home/MiscSection";
 import Reveal from "@/components/ui/Reveal";
-import SectionLoader from "@/components/ui/SectionLoader";
 import IntroSequence from "@/components/ui/IntroSequence";
 import ScrollPrompt from "@/components/ui/ScrollPrompt";
 
@@ -60,7 +59,6 @@ export default function Home() {
           </footer>
         </Reveal>
       </div>
-      <SectionLoader />
     </main>
   );
 }

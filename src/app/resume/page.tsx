@@ -18,7 +18,7 @@ const EXPERIENCE = [
       "Architected and optimized complex SQL queries across 100M+ row taxpayer tables, improving query execution performance by over 90% across various tax subsystems.",
       "Engineered custom features for tax subsystems as well as modernized legacy codebases by rewriting 20+ core VB.NET services into high-performance C#, improving maintainability and system execution speed across enterprise modules.",
       "Maintained the GenTax environment during an active production support rollout, isolating and resolving 20+ bugs across return, mailing, and account/customer subsystems, alongside one critical Core GenTax defect.",
-      "Configured, tested, and deployed software solutions for the Illinois government agency, tailoring core system workflows to meet specific regulatory requirements and operational needs."
+      "Configured, tested, and deployed software solutions for the Illinois government agency, tailoring core system workflows to meet specific regulatory requirements and operational needs.",
     ],
   },
 ];

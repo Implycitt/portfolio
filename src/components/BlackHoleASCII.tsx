@@ -509,8 +509,11 @@ export default function BlackHoleASCII({
           nextGlitchAt = t + 0.8 + Math.random() * 1.5;
         }
         const glitching = glitchTimer > 0;
-        const sliceBands: { rowStart: number; rowEnd: number; shift: number }[] =
-          [];
+        const sliceBands: {
+          rowStart: number;
+          rowEnd: number;
+          shift: number;
+        }[] = [];
         let corrupt: boolean[] | null = null;
 
         if (glitching) {

@@ -1,0 +1,11 @@
+.next/
+node_modules/
+out/
+build/
+public/
+content/
+bun.lock
+package-lock.json
+tsconfig.tsbuildinfo
+next-env.d.ts
+.freebuff/
