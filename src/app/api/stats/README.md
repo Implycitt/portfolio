@@ -45,16 +45,22 @@ engines won't index them. They only exist for direct URL access.
 
 ## SVG cards
 
-All four cards share one terminal-styled frame (dark background, cyan →
-violet → mauve accents, terminal-chrome header) and render as a static SVG —
-no SMIL `<animate>` or scripts — so GitHub's image proxy renders them
+All four cards share one frame built on the Catppuccin Mocha palette —
+`#1e1e2e` base, `#181825` header band, values in `#cdd6f4`, labels in
+`#7f849c`, secondary text in `#6c7086`, and `#cba6f7` mauve as the **only**
+accent (the rule under the header and the bars) — and render as a static SVG,
+no SMIL `<animate>` or scripts, so GitHub's image proxy renders them
 reliably. Cache headers let GitHub refresh them about every 5 minutes, and
 each falls back to a graceful "temporarily unavailable" card instead of
 erroring when the GitHub API is down or rate-limited, so the README images
 never break.
 
-Every card is **400×210** with the same header, prompt line, divider and
-footer rhythm, so they tile into a 2×2 grid without the README growing tall.
+Every card is **400×210** with the same 34px header, accent rule and
+three-column metric rhythm, so they tile into a 2×2 grid without the README
+growing tall. Cards carry no terminal chrome and no filler lines: a header
+(the title plus a one-token scope note — `@username`, `Last 365 days`) and the
+figures. The username appears once per card, not as a repeated
+`@user · github.com/user` line.
 
 ### One image keeps the grid (recommended)
 
@@ -110,8 +116,8 @@ missing or the API is unreachable.
 ### Languages card
 
 `GET /api/stats/languages` aggregates `bytes` across every non-fork public
-repo and renders the top 4 languages as percentage bars, with a "… and N
-more" footer for the tail.
+repo and renders the top 4 languages as percentage bars, with a `+N more languages`
+note below them for the tail.
 
 It reads that in **one GraphQL query** (repos paginated 100 at a time, capped
 at 10 pages, `languages` requested per repo), replacing the one-REST-call-per-
@@ -141,7 +147,8 @@ would waste half this card's grid. In their place are `PRS OPENED`
 (`totalPullRequestReviewContributions`), which no other card reports. The
 streak card's yearly figure is labelled `contribs` rather than `commits`, since
 `totalContributions` also counts issues, PRs and reviews — the true commit
-count is the `COMMITS · 365D` metric here.
+count is the `COMMITS` metric here (the card's `Last 365 days` note is the
+window for every figure except merged PRs, which are all-time and say so).
 
 Both cards share one contribution-calendar lookup (see _Caching_ below). It
 requires `GITHUB_TOKEN` and renders the graceful unavailable card without one.
@@ -159,8 +166,8 @@ independently, and the four standalone endpoints above remain available.
 
 A profile readme is a hot path: every view hits these endpoints, and the
 languages card alone makes **one request per public repo**. Reads are therefore
-memoized in-process for **5 minutes** — matching the "refreshed 5m" note the
-cards print and the `s-maxage=300` header they send — in
+memoized in-process for **5 minutes** — matching the `s-maxage=300` header the
+cards send — in
 `src/lib/ttl-cache.ts`.
 
 What that covers:
@@ -216,8 +223,8 @@ own copy — that is intentional (no shared dependency), and the CDN
 ### shields.io dynamic badge
 
 ```markdown
-![stars](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fquentinb.dev%2Fapi%2Fstats&query=%24.total_stars&label=stars&color=2EDFE5)
-![followers](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fquentinb.dev%2Fapi%2Fstats&query=%24.followers&label=followers&color=C77DFF)
+![stars](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fquentinb.dev%2Fapi%2Fstats&query=%24.total_stars&label=stars&color=cba6f7)
+![followers](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fquentinb.dev%2Fapi%2Fstats&query=%24.followers&label=followers&color=89b4fa)
 ```
 
 ### Direct fetch (workflow / script)
