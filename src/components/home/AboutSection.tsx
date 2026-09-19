@@ -8,6 +8,7 @@ import Spotlight from "@/components/ui/Spotlight";
 import Reveal from "@/components/ui/Reveal";
 import TiltFrame from "@/components/ui/TiltFrame";
 import SectionField from "@/components/ui/SectionField";
+import ScrollShift from "@/components/ui/ScrollShift";
 import Icon, { type IconName } from "@/components/ui/icons";
 import { fetchGitHubStats, fetchGitHubPullRequests } from "@/lib/github-stats";
 
@@ -143,9 +144,9 @@ export default async function AboutSection() {
       data-lenis-snap
       className="relative flex min-h-screen items-center justify-center py-12 sm:py-16"
     >
-      <SectionField variant="orbit" />
+      <SectionField backdrop="orbit" />
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col px-6 sm:px-10">
+      <ScrollShift className="relative mx-auto flex w-full max-w-6xl flex-col px-6 sm:px-10">
         <Reveal variant="pop" className="order-1">
           <SectionHeading
             title="About"
@@ -291,16 +292,7 @@ export default async function AboutSection() {
             </TiltFrame>
           </Reveal>
         </div>{" "}
-        <div className="order-3 mt-8 flex items-center gap-3 lg:order-2 lg:mt-6">
-          <span className="text-mocha-mauve">
-            <Icon name="activity" className="h-3.5 w-3.5" />
-          </span>
-          <span className="font-mono text-[11px] tracking-[0.25em] text-mocha-overlay1 uppercase">
-            GitHub stats
-          </span>
-          <span className="h-px flex-1 bg-gradient-to-r from-mocha-mauve/45 to-transparent" />
-        </div>
-        <div className="order-3 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:order-2 mt-4">
+        <div className="order-3 mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:order-2 lg:mt-8">
           {STATS.map((stat, i) => (
             <Reveal
               key={stat.key}
@@ -335,7 +327,7 @@ export default async function AboutSection() {
             </Reveal>
           ))}
         </div>
-      </div>
+      </ScrollShift>
     </section>
   );
 }

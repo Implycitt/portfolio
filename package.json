@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "test:blog": "node scripts/blog-check.mjs"
   },
   "dependencies": {
     "highlight.js": "^11.11.1",

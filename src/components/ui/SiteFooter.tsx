@@ -27,7 +27,7 @@ const STACK = [
 export default function SiteFooter({ exit }: { exit: string }) {
   return (
     <footer data-lenis-snap className="relative py-16 sm:py-20">
-      <SectionField variant="horizon" />
+      <SectionField backdrop="horizon" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">

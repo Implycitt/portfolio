@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SectionHeading from "@/components/ui/SectionHeading";
+import PageBackdrop from "@/components/ui/PageBackdrop";
 import Panel from "@/components/ui/Panel";
 import ResumeDownload from "@/components/ui/ResumeDownload";
 
@@ -134,9 +135,9 @@ export default function Resume() {
     <main
       id="content"
       tabIndex={-1}
-      className="relative min-h-screen bg-background text-foreground overflow-hidden print:overflow-visible"
+      className="relative min-h-screen text-foreground overflow-hidden print:overflow-visible"
     >
-      <div className="aurora pointer-events-none absolute inset-x-0 top-0 mx-auto h-[380px] w-[760px] rounded-full bg-gradient-to-tr from-mocha-mauve/18 via-mocha-lavender/10 to-mocha-sapphire/10 blur-[130px]" />
+      <PageBackdrop top="bloom" bottom="ripples" />
 
       <div className="relative mx-auto w-full max-w-5xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36 print:max-w-none print:px-0 print:py-0">
         <div className="flex flex-col items-center gap-6 print:hidden">

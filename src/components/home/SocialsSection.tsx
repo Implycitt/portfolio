@@ -2,6 +2,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Spotlight from "@/components/ui/Spotlight";
 import Reveal from "@/components/ui/Reveal";
 import SectionField from "@/components/ui/SectionField";
+import ScrollShift from "@/components/ui/ScrollShift";
 
 const SOCIALS = [
   {
@@ -56,9 +57,9 @@ export default function SocialsSection() {
       data-lenis-snap
       className="relative flex min-h-screen items-center justify-center py-16 sm:py-20"
     >
-      <SectionField variant="ripples" />
+      <SectionField backdrop="ripples" />
 
-      <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
+      <ScrollShift className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
         <Reveal variant="pop">
           <SectionHeading title="Socials" />
         </Reveal>
@@ -106,7 +107,7 @@ export default function SocialsSection() {
             </Reveal>
           ))}
         </div>
-      </div>
+      </ScrollShift>
     </section>
   );
 }

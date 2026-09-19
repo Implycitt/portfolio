@@ -35,6 +35,7 @@ export interface ParallaxLayer {
   property: string;
   factor: number;
   progress?: boolean;
+  read?: boolean;
 }
 
 const parallaxLayers = new Map<HTMLElement, ParallaxLayer[]>();
@@ -56,6 +57,16 @@ function measure() {
         element.style.setProperty(layer.property, value.toFixed(3));
         continue;
       }
+      if (layer.read) {
+        const scrollable =
+          window.document.documentElement.scrollHeight - window.innerHeight;
+        const value =
+          scrollable > 0
+            ? Math.min(1, Math.max(0, window.scrollY / scrollable))
+            : 0;
+        element.style.setProperty(layer.property, value.toFixed(4));
+        continue;
+      }
       const shift = Math.max(-80, Math.min(80, offset * layer.factor));
       element.style.setProperty(layer.property, `${shift.toFixed(1)}px`);
     }
@@ -65,6 +76,14 @@ function measure() {
 function schedule() {
   if (parallaxFrame) return;
   parallaxFrame = requestAnimationFrame(measure);
+}
+
+let resizeObserver: ResizeObserver | null = null;
+
+function getResizeObserver(): ResizeObserver | null {
+  if (typeof ResizeObserver === "undefined") return null;
+  if (!resizeObserver) resizeObserver = new ResizeObserver(schedule);
+  return resizeObserver;
 }
 
 export function registerParallax(
@@ -78,9 +97,12 @@ export function registerParallax(
   }
 
   parallaxLayers.set(element, layers);
+  const resizes = getResizeObserver();
+  resizes?.observe(element);
   schedule();
 
   return () => {
+    resizes?.unobserve(element);
     parallaxLayers.delete(element);
     for (const layer of layers) element.style.removeProperty(layer.property);
     if (parallaxLayers.size === 0) {

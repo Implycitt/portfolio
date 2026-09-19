@@ -1,7 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import SynthwaveBackground from "@/components/blog/SynthwaveBackground";
+import SectionField from "@/components/ui/SectionField";
+import { PRESETS, type BackdropSpec } from "@/lib/backdrop";
 import { getAllPosts, formatDate, blogSource } from "@/lib/posts";
+
+const ARCHIVE_SKY: BackdropSpec = {
+  ...PRESETS.station,
+  layers: [
+    ...PRESETS.station.layers,
+    {
+      kind: "shooting",
+      count: 2,
+      seed: 9909,
+      area: { x: [12, 78], y: [8, 30] },
+      duration: [14, 20],
+    },
+  ],
+};
 
 export const metadata: Metadata = {
   title: "Blog — Quentin Bordelon",
@@ -19,98 +34,124 @@ export default async function Blog() {
   }
   const categories = Object.keys(groups).sort();
 
+  const feedLabel =
+    blogSource.type === "github"
+      ? `${blogSource.repo} · ${blogSource.path}/ · ${blogSource.branch}`
+      : blogSource.label;
+
   return (
     <main
       id="content"
       tabIndex={-1}
-      className="relative min-h-screen overflow-hidden bg-background text-foreground"
+      className="relative min-h-screen overflow-hidden text-foreground"
     >
-      <SynthwaveBackground />
+      <SectionField backdrop={ARCHIVE_SKY} />
 
-      <div className="relative z-10 mx-auto w-full max-w-5xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36">
-        <span aria-hidden className="mb-4 block h-[2px] w-12 bg-mocha-mauve" />
-
-        <h1
-          data-text="./blog --synthwave"
-          className="glitch-text mt-3 max-w-full font-mono text-2xl font-black tracking-tighter text-transparent break-words sm:text-4xl lg:text-6xl"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #05d9e8, #ff2a6d 55%, #d300c5)",
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-          }}
+      <div className="relative z-10 mx-auto w-full max-w-5xl px-5 pb-24 pt-24 sm:px-10 sm:pt-32">
+        <Link
+          href="/"
+          className="group inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.25em] uppercase text-mocha-overlay1 transition-colors hover:text-mocha-teal"
         >
-          ./blog --synthwave
-        </h1>
+          <span className="transition-transform duration-200 group-hover:-translate-x-1">
+            ←
+          </span>
+          ~/home
+        </Link>
 
-        <p className="mt-4 max-w-xl font-mono text-sm leading-relaxed text-mocha-subtext">
-          A signal line of notes on math, physics, software, and whatever
-          crosses my mind. Rendered at 88% CRT nostalgia.
-        </p>
-
-        <div className="mt-6 mb-16 h-px w-full bg-gradient-to-r from-mocha-mauve/50 via-mocha-lavender/30 to-transparent" />
+        <header className="hud-panel hud-frame mt-8">
+          <div className="hud-bar text-mocha-overlay1">
+            <span className="hud-lamp text-mocha-teal" />
+            <span className="text-mocha-teal">archive link</span>
+            <span className="text-mocha-overlay0">//</span>
+            <span>station net · sector 07</span>
+            <span className="ml-auto text-mocha-overlay0">
+              {String(posts.length).padStart(2, "0")} logged
+            </span>
+          </div>
+          <div className="p-6 sm:p-8">
+            <h1 className="font-mono text-3xl font-black tracking-tighter text-mocha-text sm:text-5xl">
+              ./blog
+              <span className="hud-cursor ml-1 text-mocha-teal" />
+            </h1>
+            <p className="mt-4 max-w-xl font-mono text-sm leading-relaxed text-mocha-subtext">
+              A signal line of notes on math, physics, software, and whatever
+              crosses my mind.
+            </p>
+          </div>
+        </header>
 
         {categories.length === 0 ? (
-          <p className="font-mono text-sm text-mocha-subtext">
-            No posts yet — drop .md files into{" "}
-            {blogSource.type === "github"
-              ? `${blogSource.repo}/${blogSource.path}/{category}/`
-              : blogSource.label}
+          <p className="hud-panel mt-10 p-5 font-mono text-sm leading-relaxed text-mocha-subtext">
+            No posts yet — drop .md files into {feedLabel}
           </p>
         ) : (
-          <div className="space-y-14">
+          <div className="mt-12 space-y-12">
             {categories.map((category) => (
-              <section key={category} className="space-y-5">
-                <div className="flex items-center gap-3 font-mono text-xs tracking-widest uppercase">
-                  <span className="text-mocha-text">{category}</span>
-                  <span className="text-mocha-overlay0">
-                    {groups[category].length}
+              <section key={category}>
+                <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase">
+                  <span className="hud-lamp text-mocha-mauve" />
+                  <h2 className="text-mocha-text">{category}</h2>
+                  <span className="hidden shrink-0 sm:block">
+                    <span className="hud-meter block w-20 text-mocha-teal">
+                      <span
+                        style={{
+                          width: `${Math.round((groups[category].length / posts.length) * 100)}%`,
+                        }}
+                      />
+                    </span>
                   </span>
-                  <span className="h-px flex-1 bg-gradient-to-r from-mocha-mauve/40 to-transparent" />
+                  <span className="text-mocha-overlay0">
+                    {String(groups[category].length).padStart(2, "0")}
+                  </span>
+                  <span className="h-px flex-1 bg-gradient-to-r from-mocha-surface to-transparent" />
                 </div>
 
-                {groups[category].map((post) => (
-                  <Link
-                    key={post.slug}
-                    href={`/blog/${post.slug}`}
-                    className="spotlight group relative block overflow-hidden rounded-xl border border-mocha-surface bg-mocha-base p-5 transition-colors duration-300 hover:border-mocha-overlay0 sm:p-6"
-                  >
-                    <span className="absolute left-0 top-0 h-full w-0.5 bg-gradient-to-b from-mocha-lavender via-mocha-mauve to-mocha-pink opacity-50 transition-opacity duration-300 group-hover:opacity-100" />
-
-                    <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] tracking-widest uppercase">
-                      <span className="text-mocha-mauve">{post.tag}</span>
-                      <span className="text-mocha-surface">·</span>
-                      <span className="text-mocha-overlay1">
-                        {formatDate(post.date)}
+                <div className="hud-panel hud-notch mt-4 overflow-hidden">
+                  {groups[category].map((post, i) => (
+                    <Link
+                      key={post.slug}
+                      href={`/blog/${post.slug}`}
+                      className="hud-row group flex items-start gap-4 px-5 py-5 sm:gap-6 sm:px-6"
+                    >
+                      <span className="mt-0.5 w-5 shrink-0 font-mono text-[11px] tracking-widest text-mocha-overlay0">
+                        {String(i + 1).padStart(2, "0")}
                       </span>
-                      <span className="ml-auto hidden text-mocha-overlay0 sm:inline">
-                        {post.readMinutes} read
+
+                      <span className="min-w-0 flex-1">
+                        <h3 className="font-mono text-base font-bold text-mocha-text transition-colors group-hover:text-mocha-teal sm:text-lg">
+                          {post.title}
+                        </h3>
+                        <span className="mt-2 block font-mono text-[13px] leading-relaxed text-mocha-subtext">
+                          {post.excerpt}
+                        </span>
+                        <span className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] tracking-[0.2em] uppercase text-mocha-overlay0">
+                          <span className="text-mocha-mauve">{post.tag}</span>
+                          <span>{formatDate(post.date)}</span>
+                          <span>{post.readMinutes} read</span>
+                        </span>
                       </span>
-                    </div>
 
-                    <h2 className="mt-3 font-mono text-lg font-bold text-mocha-text transition-colors duration-300 group-hover:text-mocha-lavender sm:text-2xl">
-                      {post.title}
-                    </h2>
-
-                    <p className="mt-2 font-mono text-sm leading-relaxed text-mocha-subtext">
-                      {post.excerpt}
-                    </p>
-                  </Link>
-                ))}
+                      <span className="hidden shrink-0 pt-1 font-mono text-[10px] tracking-[0.2em] uppercase text-mocha-overlay0 transition-colors group-hover:text-mocha-teal sm:block">
+                        open ▸
+                      </span>
+                    </Link>
+                  ))}
+                </div>
               </section>
             ))}
           </div>
         )}
 
-        <p className="mt-16 text-center font-mono text-[10px] tracking-widest text-mocha-overlay0 uppercase">
-          feed:{" "}
-          {blogSource.type === "github"
-            ? `${blogSource.repo} (${blogSource.path}/ · ${blogSource.branch})`
-            : blogSource.label}
-        </p>
+        <div className="hud-panel mt-14">
+          <div className="hud-bar text-mocha-overlay0">
+            <span className="hud-lamp hud-lamp-idle text-mocha-overlay1" />
+            <span>feed</span>
+            <span className="normal-case tracking-normal text-mocha-overlay1">
+              {feedLabel}
+            </span>
+          </div>
+        </div>
       </div>
-
-      <div className="scanlines pointer-events-none fixed inset-0 z-40" />
     </main>
   );
 }

@@ -3,6 +3,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Spotlight from "@/components/ui/Spotlight";
 import Reveal from "@/components/ui/Reveal";
 import SectionField from "@/components/ui/SectionField";
+import ScrollShift from "@/components/ui/ScrollShift";
 import Icon from "@/components/ui/icons";
 
 interface Accent {
@@ -184,9 +185,9 @@ export default function MiscSection() {
       data-lenis-snap
       className="relative flex min-h-screen items-center justify-center py-16 sm:py-20"
     >
-      <SectionField variant="bloom" />
+      <SectionField backdrop="bloom" />
 
-      <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
+      <ScrollShift className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
         <Reveal variant="pop">
           <SectionHeading
             title="Interests"
@@ -263,7 +264,7 @@ export default function MiscSection() {
             );
           })}
         </div>
-      </div>
+      </ScrollShift>
     </section>
   );
 }

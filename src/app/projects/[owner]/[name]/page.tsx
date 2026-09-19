@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Panel from "@/components/ui/Panel";
+import PageBackdrop from "@/components/ui/PageBackdrop";
 import Link from "next/link";
 import Icon from "@/components/ui/icons";
 import {
@@ -77,9 +78,9 @@ export default async function ProjectDetail({ params }: Props) {
     <main
       id="content"
       tabIndex={-1}
-      className="relative min-h-screen bg-background text-foreground overflow-hidden"
+      className="relative min-h-screen text-foreground overflow-hidden"
     >
-      <div className="aurora pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-mocha-mauve/18 via-mocha-lavender/10 to-mocha-sapphire/10 blur-[130px]" />
+      <PageBackdrop top="orbit" bottom="constellation" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36">
         <Link

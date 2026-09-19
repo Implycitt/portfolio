@@ -11,7 +11,9 @@ Live at **[quentinb.dev](https://quentinb.dev)**.
   deep-linkable sections
 - `/resume`: printable, with a PDF download
 - `/blog`: posts pulled straight out of a GitHub repo, with KaTeX math and
-  highlighted code
+  highlighted code, dressed as a System Shock station terminal — a fixed
+  space backdrop, HUD panels, an outline console that follows your position and
+  a progress meter that fills as you read
 - `/api/stats/*`: JSON and Catppuccin-themed SVG cards, not linked anywhere in
   the UI (see [its own README](src/app/api/stats/README.md))
 
@@ -55,9 +57,9 @@ src/
     sitemap.ts          sitemap generation
   components/
     home/               landing sections (about, featured, interests, socials)
-    blog/               synthwave backdrop for the blog routes
     ui/                 shared primitives
   lib/
+    backdrop.ts         backdrop layer vocabulary, presets and seeded layouts
     github-repos.ts     repo, org and contribution queries
     github-stats.ts     profile stats, streaks and language bytes
     posts.ts            blog source resolution and frontmatter parsing
@@ -163,6 +165,64 @@ Then open <http://localhost:3000>.
 | `bun run lint`         | ESLint + TypeScript rules  |
 | `bun run format`       | Prettier, write            |
 | `bun run format:check` | Prettier, check only       |
+| `bun run test:smoke`   | Rendered checks in Chrome  |
+| `bun run test:blog`    | Blog readability audit     |
+
+### `bun run test:smoke`
+
+Drives a headless Chrome over the DevTools protocol, with no test-runner or
+browser dependency to install. It reuses a dev server already listening on
+`SMOKE_PORT` (default 3000) and starts one if there is none. Point it somewhere
+else with `SMOKE_URL`, or hand it a browser with `CHROME_PATH`; otherwise it
+finds Chrome, Chromium or a Playwright download itself.
+
+For `/`, `/projects`, `/resume` and `/blog`, plus the first article it finds on
+the blog index, at 390, 768 and 1440px wide it asserts: no horizontal overflow,
+no reveal left stuck invisible, no console or page errors, every backdrop field
+carrying an edge mask, and — the point of the whole thing — **no seam in the
+backdrop at a section or field boundary**. It hides all page content, walks the
+boundaries of the backdrop scope, captures the viewport at each one and
+compares row luminance across the boundary. A step of 3 or more across at least
+60% of the width fails; narrower steps are field art and are reported as notes.
+
+The blog's backdrop is `position: fixed` rather than sectioned, so it gets its
+own pass: the same full-width band check, sampled at four scroll offsets.
+
+`SMOKE_SELF_TEST=1 bun run test:smoke` paints a deliberate 2px line across
+every field and requires the check to catch it, which is how you know the
+detector itself still works.
+
+### `bun run test:blog`
+
+Walks every blog route — the index plus every article it finds linked from it —
+at 390 and 1440px, and audits the reading experience from computed styles only.
+It fails on:
+
+- **fonts** — `--font-fira-code-nerd` missing from `<html>`, a webfont face in
+  `error` state (Next's synthetic `* Fallback` faces exempt), or `.md-body` /
+  `.hud-bar` resolving to a family that is not a loaded webfont, which is what a
+  broken font file looks like.
+- **anchors** — any `a[href^="#"]` with no matching id, duplicate ids, and any
+  drift between the outline panel and the article's `h2`/`h3` ids.
+- **contrast** — composited foreground against the composited ancestor
+  background stack. Prose needs 4.5:1 (3:1 for large text), HUD chrome and meta
+  labels need 3:1. It also asserts the reading panel itself is ≥0.9 opaque, so
+  backdrop art cannot reach the prose.
+- **overflow** — maths, code, tables or images reaching past the prose column,
+  and any horizontal page scroll. Blocks that scroll inside their own box are
+  reported as notes instead.
+- **outline** — on a narrow viewport the section panel has to start collapsed,
+  expand to exactly the article's `h2`/`h3` ids, report `aria-expanded`, land a
+  picked section on the `scroll-padding-top` mark with the URL and the collapsed
+  bar following along, then close again — and land just as accurately on a
+  second pick after the page has shifted underneath the jump.
+
+`BLOG_SELF_TEST=1 bun run test:blog` injects a faint paragraph, a dangling
+anchor, an oversized maths block and a broken font stack, then requires the
+check to report all four. `OUTLINE_SELF_TEST=1 bun run test:blog` strips a row's
+href and renders the last heading away from its layout position, and requires
+the listing and landing checks to catch both. `BLOG_LIMIT` caps how many
+articles it walks.
 
 ## Deploying
 
@@ -204,5 +264,66 @@ shows the right title and description.
   `next/image` rejects them at runtime.
 - **The stats endpoints are intentionally unlinked** — no nav entry, no page,
   and `robots.txt` disallows them. They exist for direct URL access.
-- **There is no test suite yet.** Type checking (`tsc --noEmit`), ESLint and
-  Prettier are the current gates, and `bun run build` must stay green.
+- **Gates.** Type checking (`tsc --noEmit`), ESLint, Prettier,
+  `bun run test:smoke`, `bun run test:blog` and `bun run build` all have to
+  stay green.
+- **Backdrop continuity is enforced, not eyeballed.** Any new route that wants
+  the shared backdrop renders `PageBackdrop` (which tags itself
+  `data-backdrop-scope`) and puts `page-flow` on its `<main>`; the smoke test
+  then covers its boundaries automatically. Sections keep their own
+  `SectionField`, and the smoke test fails if a field loses its edge mask.
+- **Backdrops are data, not components.** Everything decorative is one of eight
+  layer kinds (`wash`, `dressing`, `blob`, `particles`, `rings`, `ripples`,
+  `sweep`, `shooting`) declared in `src/lib/backdrop.ts`, rendered by the single
+  `SectionField`. A section passes a preset name, a page passes a spec — usually
+  a preset with different layers, e.g. the blog index spreads `PRESETS.station`
+  and adds shooting stars. Adding art means adding entries plus, at most, one
+  CSS class for a new `dressing`, never a new React component. Particles and
+  rings are generated from ranges with a seeded PRNG, so the same spec always
+  renders the same layout on the server and the client.
+- **Depth is declared, not hand-animated.** A `group` layer takes `pointer` and
+  `drift` numbers, so the station backdrop is three nested frames: the planet and
+  horizon drift 5px against the cursor, the stars and deck 15px, the foreground
+  rails and sweep 28px, and each frame also travels a little as the reader
+  scrolls (`--field-read`, set once per frame by the shared loop in
+  `src/lib/field.ts`). All of it is transform-only, and everything still shares
+  one IntersectionObserver, one scroll listener and one pointer subscription.
+- **The brand link skips the hero.** The header's top-left mark points at
+  `#about` rather than `/`, so a click from any route lands on the About section
+  instead of replaying the event-horizon hero. `SmoothScroll` reads the hash
+  after the route's streamed sections exist, targets the section's layout offset
+  (the reveal transform would otherwise bias the measurement) and re-applies
+  until the position sticks, because Next resets the scroll when the shell
+  commits.
+- **Article progress has one source of truth.** `src/lib/markdown.ts` gives every
+  `h2`/`h3` an id and hands the same list to the page, so the outline panel and
+  the heading ids cannot drift. `PostRead` measures the article once per resize
+  and then per frame on scroll, writes `--read` (0–1) plus `data-read` on its
+  root, and every reader of that state — outline highlighting, HUD lamps, the
+  header status and the read meter — derives from it rather than measuring
+  again. One panel serves both breakpoints: it is always open and translucent
+  from `lg` up, and on phones it collapses into a sticky opaque bar showing the
+  current section and progress, expanding into the same list (capped at 55vh)
+  and closing again when a section is picked. The header's mobile variant and
+  the desktop one are separate elements behind `lg:hidden` / `hidden lg:block`
+  wrappers, because the unlayered HUD classes outrank Tailwind's `display`
+  utilities.
+- **Sections are reachable by swipe.** On touch devices a horizontal drag of at
+  least 56px, with the horizontal travel ≥1.8× the vertical and within 700ms,
+  moves to the next (left) or previous (right) heading, or to the article top
+  when already on the first. It closes the outline if it was open, then measures
+  the target on the next frame so the collapse cannot skew the landing, and it
+  lands on the same offset a link click would because Lenis honours
+  `scroll-padding-top`. The gesture reads touch events rather than cancelling
+  pans, so vertical scrolling, pinch-zoom and horizontally scrollable children
+  (code, tables, maths) are untouched — and `overscroll-behavior-x: none` on
+  `html` stops the browser reading the drag as a history swipe.
+  `src/lib/scroller.ts` is the one place that knows how to scroll to a section:
+  `SmoothScroll` registers its Lenis instance there, and anything without a
+  registered scroller falls back to a native scroll that respects reduced
+  motion. It resolves the section from its layout offset (never its transformed
+  rect) and re-resolves it once the scroll settles, re-applying immediately if
+  the page moved underneath — on phones the outline panel sits above the
+  article, so picking a section collapses it and shortens the document
+  mid-jump. A wheel, touch or key press during the flight cancels the
+  correction, so the reader always wins.

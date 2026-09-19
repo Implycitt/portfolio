@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { fetchGitHubRepos, fetchGitHubContributions } from "@/lib/github-repos";
 import SectionHeading from "@/components/ui/SectionHeading";
+import PageBackdrop from "@/components/ui/PageBackdrop";
 import ProjectCard from "@/components/ui/ProjectCard";
 import OrgCard from "@/components/ui/OrgCard";
 import ShowMore from "@/components/ui/ShowMore";
@@ -14,13 +15,12 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600;
 
-const EXCLUDED = ["Implycitt", "School", "GameDev", "CSPGame"];
+const EXCLUDED = ["Implycitt", "School", "GameDev", "CSPGame", "portfolio", "blog"];
 
 const GITHUB_USER = process.env.GITHUB_USERNAME ?? "Implycitt";
 
 const TAG_MAP: Record<string, string[]> = {
   PrintIt: ["javafx", "maven", "sqlite", "desktop"],
-  portfolio: ["next.js", "react", "tailwindcss", "typescript"],
   quickView: ["electron", "latex", "typst", "pdf"],
   tools: ["cli"],
   dotfiles: ["neovim", "tmux", "zsh", "alacritty"],
@@ -146,9 +146,9 @@ export default async function Projects() {
     <main
       id="content"
       tabIndex={-1}
-      className="relative min-h-screen bg-background text-foreground overflow-hidden"
+      className="relative min-h-screen text-foreground overflow-hidden"
     >
-      <div className="aurora pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-mocha-mauve/18 via-mocha-lavender/10 to-mocha-sapphire/10 blur-[130px]" />
+      <PageBackdrop top="constellation" bottom="bloom" />
 
       <div className="relative mx-auto w-full max-w-4xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36">
         <SectionHeading

@@ -19,8 +19,8 @@ const SOCIAL_LINKS = [
 
 export default function Header() {
   const pathname = usePathname();
+  const isHome = pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
-  const [logoReplay, setLogoReplay] = useState(0);
   const [showStatus, setShowStatus] = useState(false);
   const [clock, setClock] = useState<string | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
@@ -83,14 +83,12 @@ export default function Header() {
         }`}
       >
         <Link
-          href="/"
-          onMouseEnter={() => setLogoReplay((n) => n + 1)}
+          href={isHome ? "#about" : "/#about"}
           className="pointer-events-auto group flex items-center gap-2 text-mocha-text/85 hover:text-mocha-text transition-colors"
         >
           <span className="text-mocha-mauve">[</span>
           <Logo
-            key={logoReplay}
-            isAnimating
+            isAnimating={false}
             className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:scale-110"
           />
           <span className="font-bold tracking-widest">qb</span>

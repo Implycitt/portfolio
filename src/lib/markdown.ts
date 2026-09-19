@@ -178,12 +178,63 @@ function resolveUrl(value: string, baseUrl: string): string {
   return ABSOLUTE_SRC.test(resolved) ? resolved : value;
 }
 
+export interface Heading {
+  id: string;
+  text: string;
+  level: number;
+}
+
+const HEADING = /<h([1-6])(?:\s[^>]*)?>([\s\S]*?)<\/h\1>/g;
+
+function stripTags(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&[a-z]+;|&#\d+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function withHeadingIds(html: string): string {
+  const seen = new Map<string, number>();
+  return html.replace(HEADING, (match, level: string, inner: string) => {
+    const base = slugify(stripTags(inner)) || `section-${level}`;
+    const count = seen.get(base) ?? 0;
+    seen.set(base, count + 1);
+    const id = count === 0 ? base : `${base}-${count}`;
+    return `<h${level} id="${id}">${inner}</h${level}>`;
+  });
+}
+
+export function extractHeadings(
+  html: string,
+  levels: number[] = [2, 3],
+): Heading[] {
+  const headings: Heading[] = [];
+  for (const match of html.matchAll(HEADING)) {
+    const level = Number(match[1]);
+    const id = /\sid="([^"]+)"/.exec(match[0]);
+    const text = stripTags(match[2]);
+    if (!levels.includes(level) || !id || !text) continue;
+    headings.push({ id: id[1], text, level });
+  }
+  return headings;
+}
+
 export function renderMarkdown(
   markdown: string,
   imageBaseUrl?: string,
   linkBaseUrl?: string,
 ): string {
-  let html = marked.parse(markdown, { async: false }) as string;
+  let html = withHeadingIds(marked.parse(markdown, { async: false }) as string);
   if (imageBaseUrl) {
     const base = imageBaseUrl.endsWith("/") ? imageBaseUrl : `${imageBaseUrl}/`;
     html = html.replace(

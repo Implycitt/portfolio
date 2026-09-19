@@ -92,7 +92,10 @@ export default function Home() {
         </p>
       </section>
 
-      <div className="page-flow relative z-10 overflow-hidden">
+      <div
+        data-backdrop-scope
+        className="page-flow relative z-10 overflow-hidden"
+      >
         <div aria-hidden className="page-drift" />
         <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
           {" "}

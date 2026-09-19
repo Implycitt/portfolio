@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import "katex/dist/katex.min.css";
-import SynthwaveBackground from "@/components/blog/SynthwaveBackground";
+import SectionField from "@/components/ui/SectionField";
+import { PostRead, ReadOutro, ReadStatus } from "@/components/blog/PostRead";
 import {
   getAllPosts,
   getPostBySlug,
   formatDate,
   blogSource,
 } from "@/lib/posts";
-import { renderMarkdown } from "@/lib/markdown";
+import { extractHeadings, renderMarkdown } from "@/lib/markdown";
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string[] }>;
@@ -53,19 +54,20 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
     repoBase ? `https://raw.githubusercontent.com/${repoBase}` : undefined,
     repoBase ? `https://github.com/${repoBase}` : undefined,
   );
+  const headings = extractHeadings(html);
 
   return (
     <main
       id="content"
       tabIndex={-1}
-      className="relative min-h-screen overflow-hidden bg-background text-foreground"
+      className="relative min-h-screen overflow-clip text-foreground"
     >
-      <SynthwaveBackground />
+      <SectionField backdrop="station" />
 
-      <div className="relative z-10 mx-auto w-full max-w-4xl px-6 pb-28 pt-28 sm:px-10 sm:pt-36">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-5 pb-24 pt-24 sm:px-10 sm:pt-32">
         <Link
           href="/blog"
-          className="group inline-flex items-center gap-2 font-mono text-xs tracking-[0.25em] uppercase text-mocha-overlay1 transition-colors hover:text-mocha-mauve"
+          className="group inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.25em] uppercase text-mocha-overlay1 transition-colors hover:text-mocha-teal"
         >
           <span className="transition-transform duration-200 group-hover:-translate-x-1">
             ←
@@ -73,50 +75,60 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
           ~/blog
         </Link>
 
-        <div className="mt-10 flex flex-wrap items-center gap-3 font-mono text-[11px] tracking-widest uppercase">
-          <span className="text-mocha-mauve">{post.tag}</span>
-          <span className="text-mocha-surface">·</span>
-          <span className="text-mocha-lavender">{post.category}</span>
-          <span className="text-mocha-surface">·</span>
-          <span className="text-mocha-overlay1">{formatDate(post.date)}</span>
-          <span className="text-mocha-surface">·</span>
-          <span className="text-mocha-overlay1">{post.readMinutes} read</span>
-        </div>
+        <PostRead headings={headings}>
+          <header className="hud-panel hud-frame">
+            <div className="hud-bar text-mocha-overlay1">
+              <span className="hud-lamp text-mocha-teal" />
+              <span className="text-mocha-teal normal-case tracking-normal">
+                {post.slug}.md
+              </span>
+              <span className="hidden sm:inline">{formatDate(post.date)}</span>
+              <ReadStatus />
+            </div>
 
-        <h1
-          data-text={post.title}
-          className="glitch-text mt-4 max-w-full font-mono text-2xl font-black leading-tight tracking-tighter text-transparent break-words sm:text-4xl lg:text-5xl"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #fff, #05d9e8 60%, #ff2a6d)",
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-          }}
-        >
-          {post.title}
-        </h1>
+            <div className="p-6 sm:p-8">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] tracking-[0.24em] uppercase">
+                <span className="text-mocha-mauve">{post.tag}</span>
+                <span className="text-mocha-overlay0">/</span>
+                <span className="text-mocha-lavender">{post.category}</span>
+                <span className="text-mocha-overlay0">/</span>
+                <span className="text-mocha-overlay1">
+                  {post.readMinutes} read
+                </span>
+              </div>
 
-        <div className="mt-6 mb-12 h-px w-full bg-gradient-to-r from-mocha-mauve/50 via-mocha-lavender/30 to-transparent" />
+              <h1 className="mt-4 font-mono text-2xl font-black leading-tight tracking-tighter text-mocha-text break-words sm:text-4xl">
+                {post.title}
+              </h1>
 
-        <div className="rounded-xl border border-mocha-surface bg-mocha-base p-6 sm:p-10">
-          <article
-            className="md-body font-mono"
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-        </div>
+              {post.excerpt ? (
+                <p className="mt-4 border-l border-mocha-surface pl-4 font-mono text-[13px] leading-relaxed text-mocha-subtext">
+                  {post.excerpt}
+                </p>
+              ) : null}
+            </div>
+          </header>
 
-        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-mocha-surface pt-8 font-mono text-xs tracking-widest uppercase text-mocha-overlay0 sm:flex-row sm:items-center">
-          <p>Thanks for reading</p>
-          <Link
-            href="/blog"
-            className="transition-colors hover:text-mocha-mauve"
-          >
-            ← all posts
-          </Link>
-        </div>
+          <article className="hud-panel hud-panel-solid hud-frame hud-edge-amber mt-8 px-5 py-8 sm:px-10 sm:py-12">
+            <div
+              className="md-body font-mono"
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          </article>
+
+          <div className="hud-panel mt-12">
+            <div className="hud-bar text-mocha-overlay0">
+              <ReadOutro />
+              <Link
+                href="/blog"
+                className="ml-auto transition-colors hover:text-mocha-teal"
+              >
+                ← all posts
+              </Link>
+            </div>
+          </div>
+        </PostRead>
       </div>
-
-      <div className="scanlines pointer-events-none fixed inset-0 z-40" />
     </main>
   );
 }

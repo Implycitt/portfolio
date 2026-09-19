@@ -3,11 +3,12 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import ProjectCard from "@/components/ui/ProjectCard";
 import Reveal from "@/components/ui/Reveal";
 import SectionField from "@/components/ui/SectionField";
+import ScrollShift from "@/components/ui/ScrollShift";
 import { fetchGitHubRepos } from "@/lib/github-repos";
 
 const USERNAME = process.env.GITHUB_USERNAME ?? "Implycitt";
 
-const FEATURED = ["competitive-programming", "quickView", "AveResearch2026"];
+const FEATURED = ["PrintIt", "quickView", "AveResearch2026"];
 
 const EXCLUDED = ["Implycitt", "School", "GameDev", "CSPGame"];
 
@@ -29,9 +30,9 @@ export default async function FeaturedSection() {
       data-lenis-snap
       className="relative flex min-h-screen items-center justify-center py-16 sm:py-20"
     >
-      <SectionField variant="constellation" />
+      <SectionField backdrop="constellation" />
 
-      <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
+      <ScrollShift className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <Reveal variant="pop">
             <SectionHeading title="Selected work" />
@@ -65,7 +66,7 @@ export default async function FeaturedSection() {
             </Reveal>
           ))}
         </div>
-      </div>
+      </ScrollShift>
     </section>
   );
 }
