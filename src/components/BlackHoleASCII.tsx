@@ -28,14 +28,40 @@ const CONFIG = {
   fillProgressRange: [0.0, 0.35] as [number, number],
   fillMaxDensity: 0.85,
   dissolveProgressRange: [0.3, 0.6] as [number, number],
-  clearProgressRange: [0.55, 0.85] as [number, number],
-  nameProgressRange: [0.5, 1.0] as [number, number],
+  clearProgressRange: [0.5, 0.76] as [number, number],
+  nameProgressRange: [0.55, 0.85] as [number, number],
+  fadeProgressRange: [1.2, 1.45] as [number, number],
+} as const;
 
-  nameFontRatio: 0.09,
-  nameMaxWidthRatio: 0.82,
-  nameMaskScale: 2,
-  nameThreshold: 0.05,
-  nameGlitchChars: "!<>-_\\/[]{}()=+*^?#$&|;:,.~",
+const NAME = {
+  heightRatio: 0.13,
+  maxWidthRatio: 0.88,
+  cellMin: 5,
+  cellMax: 8,
+  targetRows: 8,
+  minRows: 8,
+  maxBlockRatio: 0.55,
+  capRatio: 0.72,
+  maskScale: 2,
+  strokeRatio: 0.06,
+  coverageThreshold: 0.2,
+  ramp: " .:-=+*#%@",
+  jitter: 1.4,
+  revealSpan: 0.6,
+  redrawSteps: 24,
+  glitchChars: "!<>-_\\/[]{}()=+*^?#$&|;:,.~",
+} as const;
+
+const GLITCH = {
+  firstDelay: [0.2, 0.5] as [number, number],
+  interval: [1.1, 2.6] as [number, number],
+  duration: [0.12, 0.3] as [number, number],
+  redrawInterval: 0.05,
+  charRate: 0.07,
+  bandMin: 1,
+  bandMax: 3,
+  bandRows: 3,
+  shiftMax: 3,
 } as const;
 
 interface Star {
@@ -46,11 +72,28 @@ interface Star {
 }
 
 interface NameCell {
-  row: number;
   col: number;
-  brightness: number;
+  level: number;
   seed: number;
 }
+
+interface NameGrid {
+  rows: (NameCell[] | undefined)[];
+  rowMin: number;
+  colMin: number;
+  colMax: number;
+  cellW: number;
+  cellH: number;
+}
+
+const EMPTY_GRID: NameGrid = {
+  rows: [],
+  rowMin: 0,
+  colMin: 0,
+  colMax: 0,
+  cellW: 1,
+  cellH: 1,
+};
 
 function smoothstep(x: number, edge0: number, edge1: number) {
   if (edge0 === edge1) return x < edge0 ? 0 : 1;
@@ -58,111 +101,132 @@ function smoothstep(x: number, edge0: number, edge1: number) {
   return t * t * (3 - 2 * t);
 }
 
-function buildNameMask(
+function nameFont(size: number, bold = true): string {
+  return `${bold ? "bold " : ""}${size}px "Courier New", monospace`;
+}
+
+function buildNameGrid(
   ctx: CanvasRenderingContext2D,
   name: string,
   w: number,
   h: number,
-  charWidth: number,
-  charHeight: number,
-): { cells: NameCell[]; rowMin: number; rowMax: number } {
+): NameGrid {
   const words = name.trim().split(/\s+/).filter(Boolean);
-  const maxWidth = w * CONFIG.nameMaxWidthRatio;
-  const ideal = h * CONFIG.nameFontRatio;
+  if (words.length === 0) return EMPTY_GRID;
 
-  let lines: string[] = [name];
-  let fontSize = ideal;
-  ctx.font = `bold ${fontSize}px "Courier New", monospace`;
+  const maxWidth = w * NAME.maxWidthRatio;
+  const ideal = Math.min(h * NAME.heightRatio, maxWidth);
 
-  const singleW = ctx.measureText(name).width;
-  if (singleW > maxWidth && words.length > 1) {
-    const wordWidths = words.map((word) => ctx.measureText(word).width);
-    const longest = Math.max(...wordWidths);
-    const multiFs = ideal * (maxWidth / longest);
-    const singleFs = ideal * (maxWidth / singleW);
-    if (multiFs > singleFs * 1.18) {
+  const measure = (text: string, size: number) => {
+    ctx.font = nameFont(size);
+    return ctx.measureText(text).width;
+  };
+  const cellFor = (size: number) =>
+    Math.max(
+      NAME.cellMin,
+      Math.min(
+        NAME.cellMax,
+        Math.round((size * NAME.capRatio) / NAME.targetRows),
+      ),
+    );
+  const rowsFor = (size: number) => (size * NAME.capRatio) / cellFor(size);
+
+  const singleWidth = Math.max(1, measure(name, ideal));
+  const singleSize = Math.min(ideal, (ideal * maxWidth) / singleWidth);
+  let lines = [name];
+  let fontSize = singleSize;
+
+  if (words.length > 1 && rowsFor(singleSize) < NAME.minRows) {
+    const longest = Math.max(1, ...words.map((word) => measure(word, ideal)));
+    const stacked = Math.min(
+      ideal,
+      (ideal * maxWidth) / longest,
+      (h * NAME.maxBlockRatio) / (words.length * 1.3),
+    );
+    if (stacked > singleSize && rowsFor(stacked) > rowsFor(singleSize) + 1) {
       lines = words;
-      fontSize = multiFs;
-    } else {
-      fontSize = singleFs;
+      fontSize = stacked;
     }
-  } else if (singleW > maxWidth) {
-    fontSize = ideal * (maxWidth / singleW);
   }
 
-  ctx.font = `bold ${fontSize}px "Courier New", monospace`;
-  let widest = Math.max(...lines.map((line) => ctx.measureText(line).width));
-  if (widest > maxWidth) {
-    fontSize *= maxWidth / widest;
-    ctx.font = `bold ${fontSize}px "Courier New", monospace`;
-    widest = Math.max(...lines.map((line) => ctx.measureText(line).width));
-  }
+  if (!Number.isFinite(fontSize) || fontSize < 8) return EMPTY_GRID;
 
-  const maskScale = CONFIG.nameMaskScale;
-  const pad = fontSize * 0.5;
+  const cellSize = cellFor(fontSize);
+
+  ctx.font = nameFont(cellSize, false);
+  const cellW = Math.max(1, ctx.measureText("M").width);
+  const cellH = cellSize;
+
+  const lineH = fontSize * 1.3;
+  const widest = Math.max(...lines.map((line) => measure(line, fontSize)));
+  const pad = fontSize * 0.35;
   const maskW = Math.max(2, Math.ceil(widest + pad * 2));
-  const lineH = fontSize * 1.4;
   const maskH = Math.max(2, Math.ceil(lineH * lines.length + pad));
-  const mask = document.createElement("canvas");
-  mask.width = Math.ceil(maskW * maskScale);
-  mask.height = Math.ceil(maskH * maskScale);
-  const mctx = mask.getContext("2d");
-  if (!mctx) return { cells: [], rowMin: 0, rowMax: 0 };
 
-  mctx.scale(maskScale, maskScale);
+  const mask = document.createElement("canvas");
+  mask.width = Math.ceil(maskW * NAME.maskScale);
+  mask.height = Math.ceil(maskH * NAME.maskScale);
+  const mctx = mask.getContext("2d");
+  if (!mctx) return EMPTY_GRID;
+
+  mctx.scale(NAME.maskScale, NAME.maskScale);
   mctx.fillStyle = "#000";
   mctx.fillRect(0, 0, maskW, maskH);
-  mctx.font = `bold ${fontSize}px "Courier New", monospace`;
-  mctx.fillStyle = "#fff";
+  mctx.font = nameFont(fontSize);
   mctx.textAlign = "center";
   mctx.textBaseline = "middle";
+  mctx.lineJoin = "round";
+  mctx.fillStyle = "#fff";
+  mctx.strokeStyle = "#fff";
+  mctx.lineWidth = fontSize * NAME.strokeRatio;
+
   const centerY = maskH / 2;
   lines.forEach((line, i) => {
-    mctx.fillText(
-      line,
-      maskW / 2,
-      centerY + (i - (lines.length - 1) / 2) * lineH,
-    );
+    const y = centerY + (i - (lines.length - 1) / 2) * lineH;
+    mctx.fillText(line, maskW / 2, y);
+    mctx.strokeText(line, maskW / 2, y);
   });
+
   const img = mctx.getImageData(0, 0, mask.width, mask.height);
   const data = img.data;
 
   const boxLeft = w / 2 - maskW / 2;
   const boxTop = h / 2 - maskH / 2;
-  const cells: NameCell[] = [];
-  const firstCol = Math.max(0, Math.floor(boxLeft / charWidth));
+  const firstCol = Math.max(0, Math.floor(boxLeft / cellW));
   const lastCol = Math.min(
-    Math.floor(w / charWidth) - 1,
-    Math.floor((boxLeft + maskW) / charWidth),
+    Math.ceil(w / cellW) - 1,
+    Math.ceil((boxLeft + maskW) / cellW),
   );
-  const firstRow = Math.max(0, Math.floor(boxTop / charHeight));
+  const firstRow = Math.max(0, Math.floor(boxTop / cellH));
   const lastRow = Math.min(
-    Math.floor(h / charHeight) - 1,
-    Math.floor((boxTop + maskH) / charHeight),
+    Math.ceil(h / cellH) - 1,
+    Math.ceil((boxTop + maskH) / cellH),
   );
+  if (lastCol < firstCol || lastRow < firstRow) return EMPTY_GRID;
 
-  let rowMin = Infinity;
-  let rowMax = -Infinity;
+  const rows: (NameCell[] | undefined)[] = new Array(lastRow - firstRow + 1);
+  const rampTop = NAME.ramp.length - 1;
 
   for (let row = firstRow; row <= lastRow; row++) {
     for (let col = firstCol; col <= lastCol; col++) {
       const x0 = Math.max(
         0,
-        Math.round((col * charWidth - boxLeft) * maskScale),
+        Math.round((col * cellW - boxLeft) * NAME.maskScale),
       );
       const y0 = Math.max(
         0,
-        Math.round((row * charHeight - boxTop) * maskScale),
+        Math.round((row * cellH - boxTop) * NAME.maskScale),
       );
       const x1 = Math.min(
         mask.width,
-        Math.round((col * charWidth + charWidth - boxLeft) * maskScale),
+        Math.round((col * cellW + cellW - boxLeft) * NAME.maskScale),
       );
       const y1 = Math.min(
         mask.height,
-        Math.round((row * charHeight + charHeight - boxTop) * maskScale),
+        Math.round((row * cellH + cellH - boxTop) * NAME.maskScale),
       );
       if (x1 <= x0 || y1 <= y0) continue;
+
       let sum = 0;
       let count = 0;
       for (let y = y0; y < y1; y++) {
@@ -173,15 +237,32 @@ function buildNameMask(
         }
       }
       if (count === 0) continue;
-      const brightness = (sum / count / 255) * (1 / 3);
-      if (brightness < CONFIG.nameThreshold) continue;
-      cells.push({ row, col, brightness, seed: Math.random() });
-      if (row < rowMin) rowMin = row;
-      if (row > rowMax) rowMax = row;
+
+      const coverage = sum / count / 255 / 3;
+      if (coverage < NAME.coverageThreshold) continue;
+
+      const t =
+        (coverage - NAME.coverageThreshold) / (1 - NAME.coverageThreshold);
+      const seed = Math.random();
+      const level = Math.max(
+        1,
+        Math.min(rampTop, Math.round(t * rampTop + (seed - 0.5) * NAME.jitter)),
+      );
+
+      const bucket = row - firstRow;
+      const cells = rows[bucket] ?? (rows[bucket] = []);
+      cells.push({ col, level, seed });
     }
   }
-  if (rowMin === Infinity) rowMin = rowMax = 0;
-  return { cells, rowMin, rowMax };
+
+  return {
+    rows,
+    rowMin: firstRow,
+    colMin: firstCol,
+    colMax: lastCol,
+    cellW,
+    cellH,
+  };
 }
 
 interface BlackHoleASCIIProps {
@@ -194,6 +275,7 @@ export default function BlackHoleASCII({
   className = "",
 }: BlackHoleASCIIProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const nameCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -210,9 +292,11 @@ export default function BlackHoleASCII({
 
   useEffect(() => {
     const node = canvasRef.current;
-    if (!node) return;
+    const nameNode = nameCanvasRef.current;
+    if (!node || !nameNode) return;
     const context = node.getContext("2d");
-    if (!context) return;
+    const nameContext = nameNode.getContext("2d");
+    if (!context || !nameContext) return;
 
     let frameId = 0;
     let cols = 0;
@@ -223,15 +307,17 @@ export default function BlackHoleASCII({
     let charHeight = 1;
     let stars: Star[] = [];
     let cellRandom = new Float32Array(0);
-    let nameCells: NameCell[] = [];
-    let nameRowMin = 0;
-    let nameRowMax = 0;
+    let nameGrid: NameGrid = EMPTY_GRID;
+    let nameSteps = -1;
+    let nameDirty = false;
+    let nameOpacity = "0";
     let glitchTimer = 0;
-    let nextGlitchAt = 2.5 + Math.random() * 2;
+    let glitchArmed = false;
+    let nextGlitchAt = 0;
+    let lastGlitchDraw = 0;
     let lastTime = 0;
-    let nameSeen = false;
-    let corruptScratch: boolean[] = [];
     let running = true;
+    const nameScratch: string[] = [""];
 
     const measureFont = () => {
       context.font = `${CONFIG.fontSize}px "Courier New", monospace`;
@@ -276,17 +362,15 @@ export default function BlackHoleASCII({
       rows = Math.max(1, Math.floor(viewH / charHeight));
       initStars();
       initCellRandom();
-      const mask = buildNameMask(
-        context,
-        name,
-        viewW,
-        viewH,
-        charWidth,
-        charHeight,
-      );
-      nameCells = mask.cells;
-      nameRowMin = mask.rowMin;
-      nameRowMax = mask.rowMax;
+
+      nameNode.width = Math.round(viewW * dpr);
+      nameNode.height = Math.round(viewH * dpr);
+      nameNode.style.width = `${viewW}px`;
+      nameNode.style.height = `${viewH}px`;
+      nameContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+      nameGrid = buildNameGrid(context, name, viewW, viewH);
+      nameSteps = -1;
+      measureFont();
     };
 
     resize();
@@ -295,18 +379,85 @@ export default function BlackHoleASCII({
     let zbuf = new Float32Array(0);
     let buffer: string[] = [];
 
+    const drawName = (progress: number, glitch: boolean) => {
+      const step = Math.round(progress * NAME.redrawSteps);
+      if (step === nameSteps && !glitch && !nameDirty) return;
+      nameSteps = step;
+      nameDirty = glitch;
+
+      nameContext.setTransform(1, 0, 0, 1, 0, 0);
+      nameContext.clearRect(0, 0, nameNode.width, nameNode.height);
+      if (progress <= 0) return;
+
+      const dpr = nameNode.width / Math.max(1, viewW);
+      nameContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const { rows: gridRows, rowMin, colMin, colMax, cellW, cellH } = nameGrid;
+      if (gridRows.length === 0) return;
+      nameContext.font = `${cellH}px "Courier New", monospace`;
+      nameContext.fillStyle = "#fff";
+      nameContext.textBaseline = "top";
+
+      const reveal = progress / NAME.revealSpan;
+      const bands: { start: number; end: number; shift: number }[] = [];
+      if (glitch) {
+        const bandCount =
+          GLITCH.bandMin +
+          Math.floor(Math.random() * (GLITCH.bandMax - GLITCH.bandMin + 1));
+        for (let i = 0; i < bandCount; i++) {
+          const start = Math.floor(Math.random() * gridRows.length);
+          bands.push({
+            start,
+            end: start + Math.floor(Math.random() * GLITCH.bandRows),
+            shift:
+              (Math.random() < 0.5 ? -1 : 1) *
+              (1 + Math.floor(Math.random() * GLITCH.shiftMax)),
+          });
+        }
+      }
+
+      const span = colMax - colMin + 1;
+      if (nameScratch.length !== span) {
+        nameScratch.length = span;
+        for (let i = 0; i < span; i++) nameScratch[i] = " ";
+      }
+
+      for (let i = 0; i < gridRows.length; i++) {
+        const cells = gridRows[i];
+        if (!cells || cells.length === 0) continue;
+        for (let s = 0; s < span; s++) nameScratch[s] = " ";
+        let ink = false;
+        for (const cell of cells) {
+          if (reveal < cell.seed) continue;
+          let ch = NAME.ramp[cell.level];
+          if (glitch && Math.random() < GLITCH.charRate) {
+            ch =
+              NAME.glitchChars[
+                Math.floor(Math.random() * NAME.glitchChars.length)
+              ];
+          }
+          nameScratch[cell.col - colMin] = ch;
+          ink = true;
+        }
+        if (!ink) continue;
+        let shift = 0;
+        for (const band of bands) {
+          if (i >= band.start && i <= band.end) {
+            shift = band.shift;
+            break;
+          }
+        }
+        nameContext.fillText(
+          nameScratch.join(""),
+          (colMin + shift) * cellW,
+          (rowMin + i) * cellH,
+        );
+      }
+    };
+
     const render = (time: number) => {
       const t = time * 0.001;
       const dt = lastTime === 0 ? 0.016 : Math.min(0.1, t - lastTime);
       lastTime = t;
-      if (glitchTimer <= 0) {
-        if (t >= nextGlitchAt) {
-          glitchTimer = 0.09 + Math.random() * 0.21;
-          nextGlitchAt = t + 4 + Math.random() * 6;
-        }
-      } else {
-        glitchTimer -= dt;
-      }
       const total = cols * rows;
       if (zbuf.length !== total) zbuf = new Float32Array(total);
       if (buffer.length !== total) buffer = new Array(total);
@@ -314,7 +465,7 @@ export default function BlackHoleASCII({
       zbuf.fill(-Infinity);
 
       const scrollProgress = Math.min(
-        1,
+        1.6,
         Math.max(
           0,
           window.scrollY / (window.innerHeight * CONFIG.scrollDistanceVh),
@@ -341,6 +492,29 @@ export default function BlackHoleASCII({
         CONFIG.nameProgressRange[0],
         CONFIG.nameProgressRange[1],
       );
+
+      if (nameProgress <= 0) {
+        glitchArmed = false;
+        glitchTimer = 0;
+      } else {
+        if (!glitchArmed) {
+          glitchArmed = true;
+          nextGlitchAt =
+            t +
+            GLITCH.firstDelay[0] +
+            Math.random() * (GLITCH.firstDelay[1] - GLITCH.firstDelay[0]);
+        }
+        if (glitchTimer <= 0 && t >= nextGlitchAt) {
+          glitchTimer =
+            GLITCH.duration[0] +
+            Math.random() * (GLITCH.duration[1] - GLITCH.duration[0]);
+          nextGlitchAt =
+            t +
+            GLITCH.interval[0] +
+            Math.random() * (GLITCH.interval[1] - GLITCH.interval[0]);
+        }
+        if (glitchTimer > 0) glitchTimer -= dt;
+      }
 
       const cx = cols / 2;
       const cy = rows / 2;
@@ -502,90 +676,6 @@ export default function BlackHoleASCII({
         }
       }
 
-      if (nameProgress > 0 && nameCells.length > 0) {
-        if (!nameSeen) {
-          nameSeen = true;
-          glitchTimer = 0;
-          nextGlitchAt = t + 0.8 + Math.random() * 1.5;
-        }
-        const glitching = glitchTimer > 0;
-        const sliceBands: {
-          rowStart: number;
-          rowEnd: number;
-          shift: number;
-        }[] = [];
-        let corrupt: boolean[] | null = null;
-
-        if (glitching) {
-          const bandCount = 1 + Math.floor(Math.random() * 2);
-          for (let i = 0; i < bandCount; i++) {
-            const bandLen = 1 + Math.floor(Math.random() * 3);
-            const rowStart =
-              nameRowMin +
-              Math.floor(
-                Math.random() * Math.max(1, nameRowMax - nameRowMin + 1),
-              );
-            sliceBands.push({
-              rowStart,
-              rowEnd: rowStart + bandLen - 1,
-              shift:
-                (Math.random() < 0.5 ? -1 : 1) *
-                (1 + Math.floor(Math.random() * 3)),
-            });
-          }
-          if (corruptScratch.length !== nameCells.length) {
-            corruptScratch = new Array(nameCells.length).fill(false);
-          } else {
-            corruptScratch.fill(false);
-          }
-          corrupt = corruptScratch;
-          const corruptCount = Math.floor(
-            nameCells.length * (0.06 + Math.random() * 0.12),
-          );
-          for (let i = 0; i < corruptCount; i++) {
-            corruptScratch[Math.floor(Math.random() * nameCells.length)] = true;
-          }
-        }
-
-        const flicker = glitching && Math.random() < 0.18 ? 0.35 : 1;
-
-        for (let ci = 0; ci < nameCells.length; ci++) {
-          const cell = nameCells[ci];
-          const row = cell.row;
-          let col = cell.col;
-
-          if (sliceBands.length > 0) {
-            for (const band of sliceBands) {
-              if (row >= band.rowStart && row <= band.rowEnd) {
-                col += band.shift;
-                break;
-              }
-            }
-          }
-          if (col < 0 || col >= cols) continue;
-
-          const brightness = cell.brightness * nameProgress * flicker;
-          if (brightness < CONFIG.nameThreshold) continue;
-          const level = Math.min(
-            ramp.length - 1,
-            Math.max(
-              0,
-              Math.floor(
-                brightness * (ramp.length - 1) + (cell.seed - 0.5) * 1.4,
-              ),
-            ),
-          );
-          let ch = ramp[level];
-          if (corrupt && corrupt[ci]) {
-            ch =
-              CONFIG.nameGlitchChars[
-                Math.floor(Math.random() * CONFIG.nameGlitchChars.length)
-              ];
-          }
-          buffer[row * cols + col] = ch;
-        }
-      }
-
       context.clearRect(0, 0, viewW, viewH);
       context.save();
       context.beginPath();
@@ -601,14 +691,37 @@ export default function BlackHoleASCII({
       }
       context.restore();
 
+      const nextOpacity = nameProgress <= 0 ? "0" : nameProgress.toFixed(3);
+      if (nextOpacity !== nameOpacity) {
+        nameOpacity = nextOpacity;
+        nameNode.style.opacity = nextOpacity;
+      }
+      if (nameProgress > 0) {
+        const glitchNow = glitchTimer > 0;
+        if (glitchNow) {
+          if (t - lastGlitchDraw > GLITCH.redrawInterval) {
+            lastGlitchDraw = t;
+            drawName(nameProgress, true);
+          }
+        } else {
+          drawName(nameProgress, false);
+        }
+      }
+
       const rawProgress =
         window.scrollY / (window.innerHeight * CONFIG.scrollDistanceVh);
-      const fadeAlpha = 1 - smoothstep(rawProgress, 1.0, 1.3);
+      const fadeAlpha =
+        1 -
+        smoothstep(
+          rawProgress,
+          CONFIG.fadeProgressRange[0],
+          CONFIG.fadeProgressRange[1],
+        );
       const wrapper = wrapperRef.current;
       if (wrapper) {
-        const nextOpacity = fadeAlpha.toFixed(3);
-        if (wrapper.style.opacity !== nextOpacity) {
-          wrapper.style.opacity = nextOpacity;
+        const nextWrapperOpacity = fadeAlpha.toFixed(3);
+        if (wrapper.style.opacity !== nextWrapperOpacity) {
+          wrapper.style.opacity = nextWrapperOpacity;
         }
       }
 
@@ -676,6 +789,18 @@ export default function BlackHoleASCII({
             style={{
               display: "block",
               filter: `drop-shadow(0 0 ${CONFIG.glow}px rgba(255, 255, 255, 0.85))`,
+            }}
+          />
+          <canvas
+            ref={nameCanvasRef}
+            aria-hidden
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              display: "block",
+              opacity: 0,
+              filter: "drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))",
             }}
           />
         </div>,

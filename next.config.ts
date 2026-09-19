@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
         hostname: "avatars.githubusercontent.com",
       },
     ],
-    qualities: [75, 100],
+    qualities: [75, 90],
   },
 };
 

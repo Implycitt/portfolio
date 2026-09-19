@@ -10,7 +10,6 @@ const REMOVE_AT = 3400;
 export default function IntroSequence() {
   const [isActive, setIsActive] = useState(false);
   const [isFading, setIsFading] = useState(false);
-  const [isFirstVisit] = useState(true);
 
   useLayoutEffect(() => {
     const hasPlayed = sessionStorage.getItem("introPlayed");
@@ -40,7 +39,7 @@ export default function IntroSequence() {
         opacity: isFading ? 0 : 1,
       }}
     >
-      <Logo className="h-32 w-32 md:h-40 md:w-40" isAnimating={isFirstVisit} />
+      <Logo className="h-32 w-32 md:h-40 md:w-40" isAnimating />
       <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
         initializing…
       </p>

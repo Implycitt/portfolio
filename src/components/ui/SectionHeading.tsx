@@ -1,23 +1,31 @@
+import type { ReactNode } from "react";
+
 interface SectionHeadingProps {
-  prompt: string;
   title: string;
+  align?: "left" | "center";
+  icon?: ReactNode;
   className?: string;
 }
 
 export default function SectionHeading({
-  prompt,
   title,
+  align = "left",
+  icon,
   className = "",
 }: SectionHeadingProps) {
   return (
-    <div className={`font-mono ${className}`}>
-      <p className="mb-2 inline-flex items-center gap-2 text-xs sm:text-sm tracking-[0.2em] uppercase text-white/45">
-        <span className="text-cyan">$</span>
-        <span className="text-white/60">{prompt}</span>
-        <span className="terminal-caret inline-block h-3.5 w-2 bg-white/70" />
-      </p>
-      <h2 className="drop-shadow-[0_0_18px_rgba(123,44,191,0.35)]">
-        <span className="text-3xl sm:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan via-violet to-mauve [-webkit-text-fill-color:transparent]">
+    <div
+      className={`flex items-center gap-4 font-mono ${
+        align === "center" ? "justify-center" : ""
+      } ${className}`}
+    >
+      {icon && (
+        <span className="interest-tile flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-mocha-mauve/25 bg-mocha-mauve/10 text-mocha-mauve">
+          {icon}
+        </span>
+      )}
+      <h2 className="drop-shadow-[0_0_20px_rgba(203,166,247,0.28)]">
+        <span className="text-3xl sm:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-mocha-lavender via-mocha-mauve to-mocha-pink [-webkit-text-fill-color:transparent]">
           {title}
         </span>
       </h2>
