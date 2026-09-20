@@ -59,19 +59,28 @@ export default function OrgCard({
       )}
 
       {stats && stats.commits > 0 && (
-        <div className="mt-3 flex items-center gap-2 font-mono text-[10px] tracking-wide text-mocha-sapphire">
-          <Icon name="commit" className="h-3 w-3" />
+        <div className="mt-3 flex items-center gap-2 font-mono text-[11px] tracking-wide text-mocha-subtext">
+          <Icon name="commit" className="h-3.5 w-3.5 text-mocha-teal" />
           <span>
-            {stats.commits} commits across {stats.repos} repo
-            {stats.repos === 1 ? "" : "s"}
+            <span className="font-bold tabular-nums text-mocha-teal">
+              {stats.commits}
+            </span>{" "}
+            commits across{" "}
+            <span className="font-bold tabular-nums text-mocha-teal">
+              {stats.repos}
+            </span>{" "}
+            repo{stats.repos === 1 ? "" : "s"}
           </span>
         </div>
       )}
 
-      <div className="mt-auto flex items-center justify-between pt-4 font-mono text-[10px] tracking-wide text-mocha-overlay0">
+      <div className="mt-auto flex items-center justify-between pt-4 font-mono text-[11px] tracking-wide text-mocha-subtext">
         <span className="flex items-center gap-2">
-          <Icon name="box" className="h-3 w-3" />
-          {org.public_repos} public repos
+          <Icon name="box" className="h-3.5 w-3.5 text-mocha-sapphire" />
+          <span className="font-bold tabular-nums text-mocha-text">
+            {org.public_repos}
+          </span>
+          public repos
         </span>
         <Link
           href={org.html_url}

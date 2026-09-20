@@ -109,7 +109,7 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
             </div>
           </header>
 
-          <article className="hud-panel hud-panel-solid hud-frame hud-edge-amber mt-8 px-5 py-8 sm:px-10 sm:py-12">
+          <article className="hud-panel hud-panel-solid hud-frame mt-8 px-5 py-8 sm:px-10 sm:py-12">
             <div
               className="md-body font-mono"
               dangerouslySetInnerHTML={{ __html: html }}

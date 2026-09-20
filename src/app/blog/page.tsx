@@ -1,22 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SectionField from "@/components/ui/SectionField";
-import { PRESETS, type BackdropSpec } from "@/lib/backdrop";
 import { getAllPosts, formatDate, blogSource } from "@/lib/posts";
-
-const ARCHIVE_SKY: BackdropSpec = {
-  ...PRESETS.station,
-  layers: [
-    ...PRESETS.station.layers,
-    {
-      kind: "shooting",
-      count: 2,
-      seed: 9909,
-      area: { x: [12, 78], y: [8, 30] },
-      duration: [14, 20],
-    },
-  ],
-};
 
 export const metadata: Metadata = {
   title: "Blog — Quentin Bordelon",
@@ -45,7 +30,7 @@ export default async function Blog() {
       tabIndex={-1}
       className="relative min-h-screen overflow-hidden text-foreground"
     >
-      <SectionField backdrop={ARCHIVE_SKY} />
+      <SectionField backdrop="station" />
 
       <div className="relative z-10 mx-auto w-full max-w-5xl px-5 pb-24 pt-24 sm:px-10 sm:pt-32">
         <Link
@@ -62,7 +47,7 @@ export default async function Blog() {
           <div className="hud-bar text-mocha-overlay1">
             <span className="hud-lamp text-mocha-teal" />
             <span className="text-mocha-teal">archive link</span>
-            <span className="text-mocha-overlay0">//</span>
+            <span className="hidden text-mocha-overlay0 sm:inline">//</span>
             <span>station net · sector 07</span>
             <span className="ml-auto text-mocha-overlay0">
               {String(posts.length).padStart(2, "0")} logged
@@ -100,7 +85,7 @@ export default async function Blog() {
                       />
                     </span>
                   </span>
-                  <span className="text-mocha-overlay0">
+                  <span className="text-mocha-overlay1">
                     {String(groups[category].length).padStart(2, "0")}
                   </span>
                   <span className="h-px flex-1 bg-gradient-to-r from-mocha-surface to-transparent" />
@@ -113,7 +98,7 @@ export default async function Blog() {
                       href={`/blog/${post.slug}`}
                       className="hud-row group flex items-start gap-4 px-5 py-5 sm:gap-6 sm:px-6"
                     >
-                      <span className="mt-0.5 w-5 shrink-0 font-mono text-[11px] tracking-widest text-mocha-overlay0">
+                      <span className="mt-0.5 w-5 shrink-0 font-mono text-[11px] tracking-widest text-mocha-overlay1">
                         {String(i + 1).padStart(2, "0")}
                       </span>
 
@@ -124,14 +109,14 @@ export default async function Blog() {
                         <span className="mt-2 block font-mono text-[13px] leading-relaxed text-mocha-subtext">
                           {post.excerpt}
                         </span>
-                        <span className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] tracking-[0.2em] uppercase text-mocha-overlay0">
+                        <span className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] tracking-[0.2em] uppercase text-mocha-overlay1">
                           <span className="text-mocha-mauve">{post.tag}</span>
                           <span>{formatDate(post.date)}</span>
                           <span>{post.readMinutes} read</span>
                         </span>
                       </span>
 
-                      <span className="hidden shrink-0 pt-1 font-mono text-[10px] tracking-[0.2em] uppercase text-mocha-overlay0 transition-colors group-hover:text-mocha-teal sm:block">
+                      <span className="hidden shrink-0 pt-1 font-mono text-[10px] tracking-[0.2em] uppercase text-mocha-overlay1 transition-colors group-hover:text-mocha-teal sm:block">
                         open ▸
                       </span>
                     </Link>

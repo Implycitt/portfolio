@@ -12,7 +12,7 @@ function fmtDate(iso: string): string {
 const ROLE_BADGES: Record<string, string> = {
   "sole-author": "border-mocha-mauve/35 bg-mocha-mauve/10 text-mocha-mauve",
   lead: "border-mocha-sapphire/35 bg-mocha-sapphire/10 text-mocha-sapphire",
-  contributor: "border-mocha-surface bg-mocha-mantle text-mocha-overlay1",
+  contributor: "border-mocha-overlay0/40 bg-mocha-mantle text-mocha-subtext",
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -85,7 +85,16 @@ export default function ProjectCard({
             >
               <Icon name={ROLE_ICONS[role]} className="h-3 w-3" />
               {ROLE_LABELS[role]}
-              {commits != null ? ` · ${commits}` : ""}
+              {commits != null ? (
+                <>
+                  <span aria-hidden className="opacity-50">
+                    ·
+                  </span>
+                  <span className="font-bold tabular-nums text-mocha-text">
+                    {commits}
+                  </span>
+                </>
+              ) : null}
             </span>
           )}
         </div>
@@ -94,9 +103,9 @@ export default function ProjectCard({
           <h3 className="font-mono text-lg font-bold text-mocha-text transition-colors duration-300 group-hover:text-mocha-lavender sm:text-xl">
             {repo.name}
           </h3>
-          <div className="flex shrink-0 items-center gap-3 font-mono text-xs text-mocha-overlay0">
+          <div className="flex shrink-0 items-center gap-3 font-mono text-xs text-mocha-subtext">
             {repo.stargazers_count > 0 && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 tabular-nums">
                 <span className="text-mocha-pink transition-transform duration-300 group-hover:scale-110">
                   <Icon name="star" className="h-3.5 w-3.5" />
                 </span>{" "}
@@ -104,7 +113,7 @@ export default function ProjectCard({
               </span>
             )}
             {repo.forks_count > 0 && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 tabular-nums">
                 <span className="text-mocha-sapphire">
                   <Icon name="fork" className="h-3.5 w-3.5" />
                 </span>{" "}

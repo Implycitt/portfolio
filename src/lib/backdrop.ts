@@ -564,22 +564,13 @@ export const PRESETS: Record<BackdropName, BackdropSpec> = {
     drift: 0,
     layers: [
       { kind: "wash", className: "hud-space" },
+      { kind: "dressing", className: "station-limb" },
       {
-        kind: "group",
-        pointer: [5, 4],
-        drift: -14,
-        layers: [
-          {
-            kind: "dressing",
-            className:
-              "station-planet rounded-full -top-[26%] -right-[20%] h-[40rem] w-[40rem] sm:-top-[20%] sm:-right-[14%]",
-          },
-          {
-            kind: "dressing",
-            className:
-              "inset-x-[-2%] top-[46%] h-4 bg-gradient-to-r from-transparent via-mocha-sapphire/20 to-transparent blur-[7px]",
-          },
-        ],
+        kind: "blob",
+        depth: 8,
+        alpha: 16,
+        hues: ["sapphire", "lavender", "mauve"],
+        className: "-top-[28rem] -right-[24rem] h-[56rem] w-[56rem]",
       },
       {
         kind: "group",
@@ -589,49 +580,26 @@ export const PRESETS: Record<BackdropName, BackdropSpec> = {
           {
             kind: "particles",
             motion: "twinkle",
-            count: 36,
-            alpha: 45,
+            count: 24,
+            alpha: 42,
             seed: 7707,
             area: { x: [2, 99], y: [3, 100] },
-            size: [1, 2],
-            duration: [3.6, 6.8],
+            size: [1, 1.8],
+            duration: [4.6, 8.4],
             drift: [10, 18],
             delay: [0, 5],
             hues: ["text"],
-          },
-          {
-            kind: "particles",
-            motion: "twinkle",
-            count: 5,
-            alpha: 70,
-            seed: 8808,
-            area: { x: [10, 95], y: [8, 84] },
-            size: [6, 6],
-            duration: [4, 6],
-            drift: [12, 16],
-            delay: [0, 4],
-            hues: ["sapphire", "lavender", "teal", "pink"],
-          },
-          {
-            kind: "dressing",
-            className:
-              "hud-grid inset-x-[-22%] bottom-[-2%] h-[34%] opacity-70",
           },
         ],
       },
       {
         kind: "group",
-        pointer: [28, 20],
+        pointer: [26, 18],
         drift: 18,
         layers: [
           {
             kind: "dressing",
-            className: "station-horizon inset-x-[-3%] bottom-0 h-56",
-          },
-          {
-            kind: "dressing",
-            className: "station-rail inset-y-0 w-8",
-            sides: ["left", "right"],
+            className: "station-horizon inset-x-0 bottom-0 h-64",
           },
           {
             kind: "dressing",
@@ -639,6 +607,9 @@ export const PRESETS: Record<BackdropName, BackdropSpec> = {
           },
         ],
       },
+      { kind: "dressing", className: "station-vignette" },
+      { kind: "dressing", className: "station-grain" },
+      { kind: "dressing", className: "station-bezel" },
     ],
   },
 };

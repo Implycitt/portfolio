@@ -141,17 +141,17 @@ body::-webkit-scrollbar {
 
 @keyframes caret-blink {
   0%,
-  38% {
+  46% {
     opacity: 0.85;
   }
-  62%,
+  74%,
   100% {
     opacity: 0.12;
   }
 }
 
 .terminal-caret {
-  animation: caret-blink 1.9s ease-in-out infinite;
+  animation: caret-blink 3.2s ease-in-out infinite;
 }
 
 .ascii-block {
@@ -650,29 +650,67 @@ body::-webkit-scrollbar {
   animation: status-pulse 2.4s ease-in-out infinite;
 }
 
-.station-planet {
-  background:
-    radial-gradient(
-      circle at 30% 26%,
-      rgb(137 180 250 / 0.3),
-      rgb(116 199 236 / 0.12) 36%,
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 74% 80%,
-      rgb(17 17 27 / 0.96),
-      rgb(24 24 37 / 0.88) 54%,
-      rgb(49 50 68 / 0.42) 76%,
-      transparent 86%
-    );
-  box-shadow:
-    inset 0 0 150px rgb(17 17 27 / 0.7),
-    0 0 110px 12px rgb(116 199 236 / 0.07);
+.station-limb {
+  right: -26%;
+  top: -78%;
+  width: 92%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border-bottom: 1px solid rgb(116 199 236 / 0.22);
+  box-shadow: 0 40px 150px -70px rgb(116 199 236 / 0.55);
 }
 
 .station-horizon {
   background: linear-gradient(to top, rgb(116 199 236 / 0.1), transparent);
   mask-image: linear-gradient(to top, #000, transparent);
+}
+
+.station-vignette {
+  inset: 0;
+  background: radial-gradient(
+    ellipse 76% 70% at 50% 44%,
+    transparent 42%,
+    rgb(6 6 14 / 0.4)
+  );
+}
+
+.station-grain {
+  inset: 0;
+  opacity: 0.05;
+  background-size: 180px 180px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+.station-bezel {
+  inset: 12px;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(rgb(148 226 213 / 0.4), rgb(148 226 213 / 0.4)),
+    linear-gradient(rgb(148 226 213 / 0.4), rgb(148 226 213 / 0.4)),
+    linear-gradient(rgb(148 226 213 / 0.4), rgb(148 226 213 / 0.4)),
+    linear-gradient(rgb(148 226 213 / 0.4), rgb(148 226 213 / 0.4)),
+    linear-gradient(rgb(148 226 213 / 0.4), rgb(148 226 213 / 0.4)),
+    linear-gradient(rgb(148 226 213 / 0.4), rgb(148 226 213 / 0.4)),
+    linear-gradient(rgb(148 226 213 / 0.4), rgb(148 226 213 / 0.4)),
+    linear-gradient(rgb(148 226 213 / 0.4), rgb(148 226 213 / 0.4));
+  background-size:
+    18px 1px,
+    1px 18px,
+    18px 1px,
+    1px 18px,
+    18px 1px,
+    1px 18px,
+    18px 1px,
+    1px 18px;
+  background-position:
+    left top,
+    left top,
+    right top,
+    right top,
+    left bottom,
+    left bottom,
+    right bottom,
+    right bottom;
 }
 
 @keyframes station-sweep {
@@ -696,22 +734,6 @@ body::-webkit-scrollbar {
   animation: station-sweep 24s linear infinite;
 }
 
-.station-rail {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgb(148 226 213 / 0.28) 0 1px,
-    transparent 1px 16px
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    #000 18%,
-    #000 82%,
-    transparent
-  );
-  opacity: 0.5;
-}
-
 .hud-space {
   background:
     radial-gradient(
@@ -730,17 +752,6 @@ body::-webkit-scrollbar {
       var(--color-mocha-mantle) 34%,
       var(--color-mocha-crust)
     );
-}
-
-.hud-grid {
-  background-image: repeating-linear-gradient(
-    to right,
-    rgb(148 226 213 / 0.22) 0 1px,
-    transparent 1px 54px
-  );
-  transform: perspective(560px) rotateX(64deg);
-  transform-origin: 50% 0%;
-  mask-image: linear-gradient(to top, #000 6%, transparent 88%);
 }
 
 .hud-frame {
@@ -769,10 +780,6 @@ body::-webkit-scrollbar {
   bottom: -1px;
   border-right: 1px solid;
   border-bottom: 1px solid;
-}
-
-.hud-edge-amber {
-  --hud-edge: rgb(249 226 175 / 0.65);
 }
 
 .hud-panel {
@@ -828,7 +835,7 @@ body::-webkit-scrollbar {
   display: block;
   height: 8px;
   border: 1px solid var(--color-mocha-surface);
-  background: rgb(17 17 27 / 0.7);
+  background: rgb(49 50 68 / 0.6);
   overflow: hidden;
 }
 
@@ -892,12 +899,12 @@ body::-webkit-scrollbar {
 
 @keyframes hud-blink {
   0%,
-  48% {
+  60% {
     opacity: 1;
   }
-  52%,
+  68%,
   100% {
-    opacity: 0.12;
+    opacity: 0.08;
   }
 }
 
@@ -949,14 +956,22 @@ body::-webkit-scrollbar {
   animation: qb-slide-bstem 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
 }
 
+.hud-panel h1,
+.md-body h1,
+.md-body h2,
+.md-body h3 {
+  text-shadow: 0 0 22px
+    color-mix(in srgb, var(--color-mocha-teal) 22%, transparent);
+}
+
 .hud-cursor {
   display: inline-block;
   width: 0.5rem;
   height: 1em;
-  margin-left: 0.15rem;
+  margin-left: 0.35rem;
   vertical-align: -0.12em;
   background: currentColor;
-  animation: hud-blink 1.2s steps(1, end) infinite;
+  animation: hud-blink 2.6s steps(1, end) infinite;
 }
 
 .md-body {
@@ -1109,10 +1124,14 @@ body::-webkit-scrollbar {
 }
 
 .md-body .katex-display {
-  margin: 1.5rem 0;
+  margin: 1.15rem 0;
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0.25rem 0;
+}
+
+.md-body p:has(> .katex-display) {
+  margin: 0;
 }
 
 .md-body .katex {

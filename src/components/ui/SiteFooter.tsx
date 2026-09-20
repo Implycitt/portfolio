@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SectionField from "@/components/ui/SectionField";
+import { frame } from "@/lib/ascii";
 
 const SITE_LINKS = [
   { label: "home", href: "/" },
@@ -24,9 +25,20 @@ const STACK = [
   { label: "tailwind 4", accent: "text-mocha-teal" },
 ];
 
-export default function SiteFooter({ exit }: { exit: string }) {
+const EXIT = frame(
+  [
+    `$ echo "exit 0"`,
+    "[process completed]",
+    "",
+    "(c) 2026 Quentin Bordelon",
+    "compiled in the terminal",
+  ],
+  "session ended",
+);
+
+export default function SiteFooter() {
   return (
-    <footer data-lenis-snap className="relative py-16 sm:py-20">
+    <footer className="relative py-16 sm:py-20 print:hidden">
       <SectionField backdrop="horizon" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">
@@ -101,7 +113,7 @@ export default function SiteFooter({ exit }: { exit: string }) {
         </div>
 
         <div className="mt-14 flex flex-col items-center gap-6 border-t border-mocha-surface/60 pt-10">
-          <pre className="ascii-block">{exit}</pre>
+          <pre className="ascii-block">{EXIT}</pre>
           <p className="font-mono text-[10px] tracking-widest text-mocha-overlay0 uppercase">
             © 2026 Quentin Bordelon
           </p>

@@ -15,7 +15,14 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600;
 
-const EXCLUDED = ["Implycitt", "School", "GameDev", "CSPGame", "portfolio", "blog"];
+const EXCLUDED = [
+  "Implycitt",
+  "School",
+  "GameDev",
+  "CSPGame",
+  "portfolio",
+  "blog",
+];
 
 const GITHUB_USER = process.env.GITHUB_USERNAME ?? "Implycitt";
 
@@ -74,7 +81,9 @@ function SubHeading({
               {title}
             </h2>
             {count !== null && (
-              <span className="rounded-md border border-mocha-surface bg-mocha-mantle px-2 py-0.5 font-mono text-[10px] tracking-widest text-mocha-overlay1 uppercase tabular-nums">
+              <span
+                className={`rounded-md border px-2 py-0.5 font-mono text-[11px] font-bold tracking-widest uppercase tabular-nums ${tint}`}
+              >
                 {count}
               </span>
             )}
@@ -179,7 +188,7 @@ export default async function Projects() {
         {repos === null && <Unavailable what="your repos" />}
 
         {repos !== null && (
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 font-mono text-[11px] tracking-widest text-mocha-overlay1 uppercase">
+          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 font-mono text-[11px] tracking-widest text-mocha-subtext uppercase">
             {SUMMARY.map((item) => (
               <span key={item.key} className="flex items-center gap-2">
                 <span
@@ -187,7 +196,7 @@ export default async function Projects() {
                 >
                   <Icon name={item.icon} className="h-3.5 w-3.5" />
                 </span>
-                <span className="tabular-nums">
+                <span className="text-[13px] tabular-nums">
                   <CountUp
                     value={String(counts[item.key])}
                     className={`${item.text} font-bold`}

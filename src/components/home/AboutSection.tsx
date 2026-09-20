@@ -160,27 +160,22 @@ export default async function AboutSection() {
               icon={<Icon name="user" className="h-3.5 w-3.5" />}
               className="h-full"
             >
-              <div className="space-y-4 font-mono text-[13px] leading-normal text-mocha-subtext sm:text-base sm:leading-relaxed">
+              <div className="space-y-3.5 font-mono text-[13px] leading-normal text-mocha-subtext sm:text-base sm:leading-relaxed">
                 <p>
                   <span className="text-mocha-text font-bold">
-                    I&apos;m Quentin
+                    I&apos;m Quentin Bordelon
                   </span>{" "}
-                  - a <span className="text-mocha-text">Computer Science</span>{" "}
-                  and <span className="text-mocha-text">Physics</span>{" "}
-                  undergraduate student at Louisiana State University,
-                  interested in the intersection of software and physics.
-                </p>
-                <p>
-                  Beyond the classroom I serve as the{" "}
+                  - a <span className="text-mocha-text">software engineer</span>{" "}
+                  and{" "}
                   <span className="text-mocha-text">
-                    Webmaster for LSU&apos;s Google Developer Student Club
+                    Computer Science + Physics
+                  </span>{" "}
+                  undergraduate at LSU, based in{" "}
+                  <span className="text-mocha-text">
+                    Baton Rouge, Louisiana
                   </span>
-                  , where I build internal platform tools like the club chapters
-                  website, lead technical student workshops, and organize events
-                  such as LSU&apos;s annual hackathon Geauxhack.
-                </p>
-                <p>
-                  I recently completed a software engineering internship at{" "}
+                  . I&apos;ve shipped production code as a software engineering
+                  intern at{" "}
                   <span className="text-mocha-text">FAST Enterprises</span>,
                   working with the{" "}
                   <span className="text-mocha-text">
@@ -189,9 +184,17 @@ export default async function AboutSection() {
                   .
                 </p>
                 <p>
-                  I&apos;m at home where a clean model and a fast implementation
-                  both matter. I&apos;m looking for an internship or new-grad
-                  role in algorithms, systems, or quantitative software.
+                  Beyond the classroom I&apos;m the{" "}
+                  <span className="text-mocha-text">
+                    Webmaster for LSU&apos;s Google Developer Student Club
+                  </span>
+                  : I build internal platform tools, lead technical workshops,
+                  and help run events like our annual hackathon,{" "}
+                  <span className="text-mocha-text">Geauxhack</span>.
+                </p>
+                <p>
+                  I&apos;m looking for an internship or new-grad role in
+                  algorithms, systems, or quantitative software.
                 </p>
               </div>
 

@@ -3,6 +3,7 @@ import "./globals.css";
 import localFont from "next/font/local";
 import Header from "@/components/ui/Header";
 import PageTransition from "@/components/ui/PageTransition";
+import SiteFooter from "@/components/ui/SiteFooter";
 import SmoothScroll from "@/components/ui/SmoothScroll";
 
 const firaCodeNerd = localFont({
@@ -48,13 +49,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${firaCodeNerd.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+      <body id="top" className="min-h-full flex flex-col">
         <a href="#content" className="skip-link">
           skip to content
         </a>
         <Header />
         <SmoothScroll>
           <PageTransition>{children}</PageTransition>
+          <SiteFooter />
         </SmoothScroll>
       </body>
     </html>

@@ -49,6 +49,14 @@ type GenericToken = {
 
 const ALERT_KINDS = ["note", "tip", "important", "warning", "caution"];
 
+const ALERT_GLYPH: Record<string, string> = {
+  note: "▣",
+  tip: "◆",
+  important: "▲",
+  warning: "▲",
+  caution: "✕",
+};
+
 marked.use({
   extensions: [
     {
@@ -113,7 +121,7 @@ marked.use({
       },
       renderer(token: GenericToken): string {
         const alert = token as unknown as AlertToken;
-        return `<div class="md-alert md-alert-${alert.kind}"><div class="md-alert-title">[!${alert.kind.toUpperCase()}]</div>${marked.parse(
+        return `<div class="md-alert md-alert-${alert.kind}"><div class="md-alert-title">${ALERT_GLYPH[alert.kind]} ${alert.kind.toUpperCase()}</div>${marked.parse(
           alert.body,
           { async: false },
         )}</div>`;

@@ -24,7 +24,7 @@ function scrollPadding(): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function layoutTop(el: HTMLElement): number {
+export function layoutTop(el: HTMLElement): number {
   let top = 0;
   let node: HTMLElement | null = el;
   while (node) {
@@ -34,15 +34,17 @@ function layoutTop(el: HTMLElement): number {
   return top;
 }
 
+export function sectionTop(el: HTMLElement): number {
+  return Math.max(0, layoutTop(el) - scrollPadding());
+}
+
 export function scrollToTarget(
   target: number | HTMLElement,
   duration = 1.1,
 ): void {
   const reduced = prefersReducedMotion();
   const resolve = () =>
-    typeof target === "number"
-      ? Math.max(0, target)
-      : Math.max(0, layoutTop(target) - scrollPadding());
+    typeof target === "number" ? Math.max(0, target) : sectionTop(target);
 
   const apply = (immediate: boolean) => {
     const top = resolve();

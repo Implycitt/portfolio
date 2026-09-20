@@ -240,7 +240,7 @@ export function PostRead({
           onOpenChange={setOutlineOpen}
           onSelect={goTo}
         />
-        <div className="min-w-0 lg:order-1">{children}</div>
+        <div className="mt-5 min-w-0 lg:order-1 lg:mt-0">{children}</div>
       </div>
     </ReadContext.Provider>
   );

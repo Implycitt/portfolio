@@ -12,22 +12,25 @@ Live at **[quentinb.dev](https://quentinb.dev)**.
 - `/resume`: printable, with a PDF download
 - `/blog`: posts pulled straight out of a GitHub repo, with KaTeX math and
   highlighted code, dressed as a System Shock station terminal — a fixed
-  space backdrop, HUD panels, an outline console that follows your position and
-  a progress meter that fills as you read
+  space backdrop with a static grain/vignette/bezel CRT pass, HUD panels, an
+  outline console that follows your position and a progress meter that fills as
+  you read
 - `/api/stats/*`: JSON and Catppuccin-themed SVG cards, not linked anywhere in
   the UI (see [its own README](src/app/api/stats/README.md))
+- Every route ends with the same footer — site links, GitHub, LinkedIn and email
+  — so contact details never require a trip back to the landing page
 
 ## Stack
 
-| Layer           | Choice                                                      |
-| --------------- | ----------------------------------------------------------- |
-| Framework       | Next.js 16 App Router, React 19, React Compiler enabled     |
-| Language        | TypeScript, `strict`                                        |
-| Styling         | Tailwind CSS v4 (CSS-first `@theme` tokens, no JS config)   |
-| Scrolling       | Lenis with proximity snapping on the landing sections       |
-| Content         | `marked` + `highlight.js` + KaTeX for blog and repo READMEs |
-| Data            | GitHub REST + GraphQL, no database                          |
-| Package manager | Bun (`bun.lock`); the npm scripts work too                  |
+| Layer           | Choice                                                       |
+| --------------- | ------------------------------------------------------------ |
+| Framework       | Next.js 16 App Router, React 19, React Compiler enabled      |
+| Language        | TypeScript, `strict`                                         |
+| Styling         | Tailwind CSS v4 (CSS-first `@theme` tokens, no JS config)    |
+| Scrolling       | Lenis; proximity snapping on landing sections, off at footer |
+| Content         | `marked` + `highlight.js` + KaTeX for blog and repo READMEs  |
+| Data            | GitHub REST + GraphQL, no database                           |
+| Package manager | Bun (`bun.lock`); the npm scripts work too                   |
 
 ## Routes
 
@@ -267,6 +270,27 @@ shows the right title and description.
 - **Gates.** Type checking (`tsc --noEmit`), ESLint, Prettier,
   `bun run test:smoke`, `bun run test:blog` and `bun run build` all have to
   stay green.
+- **Blog atmosphere stays behind the prose and holds still.** Everything that
+  dresses a blog route — grain, vignette, the corner bezel ticks, the planet
+  limb, headings' phosphor glow — is a `dressing` layer or a `text-shadow`, all
+  static, all inside the `aria-hidden` backdrop scope, all underneath the
+  content layer. Nothing animates but the backdrop's own slow sweep, so the
+  reading column never moves, and the reading panel stays `hud-panel-solid`
+  (≥0.9 alpha) so texture cannot reach the text. The blog check enforces that
+  opacity and the contrast of every label.
+- **The footer is chrome, not page content.** `SiteFooter` renders once in the
+  root layout, after `PageTransition`, so every route ends with the same contact
+  block and the footer never replays a page transition. It owns its `horizon`
+  backdrop and its ASCII sign-off, so a page renders it by doing nothing.
+  `print:hidden` keeps it out of the resume's printed PDF.
+- **Snapping stops where the footer starts.** Landing sections opt in with
+  `data-lenis-snap`, and the footer deliberately does not. Every scroll also
+  checks whether the reader has passed the last snap target; if so the `Snap`
+  instance is stopped, so the tail of the page can be read without a proximity
+  snap yanking the reader back up to the section above. It restarts above the
+  last target, so section-to-section snapping is unchanged. The breakpoint is
+  the target's layout offset, the same number Lenis snaps to, so the two never
+  disagree.
 - **Backdrop continuity is enforced, not eyeballed.** Any new route that wants
   the shared backdrop renders `PageBackdrop` (which tags itself
   `data-backdrop-scope`) and puts `page-flow` on its `<main>`; the smoke test
@@ -276,25 +300,29 @@ shows the right title and description.
   layer kinds (`wash`, `dressing`, `blob`, `particles`, `rings`, `ripples`,
   `sweep`, `shooting`) declared in `src/lib/backdrop.ts`, rendered by the single
   `SectionField`. A section passes a preset name, a page passes a spec — usually
-  a preset with different layers, e.g. the blog index spreads `PRESETS.station`
-  and adds shooting stars. Adding art means adding entries plus, at most, one
-  CSS class for a new `dressing`, never a new React component. Particles and
-  rings are generated from ranges with a seeded PRNG, so the same spec always
-  renders the same layout on the server and the client.
+  a preset with different layers, e.g. a page spreads `PRESETS.station` and adds
+  a `shooting` layer for a meteor shower. Adding art means adding entries plus,
+  at most, one CSS class for a new `dressing`, never a new React component.
+  Particles and rings are generated from ranges with a seeded PRNG, so the same
+  spec always renders the same layout on the server and the client.
 - **Depth is declared, not hand-animated.** A `group` layer takes `pointer` and
-  `drift` numbers, so the station backdrop is three nested frames: the planet and
-  horizon drift 5px against the cursor, the stars and deck 15px, the foreground
-  rails and sweep 28px, and each frame also travels a little as the reader
-  scrolls (`--field-read`, set once per frame by the shared loop in
-  `src/lib/field.ts`). All of it is transform-only, and everything still shares
-  one IntersectionObserver, one scroll listener and one pointer subscription.
+  `drift` numbers, so the station backdrop is three nested frames: the nebula
+  glow drifts 8px against the cursor, the stars 15px, the horizon band and the
+  scan sweep 28px, and each frame also travels a little as the reader scrolls
+  (`--field-read`, set once per frame by the shared loop in `src/lib/field.ts`).
+  All of it is transform-only, and everything still shares one
+  IntersectionObserver, one scroll listener and one pointer subscription.
 - **The brand link skips the hero.** The header's top-left mark points at
   `#about` rather than `/`, so a click from any route lands on the About section
-  instead of replaying the event-horizon hero. `SmoothScroll` reads the hash
-  after the route's streamed sections exist, targets the section's layout offset
-  (the reveal transform would otherwise bias the measurement) and re-applies
-  until the position sticks, because Next resets the scroll when the shell
-  commits.
+  instead of replaying the event-horizon hero. On the landing page a click is
+  handled directly (`scrollToTarget`) rather than through the hash, so it lands
+  the same way every time — including when the URL already reads `#about`.
+  `SmoothScroll` covers the cross-route case: it reads the hash after the
+  route's streamed sections exist, targets the section's layout offset through
+  `sectionTop()` (the reveal transform would otherwise bias the measurement)
+  and re-applies until the position sticks, because Next resets the scroll when
+  the shell commits. Both paths go through the same `sectionTop()` resolution,
+  so a section lands at the same offset however you arrive at it.
 - **Article progress has one source of truth.** `src/lib/markdown.ts` gives every
   `h2`/`h3` an id and hands the same list to the page, so the outline panel and
   the heading ids cannot drift. `PostRead` measures the article once per resize

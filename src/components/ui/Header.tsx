@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "@/components/ui/Logo";
+import { scrollToTarget } from "@/lib/scroller";
 
 const NAV_ITEMS = [
   { label: "projects", href: "/projects" },
@@ -21,9 +22,38 @@ export default function Header() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
+  const aboutRef = useRef<HTMLElement | null>(null);
   const [showStatus, setShowStatus] = useState(false);
   const [clock, setClock] = useState<string | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
+
+  const onBrandClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (
+        !isHome ||
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const about = aboutRef.current ?? document.getElementById("about");
+      if (!about) return;
+
+      event.preventDefault();
+      aboutRef.current = about;
+
+      if (window.location.hash !== "#about") {
+        history.replaceState(null, "", "#about");
+      }
+      scrollToTarget(about, 0.8);
+    },
+    [isHome],
+  );
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 24);
@@ -84,6 +114,7 @@ export default function Header() {
       >
         <Link
           href={isHome ? "#about" : "/#about"}
+          onClick={onBrandClick}
           className="pointer-events-auto group flex items-center gap-2 text-mocha-text/85 hover:text-mocha-text transition-colors"
         >
           <span className="text-mocha-mauve">[</span>

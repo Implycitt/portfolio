@@ -7,24 +7,9 @@ import Reveal from "@/components/ui/Reveal";
 import IntroSequence from "@/components/ui/IntroSequence";
 import ScrollPrompt from "@/components/ui/ScrollPrompt";
 import SectionLoader from "@/components/ui/SectionLoader";
-import SiteFooter from "@/components/ui/SiteFooter";
+import { frame, rule } from "@/lib/ascii";
 
 const CHARSET = " .:-=+*#%@";
-
-function frame(lines: string[], label: string): string {
-  const width = Math.max(...lines.map((line) => line.length));
-  const head = `-- ${label} `;
-  return [
-    `+${head}${"-".repeat(Math.max(0, width + 2 - head.length))}+`,
-    ...lines.map((line) => `| ${line.padEnd(width)} |`),
-    `+${"-".repeat(width + 2)}+`,
-  ].join("\n");
-}
-
-function rule(label: string, width = 44): string {
-  const head = `-- ${label} `;
-  return `+${head}${"-".repeat(Math.max(0, width - head.length - 2))}+`;
-}
 
 const SESSION = frame(
   [
@@ -44,17 +29,6 @@ const SECTIONS_RULE = {
   compact: rule("~/portfolio/sections", 40),
   wide: rule("~/portfolio/sections", 58),
 };
-
-const EXIT = frame(
-  [
-    `$ echo "exit 0"`,
-    "[process completed]",
-    "",
-    "(c) 2026 Quentin Bordelon",
-    "compiled in the terminal",
-  ],
-  "session ended",
-);
 
 export default function Home() {
   return (
@@ -121,10 +95,6 @@ export default function Home() {
 
         <Reveal variant="pop" delay={160}>
           <SocialsSection />
-        </Reveal>
-
-        <Reveal variant="pop" delay={120}>
-          <SiteFooter exit={EXIT} />
         </Reveal>
       </div>
     </main>

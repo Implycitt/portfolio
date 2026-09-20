@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import Snap from "lenis/snap";
-import { registerScroller } from "@/lib/scroller";
+import { layoutTop, registerScroller, sectionTop } from "@/lib/scroller";
 import "lenis/dist/lenis.css";
 
 export default function SmoothScroll({
@@ -15,6 +15,7 @@ export default function SmoothScroll({
   const pathname = usePathname();
   const lenisRef = useRef<Lenis | null>(null);
   const snapRef = useRef<Snap | null>(null);
+  const snapTargetsRef = useRef<HTMLElement[]>([]);
   const removeSnapTargetsRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
@@ -51,16 +52,6 @@ export default function SmoothScroll({
     const started = performance.now();
     let attempts = 0;
 
-    const layoutTop = (el: HTMLElement) => {
-      let top = 0;
-      let node: HTMLElement | null = el;
-      while (node) {
-        top += node.offsetTop;
-        node = node.offsetParent as HTMLElement | null;
-      }
-      return top;
-    };
-
     const scrollToHash = () => {
       const hash = window.location.hash.slice(1);
       if (!hash) return false;
@@ -68,7 +59,7 @@ export default function SmoothScroll({
       const anchor = document.getElementById(hash);
       if (!anchor) return false;
 
-      const top = layoutTop(anchor);
+      const top = sectionTop(anchor);
       if (Math.abs(window.scrollY - top) <= 8) return true;
       if (attempts >= 4) return true;
 
@@ -86,6 +77,7 @@ export default function SmoothScroll({
       const targets = Array.from(
         document.querySelectorAll<HTMLElement>("[data-lenis-snap]"),
       );
+      snapTargetsRef.current = targets;
       if (targets.length === 0) return false;
 
       const snap = new Snap(lenis, {
@@ -98,6 +90,18 @@ export default function SmoothScroll({
         snap.addElement(el, { align: "start", ignoreTransform: true }),
       );
       return true;
+    };
+
+    const syncSnapWindow = () => {
+      const snap = snapRef.current;
+      const last = snapTargetsRef.current.at(-1);
+      if (!snap || !last) return;
+
+      const past = window.scrollY > layoutTop(last);
+      if (past === snap.isStopped) return;
+
+      if (past) snap.stop();
+      else snap.start();
     };
 
     let poll = 0;
@@ -123,14 +127,21 @@ export default function SmoothScroll({
       }
 
       if (!settledSnap && registerSnap()) settledSnap = true;
+      syncSnapWindow();
 
       if ((settledHash && settledSnap) || ticks > 40) stop();
     };
 
+    window.addEventListener("scroll", syncSnapWindow, { passive: true });
+    window.addEventListener("resize", syncSnapWindow);
     poll = window.setInterval(settle, 120);
     settle();
 
-    return stop;
+    return () => {
+      stop();
+      window.removeEventListener("scroll", syncSnapWindow);
+      window.removeEventListener("resize", syncSnapWindow);
+    };
   }, [pathname]);
 
   return <>{children}</>;
