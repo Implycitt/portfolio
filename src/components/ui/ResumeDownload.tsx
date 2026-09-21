@@ -2,7 +2,7 @@ import { existsSync } from "fs";
 import path from "path";
 import PrintButton from "@/components/ui/PrintButton";
 
-const RESUME_FILE = "Quentin-Bordelon-Resume.pdf";
+const RESUME_FILE = "QuentinBordelonResume.pdf";
 const RESUME_PATH = path.join(process.cwd(), "public", "resume", RESUME_FILE);
 
 export default function ResumeDownload() {
