@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export default function CountUp({
   value,
@@ -10,51 +10,41 @@ export default function CountUp({
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement | null>(null);
-  const [shown, setShown] = useState<string | null>(null);
 
   useEffect(() => {
-    const target = Number(value.replace(/[^0-9]/g, ""));
-    if (!Number.isFinite(target) || target <= 0) {
-      setShown(value);
-      return;
-    }
     const el = ref.current;
     if (!el) return;
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduced) {
-      setShown(value);
+
+    const target = Number(value.replace(/[^0-9]/g, ""));
+    if (!Number.isFinite(target) || target <= 0) {
+      el.textContent = value;
       return;
     }
 
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.textContent = value;
+      return;
+    }
+
+    const duration = 800;
+    const start = performance.now();
     let frame = 0;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        observer.disconnect();
-        const duration = 900;
-        const start = performance.now();
-        const step = (now: number) => {
-          const t = Math.min(1, (now - start) / duration);
-          const eased = 1 - Math.pow(1 - t, 3);
-          setShown(Math.round(target * eased).toLocaleString("en-US"));
-          if (t < 1) frame = requestAnimationFrame(step);
-        };
-        frame = requestAnimationFrame(step);
-      },
-      { threshold: 0.4 },
-    );
-    observer.observe(el);
-    return () => {
-      observer.disconnect();
-      cancelAnimationFrame(frame);
+
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * eased).toLocaleString("en-US");
+      if (t < 1) frame = requestAnimationFrame(step);
     };
+
+    el.textContent = "0";
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
   }, [value]);
 
   return (
     <span ref={ref} className={className}>
-      {shown ?? "0"}
+      0
     </span>
   );
 }

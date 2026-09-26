@@ -274,7 +274,13 @@ export default function SectionField({ backdrop }: { backdrop: Backdrop }) {
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || prefersReducedMotion()) return;
+    if (
+      !el ||
+      prefersReducedMotion() ||
+      window.matchMedia("(max-width: 767px), (pointer: coarse)").matches
+    ) {
+      return;
+    }
     return registerParallax(el, [
       { property: "--field-back", factor: 0.012 },
       { property: "--field-front", factor: 0.042 },
@@ -285,7 +291,13 @@ export default function SectionField({ backdrop }: { backdrop: Backdrop }) {
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || prefersReducedMotion()) return;
+    if (
+      !el ||
+      prefersReducedMotion() ||
+      window.matchMedia("(max-width: 767px), (pointer: coarse)").matches
+    ) {
+      return;
+    }
 
     let frame = 0;
     let x = 0;

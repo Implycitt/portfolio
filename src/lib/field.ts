@@ -44,31 +44,32 @@ let listening = false;
 
 function measure() {
   parallaxFrame = 0;
-  const centre = window.innerHeight / 2;
+  const viewportHeight = window.innerHeight;
+  const centre = viewportHeight / 2;
+  const scrollable = document.documentElement.scrollHeight - viewportHeight;
+  const readProgress =
+    scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+  const updates: { element: HTMLElement; values: [string, string][] }[] = [];
+
+  // Read every rect before writing styles to avoid forcing layout per element.
   for (const [element, layers] of parallaxLayers) {
     const rect = element.getBoundingClientRect();
     const offset = centre - (rect.top + rect.height / 2);
-    for (const layer of layers) {
+    const values = layers.map((layer): [string, string] => {
       if (layer.progress) {
-        const value = Math.max(
-          -1.4,
-          Math.min(1.4, offset / window.innerHeight),
-        );
-        element.style.setProperty(layer.property, value.toFixed(3));
-        continue;
+        const value = Math.max(-1.4, Math.min(1.4, offset / viewportHeight));
+        return [layer.property, value.toFixed(3)];
       }
-      if (layer.read) {
-        const scrollable =
-          window.document.documentElement.scrollHeight - window.innerHeight;
-        const value =
-          scrollable > 0
-            ? Math.min(1, Math.max(0, window.scrollY / scrollable))
-            : 0;
-        element.style.setProperty(layer.property, value.toFixed(4));
-        continue;
-      }
+      if (layer.read) return [layer.property, readProgress.toFixed(4)];
       const shift = Math.max(-80, Math.min(80, offset * layer.factor));
-      element.style.setProperty(layer.property, `${shift.toFixed(1)}px`);
+      return [layer.property, `${shift.toFixed(1)}px`];
+    });
+    updates.push({ element, values });
+  }
+
+  for (const { element, values } of updates) {
+    for (const [property, value] of values) {
+      element.style.setProperty(property, value);
     }
   }
 }
@@ -90,6 +91,10 @@ export function registerParallax(
   element: HTMLElement,
   layers: ParallaxLayer[],
 ): () => void {
+  if (window.matchMedia("(max-width: 767px), (pointer: coarse)").matches) {
+    return () => {};
+  }
+
   if (!listening) {
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule, { passive: true });

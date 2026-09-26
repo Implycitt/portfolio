@@ -316,6 +316,11 @@ export default function BlackHoleASCII({
     let nextGlitchAt = 0;
     let lastGlitchDraw = 0;
     let lastTime = 0;
+    let lastFrameTime = 0;
+    let frameInterval = 1000 / 45;
+    let thetaSamples = 360;
+    let rhoSamples = 20;
+    let starCount = 240;
     let running = true;
     const nameScratch: string[] = [""];
 
@@ -330,7 +335,7 @@ export default function BlackHoleASCII({
       const halfDiag =
         Math.sqrt((cols * charWidth) ** 2 + (rows * charHeight) ** 2) / 2;
       const maxR = halfDiag * 1.08;
-      for (let i = 0; i < CONFIG.starCount; i++) {
+      for (let i = 0; i < starCount; i++) {
         const r = Math.sqrt(Math.random()) * maxR;
         stars.push({
           angle: Math.random() * Math.PI * 2,
@@ -350,8 +355,14 @@ export default function BlackHoleASCII({
     const resize = () => {
       viewW = window.innerWidth;
       viewH = window.innerHeight;
+      const compact =
+        viewW < 768 || window.matchMedia("(pointer: coarse)").matches;
       const rawDpr = window.devicePixelRatio || 1;
-      const dpr = Math.min(rawDpr, viewW < 768 ? 1.5 : 2);
+      const dpr = Math.min(rawDpr, compact ? 1 : 1.5);
+      thetaSamples = compact ? 220 : 360;
+      rhoSamples = compact ? 14 : 20;
+      starCount = compact ? 140 : 240;
+      frameInterval = compact ? 1000 / 40 : 1000 / 45;
       node.width = Math.round(viewW * dpr);
       node.height = Math.round(viewH * dpr);
       node.style.width = `${viewW}px`;
@@ -455,6 +466,11 @@ export default function BlackHoleASCII({
     };
 
     const render = (time: number) => {
+      if (time - lastFrameTime < frameInterval) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+      lastFrameTime = time;
       const t = time * 0.001;
       const dt = lastTime === 0 ? 0.016 : Math.min(0.1, t - lastTime);
       lastTime = t;
@@ -577,11 +593,11 @@ export default function BlackHoleASCII({
       const cosT = Math.cos(tilt);
       const sinT = Math.sin(tilt);
 
-      for (let ri = 0; ri < CONFIG.rhoSamples; ri++) {
-        const rho = innerR + (ri / (CONFIG.rhoSamples - 1)) * (outerR - innerR);
+      for (let ri = 0; ri < rhoSamples; ri++) {
+        const rho = innerR + (ri / (rhoSamples - 1)) * (outerR - innerR);
         const omega = CONFIG.spinSpeed * Math.pow(innerR / rho, 1.5);
-        for (let ti = 0; ti < CONFIG.thetaSamples; ti++) {
-          const theta = (ti / CONFIG.thetaSamples) * Math.PI * 2 + t * omega;
+        for (let ti = 0; ti < thetaSamples; ti++) {
+          const theta = (ti / thetaSamples) * Math.PI * 2 + t * omega;
           const x = rho * Math.cos(theta);
           const y0 = rho * Math.sin(theta);
           const y = y0 * cosT * CONFIG.diskSquashY;
@@ -641,11 +657,13 @@ export default function BlackHoleASCII({
         }
       }
 
-      if (fillAmount > 0 && cellRandom.length === total) {
+      if (
+        cellRandom.length === total &&
+        (fillAmount > 0 || dissolveAmount > 0 || clearAmount > 0)
+      ) {
         for (let idx = 0; idx < total; idx++) {
-          if (buffer[idx] !== " ") continue;
           const rv = cellRandom[idx];
-          if (rv < fillAmount) {
+          if (fillAmount > 0 && buffer[idx] === " " && rv < fillAmount) {
             const flicker = 0.5 + 0.5 * Math.sin(t * 1.5 + rv * 30);
             const level = Math.min(
               ramp.length - 2,
@@ -653,13 +671,7 @@ export default function BlackHoleASCII({
             );
             buffer[idx] = ramp[level];
           }
-        }
-      }
-
-      if (dissolveAmount > 0 && cellRandom.length === total) {
-        for (let idx = 0; idx < total; idx++) {
-          const rv = cellRandom[idx];
-          if (rv < dissolveAmount) {
+          if (dissolveAmount > 0 && rv < dissolveAmount) {
             const flicker = 0.5 + 0.5 * Math.sin(t * 1.7 + rv * 40);
             const level = Math.min(
               ramp.length - 1,
@@ -667,12 +679,7 @@ export default function BlackHoleASCII({
             );
             buffer[idx] = ramp[level];
           }
-        }
-      }
-
-      if (clearAmount > 0 && cellRandom.length === total) {
-        for (let idx = 0; idx < total; idx++) {
-          if (cellRandom[idx] < clearAmount) buffer[idx] = " ";
+          if (clearAmount > 0 && rv < clearAmount) buffer[idx] = " ";
         }
       }
 
@@ -742,6 +749,7 @@ export default function BlackHoleASCII({
         return;
       running = true;
       lastTime = 0;
+      lastFrameTime = 0;
       frameId = requestAnimationFrame(render);
     };
 

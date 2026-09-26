@@ -52,27 +52,6 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
 }
 
-async function fetchCommitCount(
-  owner: string,
-  repo: string,
-): Promise<number | null> {
-  try {
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/commits?per_page=1`,
-      {
-        headers: githubHeaders(),
-        next: { revalidate: 3600 },
-      },
-    );
-    if (!res.ok) return null;
-    const link = res.headers.get("link") ?? "";
-    const match = /&page=(\d+)>; rel="last"/.exec(link);
-    return match ? parseInt(match[1], 10) : null;
-  } catch {
-    return null;
-  }
-}
-
 export async function fetchGitHubRepos(
   username: string,
   exclusions: string[] = [],
@@ -88,22 +67,9 @@ export async function fetchGitHubRepos(
       !repo.fork && !repo.archived && !exclude.has(repo.name.toLowerCase()),
   );
 
-  const withCounts = await Promise.all(
-    filtered.map(
-      async (repo) =>
-        [repo, await fetchCommitCount(username, repo.name)] as const,
-    ),
+  return filtered.sort(
+    (a, b) => new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime(),
   );
-
-  return withCounts
-    .sort((a, b) => {
-      const byCommits = (b[1] ?? -1) - (a[1] ?? -1);
-      if (byCommits !== 0) return byCommits;
-      return (
-        new Date(b[0].pushed_at).getTime() - new Date(a[0].pushed_at).getTime()
-      );
-    })
-    .map(([repo]) => repo);
 }
 
 export async function fetchGitHubRepoDetail(

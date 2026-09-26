@@ -45,8 +45,8 @@ export default function SmoothScroll({
 
     const lenis = new Lenis({
       autoRaf: true,
-      duration: 1.6,
-      easing: (t) => 1 - Math.pow(1 - t, 4),
+      duration: 1.05,
+      easing: (t) => 1 - Math.pow(1 - t, 3),
       anchors: true,
       allowNestedScroll: true,
       stopInertiaOnNavigate: true,
@@ -115,8 +115,8 @@ export default function SmoothScroll({
 
       const snap = new Snap(lenis, {
         type: "proximity",
-        duration: 1.7,
-        easing: (t) => 1 - Math.pow(1 - t, 4),
+        duration: 1.05,
+        easing: (t) => 1 - Math.pow(1 - t, 3),
       });
       snapRef.current = snap;
       removeSnapTargetsRef.current = targets.map((el) =>
