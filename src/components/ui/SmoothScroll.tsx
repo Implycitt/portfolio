@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import Snap from "lenis/snap";
-import { layoutTop, registerScroller, sectionTop } from "@/lib/scroller";
+import {
+  layoutTop,
+  NATIVE_SCROLL_QUERY,
+  registerScroller,
+  sectionTop,
+} from "@/lib/scroller";
 import "lenis/dist/lenis.css";
 
 export default function SmoothScroll({
@@ -13,13 +18,30 @@ export default function SmoothScroll({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [nativeScroll, setNativeScroll] = useState(true);
   const lenisRef = useRef<Lenis | null>(null);
   const snapRef = useRef<Snap | null>(null);
   const snapTargetsRef = useRef<HTMLElement[]>([]);
   const removeSnapTargetsRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const mobile = window.matchMedia(NATIVE_SCROLL_QUERY);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateScrollMode = () =>
+      setNativeScroll(mobile.matches || reducedMotion.matches);
+
+    updateScrollMode();
+    mobile.addEventListener("change", updateScrollMode);
+    reducedMotion.addEventListener("change", updateScrollMode);
+
+    return () => {
+      mobile.removeEventListener("change", updateScrollMode);
+      reducedMotion.removeEventListener("change", updateScrollMode);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (nativeScroll) return;
 
     const lenis = new Lenis({
       autoRaf: true,
@@ -36,21 +58,29 @@ export default function SmoothScroll({
 
     return () => {
       unregister();
-      removeSnapTargetsRef.current.forEach((remove) => remove());
-      removeSnapTargetsRef.current = [];
       snapRef.current?.destroy();
       snapRef.current = null;
+      removeSnapTargetsRef.current.forEach((remove) => remove());
+      removeSnapTargetsRef.current = [];
+      snapTargetsRef.current = [];
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, []);
+  }, [nativeScroll]);
 
   useEffect(() => {
     const lenis = lenisRef.current;
-    if (!lenis) return;
-
     const started = performance.now();
     let attempts = 0;
+    let poll = 0;
+    let ticks = 0;
+    let settledHash = false;
+    let settledSnap = nativeScroll || !lenis;
+
+    const stop = () => {
+      if (poll) window.clearInterval(poll);
+      poll = 0;
+    };
 
     const scrollToHash = () => {
       const hash = window.location.hash.slice(1);
@@ -64,15 +94,18 @@ export default function SmoothScroll({
       if (attempts >= 4) return true;
 
       attempts += 1;
-      lenis.scrollTo(top, { immediate: true });
+      if (lenis) lenis.scrollTo(top, { immediate: true });
+      else document.documentElement.scrollTop = top;
       return false;
     };
 
     const registerSnap = () => {
-      removeSnapTargetsRef.current.forEach((remove) => remove());
-      removeSnapTargetsRef.current = [];
+      if (!lenis) return false;
+
       snapRef.current?.destroy();
       snapRef.current = null;
+      removeSnapTargetsRef.current.forEach((remove) => remove());
+      removeSnapTargetsRef.current = [];
 
       const targets = Array.from(
         document.querySelectorAll<HTMLElement>("[data-lenis-snap]"),
@@ -104,22 +137,15 @@ export default function SmoothScroll({
       else snap.start();
     };
 
-    let poll = 0;
-    let ticks = 0;
-    let settledHash = false;
-    let settledSnap = false;
-
-    const stop = () => {
-      if (poll) window.clearInterval(poll);
-      poll = 0;
-    };
-
     const settle = () => {
       ticks += 1;
 
       if (!settledHash) {
         if (!window.location.hash) {
-          if (ticks === 1) lenis.scrollTo(0, { immediate: true });
+          if (ticks === 1) {
+            if (lenis) lenis.scrollTo(0, { immediate: true });
+            else document.documentElement.scrollTop = 0;
+          }
           if (performance.now() - started > 600) settledHash = true;
         } else if (scrollToHash()) {
           settledHash = true;
@@ -142,7 +168,7 @@ export default function SmoothScroll({
       window.removeEventListener("scroll", syncSnapWindow);
       window.removeEventListener("resize", syncSnapWindow);
     };
-  }, [pathname]);
+  }, [pathname, nativeScroll]);
 
   return <>{children}</>;
 }

@@ -15,8 +15,14 @@ import {
 } from "./lib/browser.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const ROUTES = ["/", "/projects", "/resume", "/blog"];
-const WIDTHS = [390, 768, 1440];
+const ROUTES = [
+  "/",
+  "/projects",
+  "/projects/Implycitt/competitive-programming",
+  "/resume",
+  "/blog",
+];
+const WIDTHS = [320, 360, 390, 640, 768, 1024, 1440];
 const VIEWPORT_HEIGHT = 820;
 const SEAM_LIMIT = 3;
 const SEAM_WINDOW = 120;
@@ -31,15 +37,47 @@ const SELF_TEST_CSS =
 const AUDIT = `(async () => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const stagger = window.innerHeight * 0.5;
+  const scrollTo = (top) => {
+    if (document.documentElement.classList.contains("lenis")) {
+      window.scrollTo({ top, behavior: "instant" });
+    } else {
+      document.documentElement.scrollTop = top;
+    }
+  };
   for (let y = 0; y < document.documentElement.scrollHeight; y += stagger) {
-    window.scrollTo({ top: y, behavior: "instant" });
+    scrollTo(y);
     await sleep(90);
   }
-  window.scrollTo({ top: 0, behavior: "instant" });
+  scrollTo(0);
   await sleep(600);
+
+  let hashJumpImmediate = null;
+  if (window.innerWidth < 768 && window.location.pathname === "/") {
+    const about = document.getElementById("about");
+    const brand = document.querySelector('header a[href="#about"]');
+    if (about && brand instanceof HTMLAnchorElement) {
+      brand.click();
+      await new Promise(requestAnimationFrame);
+      const target = Math.max(
+        0,
+        about.getBoundingClientRect().top +
+          window.scrollY -
+          (Number.parseFloat(
+            getComputedStyle(document.documentElement).scrollPaddingTop,
+          ) || 0),
+      );
+      hashJumpImmediate = Math.abs(window.scrollY - target) <= 8;
+      document.documentElement.scrollTop = 0;
+      await sleep(100);
+    }
+  }
 
   const report = {
     overflowX: document.documentElement.scrollWidth - window.innerWidth,
+    scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior,
+    lenis: document.documentElement.classList.contains("lenis"),
+    snapActive: Boolean(window.lenis?.snap),
+    hashJumpImmediate,
     hiddenReveals: [...document.querySelectorAll(".reveal")].filter(
       (el) => Number(getComputedStyle(el).opacity) < 0.9,
     ).length,
@@ -188,7 +226,7 @@ async function inspectBoundaries(conn, boundaries, docHeight) {
     );
     await evaluate(
       conn,
-      `window.scrollTo({ top: ${wanted}, behavior: "instant" }), window.scrollY`,
+      `(document.documentElement.scrollTop = ${wanted}), window.scrollY`,
     );
     await sleep(200);
     const scrollY = await evaluate(conn, "window.scrollY");
@@ -219,7 +257,7 @@ async function inspectFixedBackdrop(conn, docHeight) {
   for (const offset of offsets) {
     await evaluate(
       conn,
-      `window.scrollTo({ top: ${offset}, behavior: "instant" }), window.scrollY`,
+      `(document.documentElement.scrollTop = ${offset}), window.scrollY`,
     );
     await sleep(220);
     const shot = await conn.send("Page.captureScreenshot", { format: "png" });
@@ -271,6 +309,31 @@ async function auditRoute(chrome, base, route, width) {
     if (report.overflowX > 0) {
       fail(
         `${route} @${width}px: horizontal overflow of ${report.overflowX}px`,
+      );
+    }
+    if (width < 768 && report.scrollBehavior !== "auto") {
+      fail(
+        `${route} @${width}px: CSS scroll behavior is ${report.scrollBehavior}, expected auto`,
+      );
+    }
+    if (width < 768 && (report.lenis || report.snapActive)) {
+      fail(
+        `${route} @${width}px: Lenis or scroll snapping is active on mobile`,
+      );
+    }
+    if (width < 768 && route === "/" && report.hashJumpImmediate === false) {
+      fail(
+        `${route} @${width}px: the #about navigation animates instead of jumping immediately`,
+      );
+    }
+    if (width >= 768 && width < 1024 && !report.lenis) {
+      fail(
+        `${route} @${width}px: desktop Lenis smooth scrolling was unexpectedly disabled`,
+      );
+    }
+    if (width >= 768 && width < 1024 && route === "/" && !report.snapActive) {
+      fail(
+        `${route} @${width}px: desktop section snapping was unexpectedly disabled`,
       );
     }
     if (report.hiddenReveals > 0) {
@@ -375,7 +438,7 @@ async function main() {
 
   const chrome = await startChrome(bin);
   const line = (route, width, outcome) =>
-    `${route.padEnd(24)} ${String(width).padStart(4)}px  ` +
+    `${route.padEnd(48)} ${String(width).padStart(4)}px  ` +
     `overflow=${outcome.report.overflowX}  ` +
     `reveals=${outcome.report.hiddenReveals}  ` +
     `fields=${outcome.report.maskedFields}/${outcome.report.fields}  ` +

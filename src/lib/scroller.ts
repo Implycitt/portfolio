@@ -2,6 +2,8 @@
 
 import { prefersReducedMotion } from "@/lib/reveal-observer";
 
+export const NATIVE_SCROLL_QUERY = "(max-width: 767px), (pointer: coarse)";
+
 interface Scroller {
   scrollTo(
     target: number,
@@ -42,7 +44,8 @@ export function scrollToTarget(
   target: number | HTMLElement,
   duration = 1.1,
 ): void {
-  const reduced = prefersReducedMotion();
+  const immediate =
+    prefersReducedMotion() || window.matchMedia(NATIVE_SCROLL_QUERY).matches;
   const resolve = () =>
     typeof target === "number" ? Math.max(0, target) : sectionTop(target);
 
@@ -52,14 +55,15 @@ export function scrollToTarget(
       scroller.scrollTo(top, immediate ? { immediate: true } : { duration });
       return;
     }
-    window.scrollTo({
-      top,
-      behavior: immediate ? "auto" : "smooth",
-    });
+    if (immediate) {
+      document.documentElement.scrollTop = top;
+      return;
+    }
+    window.scrollTo({ top, behavior: "smooth" });
   };
 
-  apply(reduced);
-  if (reduced) return;
+  apply(immediate);
+  if (immediate) return;
 
   let last = window.scrollY;
   let stable = 0;
