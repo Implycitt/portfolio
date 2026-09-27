@@ -45,7 +45,7 @@ function languagePercent(
   return Object.entries(languages)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
-    .map(([name, bytes]) => ({ name, pct: Math.round((bytes / total) * 100) }));
+    .map(([name, bytes]) => ({ name, pct: (bytes / total) * 100 }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -94,44 +94,81 @@ export default async function ProjectDetail({ params }: Props) {
           Projects
         </Link>
 
-        <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-4">
-          <span className="interest-tile flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-mocha-mauve/25 bg-mocha-mauve/10 text-mocha-mauve">
-            <Icon name="box" className="h-5 w-5" />
-          </span>
-          <div className="min-w-0">
-            <h1 className="font-mono text-2xl font-bold break-words text-mocha-text sm:text-3xl">
-              {repo.name}
-            </h1>
-            <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] tracking-wide text-mocha-overlay1">
-              <span className="text-mocha-mauve/80">{owner}</span>
-              {repo.language && (
-                <>
-                  <span className="text-mocha-surface">·</span>
-                  <span>{repo.language}</span>
-                </>
-              )}
-              {contribution && (
-                <>
-                  <span className="text-mocha-surface">·</span>
-                  <span className="text-mocha-sapphire">
-                    {ROLE_LABELS[contribution.role] ?? contribution.role}
-                  </span>
-                </>
-              )}
-            </p>
+        <div className="mb-8 grid gap-x-8 gap-y-5 lg:grid-cols-[minmax(0,1fr)_max-content]">
+          <div className="flex min-w-0 items-start gap-4 lg:col-start-1">
+            <span className="interest-tile flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-mocha-mauve/25 bg-mocha-mauve/10 text-mocha-mauve">
+              <Icon name="box" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <h1 className="font-mono text-2xl font-bold break-words text-mocha-text sm:text-3xl">
+                {repo.name}
+              </h1>
+              <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] tracking-wide text-mocha-overlay1">
+                <span className="text-mocha-mauve/80">{owner}</span>
+                {repo.language && (
+                  <>
+                    <span className="text-mocha-surface">·</span>
+                    <span>{repo.language}</span>
+                  </>
+                )}
+                {contribution && (
+                  <>
+                    <span className="text-mocha-surface">·</span>
+                    <span className="text-mocha-sapphire">
+                      {ROLE_LABELS[contribution.role] ?? contribution.role}
+                    </span>
+                  </>
+                )}
+              </p>
+            </div>
           </div>
-
-          {repo.homepage && (
+          <nav
+            aria-label="Project links"
+            className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 lg:col-start-2 lg:row-start-1 lg:mt-0 lg:w-max lg:justify-end"
+          >
             <a
-              href={repo.homepage}
+              href={repo.html_url}
               target="_blank"
               rel="noreferrer noopener"
-              className="ml-auto inline-flex items-center gap-2 rounded-xl border border-mocha-surface bg-mocha-base px-4 py-2 font-mono text-[11px] tracking-widest uppercase text-mocha-subtext transition-colors hover:border-mocha-mauve hover:text-mocha-text"
+              className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-mauve/50 bg-gradient-to-br from-mocha-mauve/20 to-mocha-mauve/5 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-text shadow-[0_0_18px_-9px_rgba(203,166,247,0.8)] transition-all duration-200 hover:-translate-y-0.5 hover:border-mocha-mauve hover:from-mocha-mauve/30 hover:to-mocha-mauve/10 hover:shadow-[0_0_22px_-6px_rgba(203,166,247,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-mauve motion-reduce:transform-none"
             >
-              <Icon name="external" className="h-3.5 w-3.5" />
-              live demo
+              <Icon name="github" className="h-4 w-4 text-mocha-mauve" />
+              GitHub repo
+              <span className="sr-only"> (opens in a new tab)</span>
             </a>
-          )}
+            {repo.homepage && (
+              <a
+                href={repo.homepage}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-sapphire/50 bg-gradient-to-br from-mocha-sapphire/20 to-mocha-sapphire/5 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-text shadow-[0_0_18px_-9px_rgba(116,199,236,0.8)] transition-all duration-200 hover:-translate-y-0.5 hover:border-mocha-sapphire hover:from-mocha-sapphire/30 hover:to-mocha-sapphire/10 hover:shadow-[0_0_22px_-6px_rgba(116,199,236,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-sapphire motion-reduce:transform-none"
+              >
+                <Icon name="external" className="h-4 w-4 text-mocha-sapphire" />
+                Live demo
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            )}
+            <a
+              href={`${repo.html_url}/releases`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-lavender/30 bg-gradient-to-br from-mocha-lavender/10 to-mocha-base/70 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-subtext transition-all duration-200 hover:-translate-y-0.5 hover:border-mocha-lavender hover:text-mocha-lavender hover:shadow-[0_0_18px_-8px_rgba(180,190,254,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-lavender motion-reduce:transform-none"
+            >
+              <Icon name="box" className="h-4 w-4" />
+              Releases
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+            <a
+              href={`${repo.html_url}/issues`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-teal/30 bg-gradient-to-br from-mocha-teal/10 to-mocha-base/70 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-subtext transition-all duration-200 hover:-translate-y-0.5 hover:border-mocha-teal hover:text-mocha-teal hover:shadow-[0_0_18px_-8px_rgba(148,226,213,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-teal motion-reduce:transform-none"
+            >
+              <Icon name="info" className="h-4 w-4" />
+              Issues
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </nav>
         </div>
 
         <div className="flex flex-col gap-8 lg:flex-row">
@@ -289,59 +326,13 @@ export default async function ProjectDetail({ params }: Props) {
                           />
                         </div>
                         <span className="w-8 text-right text-mocha-overlay0">
-                          {l.pct}%
+                          {l.pct < 1 ? "<1%" : `${Math.round(l.pct)}%`}
                         </span>
                       </div>
                     ))}
                   </div>
                 </Panel>
               )}
-
-              <Panel
-                title="Links"
-                icon={<Icon name="link" className="h-3.5 w-3.5" />}
-              >
-                <div className="space-y-2.5 font-mono text-xs">
-                  <a
-                    href={repo.html_url}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="group flex items-center gap-2 text-mocha-subtext transition-colors hover:text-mocha-mauve"
-                  >
-                    <Icon name="github" className="h-3.5 w-3.5" />
-                    GitHub repo
-                  </a>
-                  {repo.homepage && (
-                    <a
-                      href={repo.homepage}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="group flex items-center gap-2 text-mocha-subtext transition-colors hover:text-mocha-lavender"
-                    >
-                      <Icon name="external" className="h-3.5 w-3.5" />
-                      Live demo
-                    </a>
-                  )}
-                  <a
-                    href={`${repo.html_url}/releases`}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="group flex items-center gap-2 text-mocha-subtext transition-colors hover:text-mocha-sapphire"
-                  >
-                    <Icon name="box" className="h-3.5 w-3.5" />
-                    Releases
-                  </a>
-                  <a
-                    href={`${repo.html_url}/issues`}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="group flex items-center gap-2 text-mocha-subtext transition-colors hover:text-mocha-teal"
-                  >
-                    <Icon name="info" className="h-3.5 w-3.5" />
-                    Issues
-                  </a>
-                </div>
-              </Panel>
             </div>
           </aside>
         </div>
