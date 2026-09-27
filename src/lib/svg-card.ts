@@ -28,7 +28,7 @@ export const CARD = {
   tailY: 186,
 };
 
-export const CARD_COLUMNS = [CARD.inset, 146, 276];
+export const CARD_COLUMNS = [80, CARD_W / 2, CARD_W - 80];
 
 export function esc(value: string): string {
   return value
@@ -97,8 +97,13 @@ export function svgGrid(cards: CardContent[], columns = 2): string {
   return svgRoot(W, H, placed);
 }
 
-export function label(x: number, y: number, text: string): string {
-  return `<text x="${x}" y="${y}" font-family="${SVG_FONT}" font-size="9.5" letter-spacing="0.4" fill="${MOCHA.overlay1}">${esc(text)}</text>`;
+export function label(
+  x: number,
+  y: number,
+  text: string,
+  anchor: "start" | "middle" | "end" = "start",
+): string {
+  return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${SVG_FONT}" font-size="9.5" letter-spacing="0.4" fill="${MOCHA.overlay1}">${esc(text)}</text>`;
 }
 
 export function metric(
@@ -111,8 +116,8 @@ export function metric(
   const suffix = unit
     ? `<tspan font-size="10" fill="${MOCHA.overlay0}"> ${esc(unit)}</tspan>`
     : "";
-  return `${label(x, y, name)}
-  <text x="${x}" y="${y + CARD.valueOffset}" font-family="${SVG_FONT}" font-size="20" font-weight="700" fill="${MOCHA.text}">${esc(value)}${suffix}</text>`;
+  return `${label(x, y, name, "middle")}
+  <text x="${x}" y="${y + CARD.valueOffset}" text-anchor="middle" font-family="${SVG_FONT}" font-size="20" font-weight="700" fill="${MOCHA.text}">${esc(value)}${suffix}</text>`;
 }
 
 export function divider(y: number): string {
