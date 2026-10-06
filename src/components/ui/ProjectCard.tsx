@@ -2,12 +2,8 @@ import Link from "next/link";
 import Spotlight from "@/components/ui/Spotlight";
 import Icon, { type IconName } from "@/components/ui/icons";
 import { tagColor } from "@/lib/tag-color";
+import { formatDate } from "@/lib/dates";
 import type { GitHubRepoData } from "@/lib/github-repos";
-
-function fmtDate(iso: string): string {
-  const d = new Date(iso);
-  return `${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}/${d.getFullYear()}`;
-}
 
 const ROLE_BADGES: Record<string, string> = {
   "sole-author": "border-mocha-mauve/35 bg-mocha-mauve/10 text-mocha-mauve",
@@ -33,17 +29,24 @@ export default function ProjectCard({
   owner,
   role,
   commits,
+  activity,
 }: {
   repo: GitHubRepoData;
   extraTags?: string[];
   owner?: string;
   role?: "sole-author" | "lead" | "contributor";
   commits?: number;
+  activity?: number[] | null;
 }) {
+  const peakActivity =
+    activity && activity.length > 0 ? Math.max(...activity) : 0;
+  const activityTotal = activity?.reduce((sum, count) => sum + count, 0) ?? 0;
+  const commitCount = commits ?? activityTotal;
+  const commitLabel = `${commitCount} commit${commitCount === 1 ? "" : "s"}`;
   const dateRange =
     repo.created_at.slice(0, 10) === repo.pushed_at.slice(0, 10)
-      ? fmtDate(repo.created_at)
-      : `${fmtDate(repo.created_at)} — ${fmtDate(repo.pushed_at)}`;
+      ? formatDate(repo.created_at)
+      : `${formatDate(repo.created_at)} — ${formatDate(repo.pushed_at)}`;
 
   const topics =
     repo.topics && repo.topics.length > 0 ? repo.topics.slice(0, 5) : [];
@@ -85,22 +88,12 @@ export default function ProjectCard({
             >
               <Icon name={ROLE_ICONS[role]} className="h-3 w-3" />
               {ROLE_LABELS[role]}
-              {commits != null ? (
-                <>
-                  <span aria-hidden className="opacity-50">
-                    ·
-                  </span>
-                  <span className="font-bold tabular-nums text-mocha-text">
-                    {commits}
-                  </span>
-                </>
-              ) : null}
             </span>
           )}
         </div>
 
-        <div className="flex items-start justify-between gap-4">
-          <h3 className="font-mono text-lg font-bold text-mocha-text transition-colors duration-300 group-hover:text-mocha-lavender sm:text-xl">
+        <div className="flex items-start justify-between gap-3 sm:gap-4">
+          <h3 className="min-w-0 break-words font-mono text-lg font-bold text-mocha-text transition-colors duration-300 group-hover:text-mocha-lavender sm:text-xl">
             {repo.name}
           </h3>
           <div className="flex shrink-0 items-center gap-3 font-mono text-xs text-mocha-subtext">
@@ -138,6 +131,48 @@ export default function ProjectCard({
           </p>
         )}
 
+        {commitCount > 0 && (
+          <div className="mt-3 flex items-center gap-3">
+            <span className="sr-only">
+              {commitLabel}
+              {activityTotal > 0
+                ? `, ${activityTotal} in the last twelve months`
+                : ""}
+            </span>
+            {activity && activity.length > 0 && peakActivity > 0 && (
+              <span
+                aria-hidden
+                title="commits per month, last 12 months"
+                className="flex h-5 flex-1 items-end gap-px"
+              >
+                {activity.map((count, i) => (
+                  <span
+                    key={i}
+                    className={`flex-1 rounded-sm transition-colors duration-300 ${
+                      count > 0
+                        ? "bg-mocha-teal/70 group-hover:bg-mocha-teal"
+                        : "bg-mocha-surface"
+                    }`}
+                    style={{
+                      height: `${
+                        count > 0
+                          ? 4 + Math.round((count / peakActivity) * 16)
+                          : 2
+                      }px`,
+                    }}
+                  />
+                ))}
+              </span>
+            )}
+            <span className="ml-auto shrink-0 font-mono text-[10px] tracking-wide text-mocha-overlay0">
+              <span className="font-bold tabular-nums text-mocha-subtext">
+                {commitCount}
+              </span>{" "}
+              commits
+            </span>
+          </div>
+        )}
+
         <div className="mt-auto flex items-end justify-between gap-4 pt-4">
           {allTags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
@@ -153,7 +188,7 @@ export default function ProjectCard({
           )}
           <span
             aria-hidden
-            className="mb-1 flex shrink-0 -translate-x-1 items-center text-mocha-overlay0 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:text-mocha-mauve group-hover:opacity-100"
+            className="mb-1 flex shrink-0 -translate-x-1 items-center text-mocha-overlay0 opacity-0 transition-[transform,color,opacity] duration-300 group-hover:translate-x-0 group-hover:text-mocha-mauve group-hover:opacity-100"
           >
             <Icon name="arrowUpRight" className="h-3.5 w-3.5" />
           </span>

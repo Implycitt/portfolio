@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
 import Header from "@/components/ui/Header";
@@ -20,6 +20,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quentinb.dev";
 
 const DESCRIPTION =
   "Quentin Bordelon — computer science and physics undergraduate at LSU building software, developer tooling and research at the intersection of engineering, physics and math.";
+
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#11111b",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -324,7 +324,7 @@ export default async function AboutSection() {
                 </p>
                 <span
                   aria-hidden
-                  className={`mt-2.5 block h-0.5 w-8 rounded-full bg-current opacity-60 transition-all duration-500 group-hover:w-14 ${stat.text}`}
+                  className={`mt-2.5 block h-0.5 w-8 rounded-full bg-current opacity-60 transition-[width] duration-500 group-hover:w-14 ${stat.text}`}
                 />
               </Spotlight>
             </Reveal>

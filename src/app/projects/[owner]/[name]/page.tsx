@@ -10,6 +10,7 @@ import {
 } from "@/lib/github-repos";
 import { renderMarkdown } from "@/lib/markdown";
 import { tagBar, tagColor } from "@/lib/tag-color";
+import { formatDate } from "@/lib/dates";
 import "katex/dist/katex.min.css";
 
 interface Props {
@@ -25,11 +26,6 @@ const ROLE_LABELS: Record<string, string> = {
   lead: "lead contributor",
   contributor: "contributor",
 };
-
-function fmtDate(iso: string): string {
-  const d = new Date(iso);
-  return `${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}/${d.getFullYear()}`;
-}
 
 function fmtBytes(bytes: number): string {
   if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
@@ -130,7 +126,7 @@ export default async function ProjectDetail({ params }: Props) {
               href={repo.html_url}
               target="_blank"
               rel="noreferrer noopener"
-              className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-mauve/50 bg-gradient-to-br from-mocha-mauve/20 to-mocha-mauve/5 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-text shadow-[0_0_18px_-9px_rgba(203,166,247,0.8)] transition-all duration-200 hover:-translate-y-0.5 hover:border-mocha-mauve hover:from-mocha-mauve/30 hover:to-mocha-mauve/10 hover:shadow-[0_0_22px_-6px_rgba(203,166,247,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-mauve motion-reduce:transform-none"
+              className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-mauve/50 bg-gradient-to-br from-mocha-mauve/20 to-mocha-mauve/5 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-text shadow-[0_0_18px_-9px_rgba(203,166,247,0.8)] transition-[transform,border-color,background-color,color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-mocha-mauve hover:from-mocha-mauve/30 hover:to-mocha-mauve/10 hover:shadow-[0_0_22px_-6px_rgba(203,166,247,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-mauve motion-reduce:transform-none"
             >
               <Icon name="github" className="h-4 w-4 text-mocha-mauve" />
               GitHub repo
@@ -141,7 +137,7 @@ export default async function ProjectDetail({ params }: Props) {
                 href={repo.homepage}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-sapphire/50 bg-gradient-to-br from-mocha-sapphire/20 to-mocha-sapphire/5 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-text shadow-[0_0_18px_-9px_rgba(116,199,236,0.8)] transition-all duration-200 hover:-translate-y-0.5 hover:border-mocha-sapphire hover:from-mocha-sapphire/30 hover:to-mocha-sapphire/10 hover:shadow-[0_0_22px_-6px_rgba(116,199,236,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-sapphire motion-reduce:transform-none"
+                className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-sapphire/50 bg-gradient-to-br from-mocha-sapphire/20 to-mocha-sapphire/5 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-text shadow-[0_0_18px_-9px_rgba(116,199,236,0.8)] transition-[transform,border-color,background-color,color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-mocha-sapphire hover:from-mocha-sapphire/30 hover:to-mocha-sapphire/10 hover:shadow-[0_0_22px_-6px_rgba(116,199,236,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-sapphire motion-reduce:transform-none"
               >
                 <Icon name="external" className="h-4 w-4 text-mocha-sapphire" />
                 Live demo
@@ -152,7 +148,7 @@ export default async function ProjectDetail({ params }: Props) {
               href={`${repo.html_url}/releases`}
               target="_blank"
               rel="noreferrer noopener"
-              className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-lavender/30 bg-gradient-to-br from-mocha-lavender/10 to-mocha-base/70 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-subtext transition-all duration-200 hover:-translate-y-0.5 hover:border-mocha-lavender hover:text-mocha-lavender hover:shadow-[0_0_18px_-8px_rgba(180,190,254,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-lavender motion-reduce:transform-none"
+              className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-lavender/30 bg-gradient-to-br from-mocha-lavender/10 to-mocha-base/70 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-subtext transition-[transform,border-color,background-color,color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-mocha-lavender hover:text-mocha-lavender hover:shadow-[0_0_18px_-8px_rgba(180,190,254,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-lavender motion-reduce:transform-none"
             >
               <Icon name="box" className="h-4 w-4" />
               Releases
@@ -162,7 +158,7 @@ export default async function ProjectDetail({ params }: Props) {
               href={`${repo.html_url}/issues`}
               target="_blank"
               rel="noreferrer noopener"
-              className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-teal/30 bg-gradient-to-br from-mocha-teal/10 to-mocha-base/70 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-subtext transition-all duration-200 hover:-translate-y-0.5 hover:border-mocha-teal hover:text-mocha-teal hover:shadow-[0_0_18px_-8px_rgba(148,226,213,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-teal motion-reduce:transform-none"
+              className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-mocha-teal/30 bg-gradient-to-br from-mocha-teal/10 to-mocha-base/70 px-3 py-2.5 font-mono text-xs font-semibold tracking-wide text-mocha-subtext transition-[transform,border-color,background-color,color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-mocha-teal hover:text-mocha-teal hover:shadow-[0_0_18px_-8px_rgba(148,226,213,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mocha-teal motion-reduce:transform-none"
             >
               <Icon name="info" className="h-4 w-4" />
               Issues
@@ -287,19 +283,19 @@ export default async function ProjectDetail({ params }: Props) {
                   <div className="flex justify-between gap-3">
                     <span className="text-mocha-overlay1">created</span>
                     <span className="text-mocha-subtext">
-                      {fmtDate(repo.created_at)}
+                      {formatDate(repo.created_at)}
                     </span>
                   </div>
                   <div className="flex justify-between gap-3">
                     <span className="text-mocha-overlay1">updated</span>
                     <span className="text-mocha-subtext">
-                      {fmtDate(repo.updated_at)}
+                      {formatDate(repo.updated_at)}
                     </span>
                   </div>
                   <div className="flex justify-between gap-3">
                     <span className="text-mocha-overlay1">pushed</span>
                     <span className="text-mocha-subtext">
-                      {fmtDate(repo.pushed_at)}
+                      {formatDate(repo.pushed_at)}
                     </span>
                   </div>
                 </div>

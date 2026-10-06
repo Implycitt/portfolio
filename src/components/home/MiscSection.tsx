@@ -218,7 +218,7 @@ export default function MiscSection() {
                       </h3>
                       <span
                         aria-hidden
-                        className={`mt-2.5 block h-[2px] w-6 rounded-full transition-all duration-500 group-hover:w-14 ${accent.bar}`}
+                        className={`mt-2.5 block h-[2px] w-6 rounded-full transition-[width] duration-500 group-hover:w-14 ${accent.bar}`}
                       />
                     </div>
                     <span

@@ -29,13 +29,22 @@ export default function OrgCard({
           <h3 className="truncate font-mono text-base font-bold text-mocha-text transition-colors group-hover:text-mocha-mauve">
             {org.name}
           </h3>
-          <p className="flex items-center gap-1.5 font-mono text-[10px] tracking-wide text-mocha-overlay0">
+          <p className="flex flex-wrap items-center gap-1.5 font-mono text-[10px] tracking-wide text-mocha-overlay0">
             <span className="text-mocha-sapphire">
               <Icon name={isClub ? "users" : "building"} className="h-3 w-3" />
             </span>
             @{org.login}
             <span className="text-mocha-surface">·</span>
             {isClub ? "club" : "org"}
+            <span
+              className={`rounded border px-1.5 py-px text-[9px] tracking-[0.14em] uppercase ${
+                org.member
+                  ? "border-mocha-sapphire/35 bg-mocha-sapphire/10 text-mocha-sapphire"
+                  : "border-mocha-teal/30 bg-mocha-teal/10 text-mocha-teal"
+              }`}
+            >
+              {org.member ? "member" : "contributor"}
+            </span>
           </p>
         </div>
       </div>

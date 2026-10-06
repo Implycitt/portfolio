@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { fetchGitHubRepos, fetchGitHubContributions } from "@/lib/github-repos";
+import {
+  fetchGitHubRepos,
+  fetchGitHubContributions,
+  sortContributionsByStars,
+} from "@/lib/github-repos";
 import SectionHeading from "@/components/ui/SectionHeading";
 import PageBackdrop from "@/components/ui/PageBackdrop";
 import ProjectCard from "@/components/ui/ProjectCard";
@@ -133,9 +137,7 @@ export default async function Projects() {
     fetchGitHubContributions(GITHUB_USER),
   ]);
   const { contributions: contributed, orgs } = data;
-  const sortedContributed = [...(contributed ?? [])].sort(
-    (a, b) => b.commits - a.commits,
-  );
+  const sortedContributed = sortContributionsByStars(contributed ?? []);
 
   const orgStats: Record<string, { commits: number; repos: number }> = {};
   for (const c of sortedContributed) {
@@ -227,6 +229,7 @@ export default async function Projects() {
                   repo={repo}
                   owner={GITHUB_USER}
                   extraTags={TAG_MAP[repo.name] ?? []}
+                  commits={repo.commitCount}
                 />
               </Reveal>
             ))}
@@ -286,6 +289,7 @@ export default async function Projects() {
                   owner={c.repo.full_name.split("/")[0]}
                   role={c.role}
                   commits={c.commits}
+                  activity={c.activity}
                 />
               </Reveal>
             ))}

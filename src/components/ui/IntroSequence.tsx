@@ -12,6 +12,10 @@ export default function IntroSequence() {
   const [isFading, setIsFading] = useState(false);
 
   useLayoutEffect(() => {
+    // The splash is a full-screen, non-dismissible overlay for over three
+    // seconds, so anyone asking for reduced motion should skip it entirely.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     const hasPlayed = sessionStorage.getItem("introPlayed");
 
     if (hasPlayed) return;
