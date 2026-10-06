@@ -1,12 +1,9 @@
 @import "tailwindcss";
-
 @theme {
   --color-background: #11111b;
   --color-foreground: #cdd6f4;
-
   --color-cyan: #74c7ec;
   --color-mauve: #cba6f7;
-
   --color-mocha-crust: #11111b;
   --color-mocha-mantle: #181825;
   --color-mocha-base: #1e1e2e;
@@ -29,7 +26,6 @@
   --color-mocha-yellow: #f9e2af;
   --color-mocha-flamingo: #f2cdcd;
   --color-mocha-rosewater: #f5e0dc;
-
   --font-mono:
     var(--font-fira-code-nerd), ui-monospace, SFMono-Regular, Menlo, Consolas,
     "Liberation Mono", "Courier New", monospace;
@@ -39,16 +35,11 @@ html {
   background: var(--color-background);
   color-scheme: dark;
   scroll-padding-top: 4rem;
-  /* A themed thin scrollbar rather than none — hiding it entirely left no cue
-     for how far down the page you were or how much was left. `stable` reserves
-     the gutter so pages of different lengths don't shift sideways. */
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--color-mocha-mauve) 60%, transparent)
     transparent;
   scrollbar-gutter: stable;
   overscroll-behavior-x: none;
-  /* Removes the ~300ms double-tap-zoom delay on touch, and tints the tap
-     highlight to the mauve accent instead of the platform default. */
   touch-action: manipulation;
   -webkit-tap-highlight-color: color-mix(
     in srgb,
@@ -152,8 +143,6 @@ body::-webkit-scrollbar-track {
 html::-webkit-scrollbar-thumb,
 body::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  /* A transparent border keeps a comfortable drag target while the painted
-     thumb stays thin. */
   border: 3px solid transparent;
   background-color: color-mix(
     in srgb,
@@ -165,7 +154,6 @@ body::-webkit-scrollbar-thumb {
 
 html::-webkit-scrollbar-thumb:hover,
 body::-webkit-scrollbar-thumb:hover {
-  /* background-color only: the background shorthand would reset background-clip. */
   background-color: var(--color-mocha-lavender);
 }
 

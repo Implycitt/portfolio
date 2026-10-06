@@ -1,19 +1,15 @@
 #!/usr/bin/env bun
-/**
- * Contribution discovery checks.
- *
- * `src/lib/github-repos.ts` reads GITHUB_TOKEN at module load and talks to the
- * GitHub API through global fetch, so the module is imported dynamically after
- * the token is set and every request is served from an in-memory fixture.
- *
- * Run with `bun run test:unit`.
- */
+
 import assert from "node:assert/strict";
 
 process.env.GITHUB_TOKEN = "test-token";
 
-const { fetchGitHubContributions, fetchGitHubRepos, sortContributionsByStars } =
-  await import("../src/lib/github-repos.ts");
+const { fetchGitHubContributions } =
+  await import("../src/lib/github-contributions.ts");
+const { fetchGitHubRepos } = await import("../src/lib/github-repos.ts");
+const { orderReposByCommits, sortContributionsByStars } =
+  await import("../src/lib/github-ordering.ts");
+const { buildProjectsView } = await import("../src/lib/projects-view.ts");
 
 const monthsAgo = (months, day = 15) => {
   const now = new Date();
@@ -62,7 +58,6 @@ function repoFixture(id, fullName, extra = {}) {
   };
 }
 
-/** Mirrors GitHub's Link header: `rel="last"` is present only when more pages exist. */
 function linkHeader(perPage, total) {
   if (total <= perPage) return null;
   const last = Math.ceil(total / perPage);
@@ -151,7 +146,7 @@ function makeApi(fixture = {}) {
       const full = `${contributorsMatch[1]}/${contributorsMatch[2]}`;
       const entry = contributors[full];
       if (!entry) return notFound();
-      // The single-item probe only exists to expose the true total in `link`.
+
       const body = perPage === 1 ? entry.entries.slice(0, 1) : entry.entries;
       const link = linkHeader(perPage, entry.total);
       return link ? json(body, { link }) : json(body);
@@ -237,7 +232,7 @@ check(
       113,
       "expected the Link header total, not the 100-item page length",
     );
-    // ceil(113 / 2) = 57, so 52 commits is a contributor; the capped 100 said lead.
+
     assert.equal(found.role, "contributor");
   },
 );
@@ -249,7 +244,6 @@ check(
       graphql: [["big/project", 3]],
       repos: { "big/project": repoFixture(3, "big/project") },
       contributors: {
-        // 113 contributors, but page one belongs to other people.
         "big/project": {
           entries: [{ login: "someone", contributions: 900 }],
           total: 113,
@@ -280,11 +274,11 @@ check("collapses a repo reached through its former owner name", async () => {
   };
   handler = makeApi({
     graphql: [["GDSCLSU/gdsclsu", 55]],
-    // Search still indexes the org under the name it used before the rename.
+
     search: () => ["Google-Developers-Student-Club-LSU/gdsclsu"],
     repos: {
       "GDSCLSU/gdsclsu": canonical,
-      // /repos/<old-owner>/<repo> redirects to the same repo.
+
       "Google-Developers-Student-Club-LSU/gdsclsu": canonical,
     },
     contributors: {
@@ -343,7 +337,6 @@ check(
     handler = makeApi({
       orgs: ["GDSCLSU"],
       profiles: {
-        // Renamed orgs: the old login still resolves to the new account.
         SASELSU: { login: "GDSCLSU", name: "GDSC", type: "Organization" },
         GDSCLSU: { login: "GDSCLSU", name: "GDSC", type: "Organization" },
         spicetify: {
@@ -387,7 +380,7 @@ check("orders owned repos by commit count and drops forks", async () => {
     repoCommitCounts: [
       ["quiet", 3],
       ["busy", 46],
-      // A fork can out-commit everything and must still be filtered out.
+
       ["forked", 900],
     ],
     userRepos: {
@@ -401,7 +394,9 @@ check("orders owned repos by commit count and drops forks", async () => {
     },
   });
 
-  const repos = await fetchGitHubRepos("Implycitt", ["Blog"]);
+  const repos = orderReposByCommits(
+    (await fetchGitHubRepos("Implycitt", ["Blog"])) ?? [],
+  );
 
   assert.deepEqual(
     (repos ?? []).map((repo) => repo.name),
@@ -454,6 +449,64 @@ check("orders contributions by stars, then commits", async () => {
     ["big/famous", "mid/popular", "tiny/unstarred"],
     "stars lead the ordering, commit count settles the starless tail",
   );
+});
+
+check("orders the projects page end to end", async () => {
+  handler = makeApi({
+    graphql: [
+      ["tiny/unstarred", 80],
+      ["mid/popular", 9],
+      ["big/famous", 2],
+    ],
+    repoCommitCounts: [
+      ["quiet", 3],
+      ["busy", 46],
+    ],
+    userRepos: {
+      Implycitt: [
+        repoFixture(1, "Implycitt/quiet"),
+        repoFixture(2, "Implycitt/busy"),
+      ],
+    },
+    repos: {
+      "tiny/unstarred": repoFixture(11, "tiny/unstarred", {
+        stargazers_count: 0,
+      }),
+      "mid/popular": repoFixture(12, "mid/popular", { stargazers_count: 40 }),
+      "big/famous": repoFixture(13, "big/famous", { stargazers_count: 6086 }),
+    },
+    contributors: {
+      "tiny/unstarred": {
+        entries: [{ login: "Implycitt", contributions: 80 }],
+        total: 4,
+      },
+      "mid/popular": {
+        entries: [{ login: "Implycitt", contributions: 9 }],
+        total: 4,
+      },
+      "big/famous": {
+        entries: [{ login: "Implycitt", contributions: 2 }],
+        total: 4,
+      },
+    },
+  });
+
+  const view = await buildProjectsView("Implycitt");
+
+  assert.deepEqual(
+    view.repos.map((repo) => repo.name),
+    ["busy", "quiet"],
+    "my projects run heaviest-first",
+  );
+  assert.deepEqual(
+    view.contributions.map((c) => c.repo.full_name),
+    ["big/famous", "mid/popular", "tiny/unstarred"],
+    "contributions lead on stars, commits settle the tail",
+  );
+  assert.equal(view.counts.repos, 2);
+  assert.equal(view.counts.contributions, 3);
+  assert.equal(view.orgStats.tiny.commits, 80);
+  assert.equal(view.orgStats.tiny.repos, 1);
 });
 
 let failed = 0;

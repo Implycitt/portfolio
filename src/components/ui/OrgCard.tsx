@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Spotlight from "@/components/ui/Spotlight";
 import Icon from "@/components/ui/icons";
-import type { GitHubOrgData } from "@/lib/github-repos";
+import type { GitHubOrgData } from "@/lib/github-orgs";
 
 export default function OrgCard({
   org,

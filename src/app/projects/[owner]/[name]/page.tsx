@@ -4,10 +4,11 @@ import Panel from "@/components/ui/Panel";
 import PageBackdrop from "@/components/ui/PageBackdrop";
 import Link from "next/link";
 import Icon from "@/components/ui/icons";
+import { fetchGitHubRepoDetail } from "@/lib/github-repos";
 import {
-  fetchGitHubRepoDetail,
   fetchGitHubContribution,
-} from "@/lib/github-repos";
+  ROLE_LABELS,
+} from "@/lib/github-contributions";
 import { renderMarkdown } from "@/lib/markdown";
 import { tagBar, tagColor } from "@/lib/tag-color";
 import { formatDate } from "@/lib/dates";
@@ -20,12 +21,6 @@ interface Props {
 export const revalidate = 3600;
 
 const GITHUB_USER = process.env.GITHUB_USERNAME ?? "Implycitt";
-
-const ROLE_LABELS: Record<string, string> = {
-  "sole-author": "sole author",
-  lead: "lead contributor",
-  contributor: "contributor",
-};
 
 function fmtBytes(bytes: number): string {
   if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;

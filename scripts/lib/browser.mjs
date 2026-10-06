@@ -132,7 +132,6 @@ export async function startChrome(bin, label = "portfolio-check") {
       "--no-sandbox",
       "--disable-gpu",
       "--disable-dev-shm-usage",
-      "--hide-scrollbars",
       "--no-first-run",
       "--no-default-browser-check",
       `--remote-debugging-port=${port}`,

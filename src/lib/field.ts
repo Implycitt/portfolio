@@ -51,7 +51,6 @@ function measure() {
     scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
   const updates: { element: HTMLElement; values: [string, string][] }[] = [];
 
-  // Read every rect before writing styles to avoid forcing layout per element.
   for (const [element, layers] of parallaxLayers) {
     const rect = element.getBoundingClientRect();
     const offset = centre - (rect.top + rect.height / 2);

@@ -42,7 +42,7 @@ export default function ProjectCard({
     activity && activity.length > 0 ? Math.max(...activity) : 0;
   const activityTotal = activity?.reduce((sum, count) => sum + count, 0) ?? 0;
   const commitCount = commits ?? activityTotal;
-  const commitLabel = `${commitCount} commit${commitCount === 1 ? "" : "s"}`;
+  const commitNoun = commitCount === 1 ? "commit" : "commits";
   const dateRange =
     repo.created_at.slice(0, 10) === repo.pushed_at.slice(0, 10)
       ? formatDate(repo.created_at)
@@ -134,7 +134,7 @@ export default function ProjectCard({
         {commitCount > 0 && (
           <div className="mt-3 flex items-center gap-3">
             <span className="sr-only">
-              {commitLabel}
+              {commitCount} {commitNoun}
               {activityTotal > 0
                 ? `, ${activityTotal} in the last twelve months`
                 : ""}
@@ -168,7 +168,7 @@ export default function ProjectCard({
               <span className="font-bold tabular-nums text-mocha-subtext">
                 {commitCount}
               </span>{" "}
-              commits
+              {commitNoun}
             </span>
           </div>
         )}

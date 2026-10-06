@@ -12,7 +12,8 @@
     "test:smoke": "node scripts/smoke-test.mjs",
     "test:blog": "node scripts/blog-check.mjs",
     "test:unit": "bun scripts/contributions-check.mjs",
-    "test:a11y": "node scripts/a11y-check.mjs"
+    "test:a11y": "node scripts/a11y-check.mjs",
+    "verify": "node scripts/check-all.mjs"
   },
   "dependencies": {
     "highlight.js": "^11.11.1",

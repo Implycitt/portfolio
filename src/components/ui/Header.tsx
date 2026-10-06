@@ -23,6 +23,7 @@ export default function Header() {
   const isHome = pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
   const aboutRef = useRef<HTMLElement | null>(null);
+  const railRef = useRef<HTMLDivElement | null>(null);
   const [showStatus, setShowStatus] = useState(false);
   const [clock, setClock] = useState<string | null>(null);
   const statusRef = useRef<HTMLDivElement | null>(null);
@@ -61,6 +62,34 @@ export default function Header() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      const progress =
+        max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      rail.style.transform = `scaleX(${progress.toFixed(4)})`;
+    };
+
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {
@@ -169,8 +198,6 @@ export default function Header() {
             </span>
           </button>
 
-          {/* Kept mounted but hidden so the button's aria-controls always
-              resolves to an element in the document. */}
           <div
             hidden={!showStatus}
             className="pointer-events-auto absolute right-0 top-full w-64 pt-3"
@@ -228,6 +255,16 @@ export default function Header() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px overflow-hidden"
+        >
+          <div
+            ref={railRef}
+            className="h-full origin-left scale-x-0 bg-gradient-to-r from-mocha-lavender via-mocha-mauve to-mocha-pink"
+          />
         </div>
       </div>
     </header>

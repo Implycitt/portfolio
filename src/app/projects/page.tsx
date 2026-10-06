@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
-import {
-  fetchGitHubRepos,
-  fetchGitHubContributions,
-  sortContributionsByStars,
-} from "@/lib/github-repos";
+import { buildProjectsView, type ProjectsView } from "@/lib/projects-view";
 import SectionHeading from "@/components/ui/SectionHeading";
 import PageBackdrop from "@/components/ui/PageBackdrop";
 import ProjectCard from "@/components/ui/ProjectCard";
@@ -110,7 +106,12 @@ function Unavailable({ what }: { what: string }) {
   );
 }
 
-const SUMMARY = [
+const SUMMARY: {
+  key: keyof ProjectsView["counts"];
+  icon: IconName;
+  tint: string;
+  text: string;
+}[] = [
   {
     key: "repos",
     icon: "box" as IconName,
@@ -132,26 +133,13 @@ const SUMMARY = [
 ];
 
 export default async function Projects() {
-  const [repos, data] = await Promise.all([
-    fetchGitHubRepos(GITHUB_USER, EXCLUDED),
-    fetchGitHubContributions(GITHUB_USER),
-  ]);
-  const { contributions: contributed, orgs } = data;
-  const sortedContributed = sortContributionsByStars(contributed ?? []);
-
-  const orgStats: Record<string, { commits: number; repos: number }> = {};
-  for (const c of sortedContributed) {
-    const owner = c.repo.full_name.split("/")[0];
-    const s = (orgStats[owner] ??= { commits: 0, repos: 0 });
-    s.commits += c.commits;
-    s.repos += 1;
-  }
-
-  const counts: Record<string, number> = {
-    repos: repos?.length ?? 0,
-    contributions: sortedContributed.length,
-    orgs: orgs?.length ?? 0,
-  };
+  const {
+    repos,
+    contributions: contributed,
+    orgs,
+    counts,
+    orgStats,
+  } = await buildProjectsView(GITHUB_USER, EXCLUDED);
 
   return (
     <main
@@ -229,7 +217,6 @@ export default async function Projects() {
                   repo={repo}
                   owner={GITHUB_USER}
                   extraTags={TAG_MAP[repo.name] ?? []}
-                  commits={repo.commitCount}
                 />
               </Reveal>
             ))}
@@ -276,7 +263,7 @@ export default async function Projects() {
             noun="contributions"
             section="contributions"
           >
-            {sortedContributed.map((c, i) => (
+            {contributed.map((c, i) => (
               <Reveal
                 key={c.repo.id}
                 variant="pop"

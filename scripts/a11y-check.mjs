@@ -1,14 +1,5 @@
 #!/usr/bin/env node
-/**
- * UI and accessibility regression checks.
- *
- * Drives the repo's own CDP harness (scripts/lib/browser.mjs) against a dev
- * server, including real `prefers-reduced-motion` emulation, so the theming,
- * motion and labelling guarantees are verified in a browser rather than by
- * reading the CSS.
- *
- * Run with `bun run test:a11y`.
- */
+
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -39,8 +30,6 @@ const SNAPSHOT = `(() => {
     if (el.querySelector("img[alt]:not([alt=''])")) return false;
     return true;
   });
-  // transition-property defaults to "all", so it only matters when a
-  // non-zero duration actually animates everything.
   const chromeless = [...document.querySelectorAll("*")].filter((el) => {
     const style = getComputedStyle(el);
     return (
@@ -53,6 +42,15 @@ const SNAPSHOT = `(() => {
     themeColor: themeMeta ? themeMeta.getAttribute("content") : null,
     bodyBg: getComputedStyle(document.body).backgroundColor,
     touchAction: getComputedStyle(html).touchAction,
+    scrollbar: {
+      width: getComputedStyle(html).scrollbarWidth,
+      color: getComputedStyle(html).scrollbarColor,
+      gutter: getComputedStyle(html).scrollbarGutter,
+      space:
+        html.scrollHeight > window.innerHeight
+          ? window.innerWidth - html.clientWidth
+          : null,
+    },
     transitionAll: chromeless.length,
     transitionAllSample: chromeless.slice(0, 3).map((el) => el.className.toString().slice(0, 60)),
     unlabeledControls: unlabeled.length,
@@ -64,7 +62,6 @@ const SNAPSHOT = `(() => {
   };
 })()`;
 
-/** Measured after a real Tab key press so `:focus-visible` actually matches. */
 const SKIP_LINK = `(() => {
   const link = document.querySelector(".skip-link");
   if (!link) return { found: false };
@@ -163,6 +160,22 @@ async function main() {
       if (snap.touchAction !== "manipulation") {
         failures.push(`${route}: html touch-action is "${snap.touchAction}"`);
       }
+
+      if (snap.scrollbar.width !== "thin" || !snap.scrollbar.color) {
+        failures.push(
+          `${route}: scrollbar is unstyled (width "${snap.scrollbar.width}", color "${snap.scrollbar.color}") — scroll position would be invisible`,
+        );
+      }
+      if (snap.scrollbar.gutter !== "stable") {
+        failures.push(
+          `${route}: scrollbar-gutter is "${snap.scrollbar.gutter}" — layout jogs sideways between pages of different lengths`,
+        );
+      }
+      if (snap.scrollbar.space !== null && snap.scrollbar.space < 8) {
+        failures.push(
+          `${route}: page scrolls but reserves only ${snap.scrollbar.space}px for the scrollbar`,
+        );
+      }
       if (snap.transitionAll > 0) {
         failures.push(
           `${route}: ${snap.transitionAll} element(s) transition all — ${snap.transitionAllSample.join(" | ")}`,
@@ -174,8 +187,7 @@ async function main() {
         );
       }
       await pressTab(conn);
-      // The skip link animates its transform over 220ms, so let it settle
-      // before measuring where it actually ends up.
+
       await sleep(400);
       const skip = await evaluate(conn, SKIP_LINK);
       if (!skip.found) {
@@ -209,7 +221,6 @@ async function main() {
       }
       conn.close();
 
-      // Same routes again, now with reduced motion actually emulated.
       const reducedConn = await open(target, route, true);
       const reduced = await evaluate(reducedConn, SNAPSHOT);
       if (reduced.hasIntro) {
