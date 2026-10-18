@@ -27,6 +27,9 @@ const VIEWPORT_HEIGHT = 820;
 const SEAM_LIMIT = 3;
 const SEAM_WINDOW = 120;
 const WIDE_COVERAGE = 0.6;
+const BAND_FLOOR = 9;
+const BAND_PIXEL_FLOOR = 12;
+const BANDS = 8;
 const MIN_LUMINANCE = 4;
 const BOUNDARY_GAP = 200;
 const SELF_TEST = Boolean(process.env.SMOKE_SELF_TEST);
@@ -95,15 +98,16 @@ const AUDIT = `(async () => {
   };
 
   const style = document.createElement("style");
+  const backdropFixed = Boolean(
+    document.querySelector("[data-backdrop-scope][data-backdrop-fixed]"),
+  );
   style.textContent =
     "*{visibility:hidden !important}" +
     "html,body{visibility:visible !important}" +
-    "[data-backdrop-scope],[data-backdrop-scope] *{visibility:visible !important}" +
-    "section > div:not(.section-field),section > div:not(.section-field) *," +
-    "footer > div:not(.section-field),footer > div:not(.section-field) *{visibility:hidden !important}" +
-    (document.querySelector("[data-backdrop-scope][data-backdrop-fixed]")
-      ? ""
-      : ".field-art,.field-art *{visibility:hidden !important}") +
+    ".section-field,.field-art{visibility:visible !important}" +
+    (backdropFixed
+      ? "[data-backdrop-scope][data-backdrop-fixed],[data-backdrop-scope][data-backdrop-fixed] *{visibility:visible !important}"
+      : ".section-field *,.field-art *{visibility:hidden !important}") +
     ${SELF_TEST ? JSON.stringify(SELF_TEST_CSS) : '""'};
   document.head.appendChild(style);
   await sleep(250);
@@ -152,17 +156,37 @@ const ROW_SAMPLER = `async (b64, row, spread) => {
   }
 
   const step = (i) => Math.abs(rows[i][1] - rows[i - 1][1]);
+
+  const bands = ${BANDS};
+  const bandSpan = bmp.width / bands;
   const coverage = (y) => {
     const above = ctx.getImageData(0, Math.max(0, y - 2), bmp.width, 1).data;
     const line = ctx.getImageData(0, y, bmp.width, 1).data;
-    let hits = 0;
-    const n = line.length / 4;
-    for (let i = 0; i < line.length; i += 4) {
-      const a = above[i] + above[i + 1] + above[i + 2];
-      const b = line[i] + line[i + 1] + line[i + 2];
-      if (Math.abs(b - a) >= 12) hits += 1;
+    let hit = 0;
+    for (let band = 0; band < bands; band++) {
+      const from = Math.round(band * bandSpan);
+      const to = Math.round((band + 1) * bandSpan);
+      const count = to - from;
+      let sum = 0;
+      let changed = 0;
+      for (let x = from; x < to; x++) {
+        const i = x * 4;
+        const delta =
+          line[i] +
+          line[i + 1] +
+          line[i + 2] -
+          (above[i] + above[i + 1] + above[i + 2]);
+        sum += delta;
+        if (Math.abs(delta) >= ${BAND_PIXEL_FLOOR}) changed += 1;
+      }
+      if (
+        Math.abs(sum / count) >= ${BAND_FLOOR} &&
+        changed / count >= ${WIDE_COVERAGE}
+      ) {
+        hit += 1;
+      }
     }
-    return hits / n;
+    return hit / bands;
   };
 
   const inWindow = [];

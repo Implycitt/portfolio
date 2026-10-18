@@ -86,6 +86,34 @@ function estimateReadTime(markdown: string): string {
   return `${minutes} min`;
 }
 
+export function excerptFromMarkdown(markdown: string): string {
+  const plain = markdown
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/\$\$[\s\S]*?\$\$/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/^>\s*\[![A-Z]+\][ \t]*$/gm, " ")
+    .replace(/^#{1,6}\s+/gm, " ")
+    .replace(/^>\s?/gm, " ")
+    .replace(/[*_`~]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!plain) return "";
+
+  const sentences = plain.match(/[^.!?]+[.!?]+/g) ?? [plain];
+  let excerpt = sentences[0].trim();
+  for (let i = 1; i < sentences.length && excerpt.length < 120; i += 1) {
+    excerpt += ` ${sentences[i].trim()}`;
+  }
+
+  if (excerpt.length <= 172) return excerpt;
+
+  const clipped = excerpt.slice(0, 169);
+  const boundary = clipped.lastIndexOf(" ");
+  return `${(boundary > 110 ? clipped.slice(0, boundary) : clipped).trimEnd()}…`;
+}
+
 function buildPost(slug: string, raw: string, fallbackDate?: string): Post {
   const { data, body } = parseFrontmatter(raw);
   return {

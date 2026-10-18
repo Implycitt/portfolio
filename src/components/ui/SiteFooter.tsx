@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import SectionField from "@/components/ui/SectionField";
 import { frame } from "@/lib/ascii";
 
@@ -26,19 +29,19 @@ const STACK = [
 ];
 
 const EXIT = frame(
-  [
-    `$ echo "exit 0"`,
-    "[process completed]",
-    "",
-    "(c) 2026 Quentin Bordelon",
-    "compiled in the terminal",
-  ],
+  [`$ echo "exit 0"`, "[process completed]", "compiled in Baton Rouge"],
   "session ended",
 );
 
 export default function SiteFooter() {
+  const isBlog = usePathname().startsWith("/blog");
+
   return (
-    <footer className="relative py-16 sm:py-20 print:hidden">
+    <footer
+      className={`relative py-16 sm:py-20 print:hidden ${
+        isBlog ? "os-chrome" : ""
+      }`}
+    >
       <SectionField backdrop="horizon" />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-10">

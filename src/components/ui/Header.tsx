@@ -21,6 +21,7 @@ const SOCIAL_LINKS = [
 export default function Header() {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const isBlog = pathname.startsWith("/blog");
   const [isScrolled, setIsScrolled] = useState(false);
   const aboutRef = useRef<HTMLElement | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
@@ -127,7 +128,11 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 pointer-events-none select-none font-mono text-[11px] sm:text-xs tracking-[0.22em] uppercase">
+    <header
+      className={`fixed top-0 inset-x-0 z-50 pointer-events-none select-none font-mono text-[11px] sm:text-xs tracking-[0.22em] uppercase ${
+        isBlog ? "os-chrome" : ""
+      }`}
+    >
       <div
         className={`relative flex items-center justify-between px-4 sm:px-8 py-4 transition-colors duration-300 bg-gradient-to-b from-mocha-crust/85 via-mocha-crust/35 to-transparent ${
           isScrolled ? "bg-mocha-crust/70 backdrop-blur-sm" : ""
@@ -204,7 +209,7 @@ export default function Header() {
           >
             <div
               id={statusId}
-              className="origin-top-right overflow-hidden rounded-xl border border-mocha-surface bg-mocha-base shadow-[0_16px_50px_rgba(0,0,0,0.7)]"
+              className="os-popover origin-top-right overflow-hidden rounded-xl border border-mocha-surface bg-mocha-base shadow-[0_16px_50px_rgba(0,0,0,0.7)]"
             >
               <div className="flex items-center gap-2 border-b-2 border-mocha-mauve bg-mocha-mantle px-4 py-2.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-mocha-green" />

@@ -3,11 +3,14 @@
 export default function PrintButton() {
   return (
     <button
+      type="button"
       onClick={() => window.print()}
       className="group inline-flex items-center gap-2 rounded-xl border border-mocha-surface bg-mocha-base px-5 py-2.5 font-mono text-xs tracking-widest uppercase text-mocha-subtext transition-colors duration-300 hover:border-mocha-mauve hover:text-mocha-text"
     >
       <svg
         viewBox="0 0 24 24"
+        aria-hidden="true"
+        focusable="false"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"

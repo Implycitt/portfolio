@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 interface LogoProps {
   className?: string;
   isAnimating: boolean;
@@ -9,21 +11,25 @@ export default function Logo({
   className = "w-24 h-24",
   isAnimating,
 }: LogoProps) {
+  const filterId = `qb-white-glow-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+
   return (
     <svg
       viewBox="0 0 100 100"
       className={className}
+      aria-hidden="true"
+      focusable="false"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <filter id="qb-white-glow" x="-30%" y="-30%" width="160%" height="160%">
+        <filter id={filterId} x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur stdDeviation="2.5" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
       </defs>
 
-      <g filter="url(#qb-white-glow)">
+      <g filter={`url(#${filterId})`}>
         <circle
           cx="50"
           cy="50"

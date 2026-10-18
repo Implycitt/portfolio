@@ -279,9 +279,9 @@ shows the right title and description.
   (≥0.9 alpha) so texture cannot reach the text. The blog check enforces that
   opacity and the contrast of every label.
 - **The footer is chrome, not page content.** `SiteFooter` renders once in the
-  root layout, after `PageTransition`, so every route ends with the same contact
-  block and the footer never replays a page transition. It owns its `horizon`
-  backdrop and its ASCII sign-off, so a page renders it by doing nothing.
+  root layout, after the page content, so every route ends with the same contact
+  block. It owns its `horizon` backdrop and its ASCII sign-off, so a page renders
+  it by doing nothing.
   `print:hidden` keeps it out of the resume's printed PDF.
 - **Snapping stops where the footer starts.** Landing sections opt in with
   `data-lenis-snap`, and the footer deliberately does not. Every scroll also

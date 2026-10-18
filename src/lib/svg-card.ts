@@ -84,6 +84,13 @@ export function svgCardResponse(content: CardContent): Response {
 export const GRID_GAP = 16;
 
 export function svgGrid(cards: CardContent[], columns = 2): string {
+  if (cards.length === 0) {
+    throw new Error("svgGrid requires at least one card");
+  }
+  if (!Number.isInteger(columns) || columns < 1) {
+    throw new Error("svgGrid columns must be a positive integer");
+  }
+
   const rows = Math.ceil(cards.length / columns);
   const W = columns * CARD_W + (columns - 1) * GRID_GAP;
   const H = rows * CARD_H + (rows - 1) * GRID_GAP;

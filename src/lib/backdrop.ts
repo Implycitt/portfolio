@@ -149,7 +149,13 @@ export interface BackdropSpec {
 }
 
 export type BackdropName =
-  "orbit" | "constellation" | "bloom" | "ripples" | "horizon" | "station";
+  | "orbit"
+  | "constellation"
+  | "bloom"
+  | "ripples"
+  | "horizon"
+  | "station"
+  | "laptop";
 
 export type Backdrop = BackdropName | BackdropSpec;
 
@@ -610,6 +616,28 @@ export const PRESETS: Record<BackdropName, BackdropSpec> = {
       { kind: "dressing", className: "station-vignette" },
       { kind: "dressing", className: "station-grain" },
       { kind: "dressing", className: "station-bezel" },
+    ],
+  },
+  laptop: {
+    mask: false,
+    fixed: true,
+    scope: true,
+    root: "z-0",
+    pointer: [0, 0],
+    drift: 0,
+    layers: [
+      { kind: "wash", className: "laptop-space" },
+      { kind: "dressing", className: "laptop-dither inset-0" },
+      {
+        kind: "group",
+        pointer: [0, 0],
+        drift: 0,
+        layers: [
+          { kind: "dressing", className: "os-cube laptop-cube laptop-cube-a" },
+          { kind: "dressing", className: "os-cube laptop-cube laptop-cube-c" },
+        ],
+      },
+      { kind: "dressing", className: "laptop-vignette inset-0" },
     ],
   },
 };

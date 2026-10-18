@@ -147,10 +147,13 @@ export default function Resume() {
               href="https://www.linkedin.com/in/quentinbordelon"
               target="_blank"
               rel="noreferrer noopener"
+              aria-label="LinkedIn profile (opens in a new tab)"
               className="group inline-flex items-center gap-2 rounded-xl border border-mocha-surface bg-mocha-base px-5 py-2.5 font-mono text-xs tracking-widest uppercase text-mocha-subtext transition-colors duration-300 hover:border-mocha-mauve hover:text-mocha-text"
             >
               <svg
                 viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
                 fill="currentColor"
                 className="h-4 w-4 text-mocha-overlay1 transition-colors group-hover:text-mocha-mauve"
               >

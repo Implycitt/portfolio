@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import Link from "next/link";
 import type { Heading } from "@/lib/markdown";
 import { scrollToTarget } from "@/lib/scroller";
 
@@ -37,15 +38,24 @@ const SWIPE_WINDOW = 700;
 
 export function PostRead({
   headings,
+  fileName,
+  filePath,
+  dateLabel,
+  sourceUrl,
   children,
 }: {
   headings: Heading[];
+  fileName: string;
+  filePath: string;
+  dateLabel: string;
+  sourceUrl: string | null;
   children: ReactNode;
 }) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const metrics = useRef<Metrics>({ start: 0, end: 1, tops: [] });
   const activeRef = useRef<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(false);
+  const [focus, setFocus] = useState(false);
 
   const goTo = useCallback((id: string) => {
     setOutlineOpen(false);
@@ -227,32 +237,140 @@ export function PostRead({
     };
   }, [headings, goTo]);
 
+  useEffect(() => {
+    setOutlineOpen(false);
+    if (focus) document.body.dataset.readFocus = "true";
+    else delete document.body.dataset.readFocus;
+    return () => {
+      delete document.body.dataset.readFocus;
+    };
+  }, [focus]);
+
   return (
     <ReadContext.Provider value={state}>
       <div
         ref={rootRef}
         data-read="reading"
-        className="mt-8 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start lg:gap-10"
+        data-focus={focus ? "true" : "false"}
+        className="os-app os-read"
       >
-        <Outline
-          headings={headings}
-          open={outlineOpen}
-          onOpenChange={setOutlineOpen}
-          onSelect={goTo}
-        />
-        <div className="mt-5 min-w-0 lg:order-1 lg:mt-0">{children}</div>
+        <div className="hud-bar os-titlebar">
+          <span className="os-title-icon" aria-hidden />
+          <span className="os-filename">{fileName} — DREAMREADER</span>
+          <span className="os-title-note hidden sm:inline">{dateLabel}</span>
+          <span className="os-title-progress">
+            <span className="os-progress-meter" aria-hidden>
+              <span />
+            </span>
+            <span className="os-progress-text">
+              <ReadPercent />
+            </span>
+          </span>
+          <span className="os-controls">
+            <button
+              type="button"
+              onClick={() => setFocus((value) => !value)}
+              aria-pressed={focus}
+              aria-label="Focus mode"
+              title="Hide the outline and widen the page"
+              className="os-control os-control--max"
+            >
+              <span className="sr-only">Focus mode</span>
+            </button>
+            <Link
+              href="/blog"
+              aria-label="Close and return to all posts"
+              title="Close and return to all posts"
+              className="os-control os-control--close"
+            >
+              <span aria-hidden>×</span>
+            </Link>
+          </span>
+        </div>
+
+        <nav className="os-menubar" aria-label="Post">
+          <Link href="/blog" className="os-menu">
+            ← files
+          </Link>
+          <a href="#top" className="os-menu">
+            top
+          </a>
+          {sourceUrl ? (
+            <a
+              href={sourceUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="os-menu"
+            >
+              source ↗
+            </a>
+          ) : null}
+          <span className="os-menubar-spacer" />
+          <span className="os-menubar-note">
+            {focus ? "focus mode" : "read only"}
+          </span>
+        </nav>
+
+        <div className="os-addressbar">
+          <span className="os-address-icon" aria-hidden />
+          <span className="os-address-path">{filePath}</span>
+          <span className="os-address-badge">{dateLabel}</span>
+        </div>
+
+        <div className="os-read-body">
+          <Outline
+            headings={headings}
+            fileName={fileName}
+            open={outlineOpen}
+            onOpenChange={setOutlineOpen}
+            onSelect={goTo}
+          />
+          <div className="os-read-column">
+            <div className="hud-panel os-paper">{children}</div>
+          </div>
+        </div>
+
+        <div className="os-statusbar">
+          <span className="os-status-cell">
+            <span className="os-status-lamp" aria-hidden />
+            <ReadStatusLine />
+          </span>
+          <span className="os-status-cell os-status-cell--wide">
+            {headings.length > 0
+              ? `${headings.length} section(s)`
+              : "single pass"}
+          </span>
+          <span className="os-status-spacer" />
+          <Link href="/blog" className="os-status-link">
+            all posts <span aria-hidden>↗</span>
+          </Link>
+        </div>
       </div>
     </ReadContext.Provider>
   );
 }
 
+function ReadPercent() {
+  const { progress } = useContext(ReadContext);
+  return <>{Math.round(progress * 100)}%</>;
+}
+
+function ReadStatusLine() {
+  const { progress, complete } = useContext(ReadContext);
+  return (
+    <>{complete ? "end of file" : `reading ${Math.round(progress * 100)}%`}</>
+  );
+}
+
 function Outline({
   headings,
+  fileName,
   open,
   onOpenChange,
   onSelect,
 }: {
   headings: Heading[];
+  fileName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (id: string) => void;
@@ -262,127 +380,87 @@ function Outline({
   const percent = `${Math.round(progress * 100)}%`;
 
   return (
-    <aside className="sticky top-20 z-20 order-2 mt-8 lg:top-24 lg:z-auto lg:mt-0">
-      <div className="hud-panel hud-frame">
-        <div className="bg-mocha-crust lg:bg-transparent">
-          <div className="lg:hidden">
-            <button
-              type="button"
-              onClick={() => onOpenChange(!open)}
-              aria-expanded={open}
-              aria-controls="post-outline"
-              className="hud-bar w-full cursor-pointer text-left text-mocha-overlay1 transition-colors hover:text-mocha-text"
-            >
-              <span className="hud-lamp text-mocha-teal" />
-              <span className="text-mocha-teal normal-case tracking-normal">
-                outline
-              </span>
-              {current ? (
-                <>
-                  <span className="text-mocha-overlay0">/</span>
-                  <span className="min-w-0 flex-1 truncate normal-case tracking-normal text-mocha-subtext">
-                    {current.text}
-                  </span>
-                </>
-              ) : null}
-              <span className="ml-auto tabular-nums">{percent}</span>
-              <span aria-hidden className="text-mocha-teal">
-                {open ? "▴" : "▾"}
-              </span>
-            </button>
-          </div>
+    <aside className="os-outline" aria-label="Contents">
+      <div className="os-outline-head">
+        <span className="os-outline-title">contents</span>
+        <span className="os-outline-percent">{percent}</span>
+      </div>
 
-          <div className="hidden lg:block">
-            <div className="hud-bar text-mocha-overlay1">
-              <span className="hud-lamp text-mocha-teal" />
-              <span className="text-mocha-teal normal-case tracking-normal">
-                outline
-              </span>
-              <span className="ml-auto">{percent}</span>
-            </div>
-          </div>
+      <button
+        type="button"
+        onClick={() => onOpenChange(!open)}
+        aria-expanded={open}
+        aria-controls="post-outline"
+        className="os-outline-toggle"
+      >
+        <span className="os-outline-label">contents</span>
+        {current ? (
+          <>
+            <span className="os-outline-slash" aria-hidden>
+              /
+            </span>
+            <span className="os-outline-current">{current.text}</span>
+          </>
+        ) : (
+          <span className="os-outline-current">start of file</span>
+        )}
+        <span className="os-outline-percent">{percent}</span>
+        <span
+          className={`os-outline-caret${open ? " is-open" : ""}`}
+          aria-hidden
+        >
+          ▼
+        </span>
+      </button>
 
-          <div id="post-outline" className={open ? "block" : "hidden lg:block"}>
-            <div className="p-4">
-              <ReadMeter />
-              <span className="mt-3 block font-mono text-[10px] tracking-[0.24em] text-mocha-overlay1 uppercase">
-                {headings.length > 0
-                  ? `${headings.length} sections`
-                  : "single pass"}
-              </span>
-            </div>
+      <div
+        id="post-outline"
+        className={`os-outline-panel${open ? " is-open" : ""}`}
+      >
+        <div className="os-outline-meter">
+          <span className="os-meter" aria-hidden>
+            <span />
+          </span>
+          <span className="os-outline-count">
+            {headings.length > 0
+              ? `${String(headings.length).padStart(2, "0")} sections`
+              : "single pass"}
+          </span>
+        </div>
 
-            <nav className="max-h-[55vh] overflow-y-auto overscroll-contain border-t border-mocha-surface lg:max-h-none lg:overflow-visible">
-              {headings.map((heading) => {
-                const isCurrent = heading.id === active;
-                return (
-                  <a
-                    key={heading.id}
-                    href={`#${heading.id}`}
-                    aria-current={isCurrent ? "location" : undefined}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      onSelect(heading.id);
-                    }}
-                    className={`hud-row flex items-center gap-3 pr-4 font-mono text-[11px] transition-colors ${
-                      heading.level > 2 ? "pl-8" : "pl-4"
-                    } ${isCurrent ? "text-mocha-teal" : "text-mocha-subtext hover:text-mocha-text"}`}
-                  >
-                    <span
-                      className={`hud-lamp ${isCurrent ? "text-mocha-teal" : "hud-lamp-idle text-mocha-overlay1"}`}
-                    />
-                    <span className="min-w-0 flex-1 truncate py-3">
-                      {heading.text}
-                    </span>
-                    {isCurrent ? (
-                      <span className="text-mocha-teal">▸</span>
-                    ) : null}
-                  </a>
-                );
-              })}
-            </nav>
-          </div>
+        <nav className="os-outline-nav" aria-label="Sections">
+          {headings.map((heading, index) => {
+            const isCurrent = heading.id === active;
+            return (
+              <a
+                key={heading.id}
+                href={`#${heading.id}`}
+                aria-current={isCurrent ? "location" : undefined}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onSelect(heading.id);
+                }}
+                className={`os-outline-row${isCurrent ? " is-current" : ""}${
+                  heading.level > 2 ? " os-outline-row--sub" : ""
+                }`}
+              >
+                <span className="os-outline-number" aria-hidden>
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="os-outline-text">{heading.text}</span>
+                <span className="os-outline-arrow" aria-hidden>
+                  ▸
+                </span>
+              </a>
+            );
+          })}
+        </nav>
+
+        <div className="os-outline-file">
+          <span className="os-outline-file-label">file</span>
+          <span className="os-outline-file-name">{fileName}</span>
         </div>
       </div>
     </aside>
-  );
-}
-
-export function ReadMeter() {
-  return (
-    <span className="hud-meter read-meter block w-full text-mocha-teal">
-      <span />
-    </span>
-  );
-}
-
-export function ReadStatus() {
-  const { progress, complete } = useContext(ReadContext);
-  return (
-    <span className="ml-auto flex items-center gap-2">
-      <span
-        className={`hud-lamp ${complete ? "text-mocha-teal" : "hud-lamp-idle text-mocha-overlay1"}`}
-      />
-      <span>
-        {complete ? "decoded" : `${Math.round(progress * 100)}% read`}
-      </span>
-    </span>
-  );
-}
-
-export function ReadOutro() {
-  const { progress, complete } = useContext(ReadContext);
-  return (
-    <>
-      <span
-        className={`hud-lamp ${complete ? "text-mocha-teal" : "hud-lamp-idle text-mocha-overlay1"}`}
-      />
-      <span>
-        {complete ? "transmission complete" : "transmission in progress"}
-      </span>
-      <span className="text-mocha-overlay1 normal-case tracking-normal">
-        {Math.round(progress * 100)}%
-      </span>
-    </>
   );
 }

@@ -41,7 +41,7 @@ export default function ProjectCard({
   const peakActivity =
     activity && activity.length > 0 ? Math.max(...activity) : 0;
   const activityTotal = activity?.reduce((sum, count) => sum + count, 0) ?? 0;
-  const commitCount = commits ?? activityTotal;
+  const commitCount = commits ?? repo.commitCount ?? activityTotal;
   const commitNoun = commitCount === 1 ? "commit" : "commits";
   const dateRange =
     repo.created_at.slice(0, 10) === repo.pushed_at.slice(0, 10)
@@ -68,13 +68,7 @@ export default function ProjectCard({
 
   return (
     <Spotlight className="live-card group relative flex h-full flex-col overflow-hidden rounded-xl border border-mocha-surface bg-mocha-base p-5 transition-colors duration-300 sm:p-6">
-      <Link
-        href={`/projects/${owner ?? "Implycitt"}/${repo.name}`}
-        aria-label={`View ${repo.name} details`}
-        className="absolute inset-0 z-0"
-      />
-
-      <div className="pointer-events-none relative z-10 flex flex-1 flex-col">
+      <div className="relative flex flex-1 flex-col">
         <div className="mb-2 flex items-center justify-between gap-3 font-mono text-[10px] tracking-[0.12em] text-mocha-overlay0">
           <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
             {owner && (
@@ -94,7 +88,12 @@ export default function ProjectCard({
 
         <div className="flex items-start justify-between gap-3 sm:gap-4">
           <h3 className="min-w-0 break-words font-mono text-lg font-bold text-mocha-text transition-colors duration-300 group-hover:text-mocha-lavender sm:text-xl">
-            {repo.name}
+            <Link
+              href={`/projects/${owner ?? "Implycitt"}/${repo.name}`}
+              className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mocha-mauve"
+            >
+              {repo.name}
+            </Link>
           </h3>
           <div className="flex shrink-0 items-center gap-3 font-mono text-xs text-mocha-subtext">
             {repo.stargazers_count > 0 && (
@@ -117,8 +116,8 @@ export default function ProjectCard({
               href={`https://github.com/${owner ?? "Implycitt"}/${repo.name}`}
               target="_blank"
               rel="noreferrer noopener"
-              aria-label={`Open ${repo.name} on GitHub`}
-              className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-md border border-mocha-surface bg-mocha-mantle text-mocha-overlay1 transition-colors duration-300 hover:border-mocha-mauve hover:text-mocha-mauve"
+              aria-label={`Open ${repo.name} on GitHub (opens in a new tab)`}
+              className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-md border border-mocha-surface bg-mocha-mantle text-mocha-overlay1 transition-colors duration-300 hover:border-mocha-mauve hover:text-mocha-mauve focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mocha-mauve"
             >
               <Icon name="github" className="h-3.5 w-3.5" />
             </a>

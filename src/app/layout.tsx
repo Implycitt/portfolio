@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
+import { Pixelify_Sans, Silkscreen } from "next/font/google";
 import Header from "@/components/ui/Header";
-import PageTransition from "@/components/ui/PageTransition";
 import SiteFooter from "@/components/ui/SiteFooter";
 import SmoothScroll from "@/components/ui/SmoothScroll";
 
@@ -14,6 +14,19 @@ const firaCodeNerd = localFont({
     },
   ],
   variable: "--font-fira-code-nerd",
+});
+
+const pixelDisplay = Silkscreen({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-os-display",
+  preload: false,
+});
+
+const pixelProse = Pixelify_Sans({
+  subsets: ["latin"],
+  variable: "--font-os-prose",
+  preload: false,
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quentinb.dev";
@@ -53,14 +66,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${firaCodeNerd.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${firaCodeNerd.variable} ${pixelDisplay.variable} ${pixelProse.variable} h-full antialiased`}
+    >
       <body id="top" className="min-h-full flex flex-col">
         <a href="#content" className="skip-link">
           skip to content
         </a>
         <Header />
         <SmoothScroll>
-          <PageTransition>{children}</PageTransition>
+          <div className="flex-1 w-full">{children}</div>
           <SiteFooter />
         </SmoothScroll>
       </body>
