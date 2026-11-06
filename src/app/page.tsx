@@ -1,7 +1,10 @@
+import Header from '@/lib/components/Header'
+
 export default function Home() {
   return (
   <main className="flex-1">
-    <div className="flex flex-col">
+    <div className="flex flex-col p-6 m-9">
+      <Header/>
       <div className="flex text-center items-center m-8 justify-center text-6xl">
         Quentin Bordelon
       </div>
