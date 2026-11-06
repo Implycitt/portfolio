@@ -1,6 +1,42 @@
 @import "tailwindcss";
 
 @theme {
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
-    monospace;
+  --color-background: #232136;
+  --color-surface: #2a273f;
+  --color-overlay: #393552;
+  --color-muted: #6e6a86;
+  --color-subtle: #908caa;
+  --color-text: #e0def4;
+  --color-love: #eb6f92;
+  --color-gold: #f6c177;
+  --color-rose: #ea9a97;
+  --color-pine: #3e8fb0;
+  --color-foam: #9ccfd8;
+  --color-iris: #c4a7e7;
+  --color-highlight-low: #2a283e;
+  --color-highligh-med: #44415a;
+  --color-highligh-high: #56526e;
+
+  --shadow-header: 0 1px 0 0 rgb(255 255 255 / 0.07) inset,
+    0 14px 36px -10px rgb(0 0 0 / 0.9),
+    0 6px 14px -4px rgb(0 0 0 / 0.65);
+
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html {
+  background: var(--color-background);
+  color-scheme: dark;
+  scroll-padding-top: 4rem;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-rose) 100%, transparent) transparent;
+  scrollbar-gutter: stable;
+  overscroll-behavior-x: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: color-mix(
+    in srgb,
+    var(--color-rose) 22%,
+    transparent
+  );
 }
