@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   devIndicators: false,
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  experimental: {
+    turbopackFileSystemCacheForDev: false,
+  },
   images: {
     remotePatterns: [
       {
