@@ -4,9 +4,6 @@ export default async function Blog() {
       <div className="flex justify-center rounded-sm border-3 border-rose s-8 m-8">
         This is where the blog selection will go
       </div>
-      <div className="border-3 rounded-sm border-rose s-8 m-8">
-        here I am
-      </div>
     </main>
   )
 }

@@ -1,16 +1,20 @@
 
 export default function Home() {
   return (
-  <main className="flex-1 p-10">
-    <div className="flex flex-col justify-center items-center">
-      <div className="bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift bg-clip-text text-5xl font-extrabold text-transparent p-8">
-        Quentin Bordelon
+  <main className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-10">
+    <div className="flex w-full flex-col items-center">
+      <div className="w-full max-w-full bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift bg-clip-text p-4 text-center text-4xl font-extrabold text-transparent sm:p-8 sm:text-5xl">
+        <h1 className="wrap-break-word">Quentin Bordelon</h1>
       </div>
 
-      <div className="flex flex-row">
-        <div className="flex flex-col border-[1.5] border-solid border-rose rounded-sm m-8 p-5 w-[20vw] h-[70vh] justify-center items-center gap-6 text-center bg-surface shadow-header">
-          <div className="rounded-full bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift p-1">
-            <img src="headshot.jpg" alt="Profile" className="block w-64 h-64 object-cover rounded-full"></img>
+      <div className="flex w-full flex-col items-stretch justify-center gap-8 md:flex-row">
+        <div className="flex w-full max-w-80 flex-col justify-center items-center gap-6 rounded-2xl border-[1.5] border-solid border-rose bg-overlay p-5 text-center shadow-header">
+          <div className="w-full max-w-64 rounded-full bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift p-1">
+            <img
+              src="headshot.jpg"
+              alt="Profile"
+              className="block aspect-square h-auto w-full rounded-full object-cover"
+            />
           </div>
           <div className="flex flex-col items-center justify-center">
             Computer Science and Physics @ Louisiana State University
@@ -49,7 +53,7 @@ export default function Home() {
             </a>
           </div>
         </div>
-        <div className="border-[1.5] border-solid border-rose rounded-sm justify-center items-center m-8 p-5 w-[70vw] h-[70vh]">
+        <div className="w-full min-w-0 rounded-2xl border-[1.5] border-solid border-rose bg-overlay p-5 shadow-header md:w-auto md:flex-1">
           Main container
         </div>
       </div>
