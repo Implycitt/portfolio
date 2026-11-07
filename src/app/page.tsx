@@ -2,8 +2,8 @@
 export default function Home() {
   return (
   <main className="flex-1 p-10">
-    <div className="flex flex-col">
-      <div className="flex text-center items-center m-8 justify-center text-6xl">
+    <div className="flex flex-col justify-center items-center">
+      <div className="bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift bg-clip-text text-5xl font-extrabold text-transparent p-8">
         Quentin Bordelon
       </div>
 

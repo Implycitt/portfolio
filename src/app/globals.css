@@ -17,12 +17,24 @@
   --color-highligh-med: #44415a;
   --color-highligh-high: #56526e;
 
-  --shadow-header: 0 1px 0 0 rgb(255 255 255 / 0.07) inset,
-    0 14px 36px -10px rgb(0 0 0 / 0.9),
-    0 6px 14px -4px rgb(0 0 0 / 0.65);
+  --shadow-header: 0 14px 36px -10px rgb(0 0 0 / 0.9);
 
   --font-mono:
     var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  @keyframes shift-gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  --animate-shift: shift-gradient 6s ease infinite;
 }
 
 html {
@@ -30,7 +42,8 @@ html {
   color-scheme: dark;
   scroll-padding-top: 4rem;
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--color-rose) 100%, transparent) transparent;
+  scrollbar-color: color-mix(in srgb, var(--color-rose) 100%, transparent)
+    transparent;
   scrollbar-gutter: stable;
   overscroll-behavior-x: none;
   touch-action: manipulation;
@@ -39,4 +52,16 @@ html {
     var(--color-rose) 22%,
     transparent
   );
+}
+
+a:link {
+  color: var(--color-love);
+}
+
+a:hover {
+  color: var(--color-rose);
+}
+
+a:active {
+  color: var(--color-rose);
 }
