@@ -1,7 +1,7 @@
 import { cached } from "@/lib/ttl-cache";
 
 export interface GitHubStatsData {
-  username: string;
+  username: "Implycitt";
   name: string;
   avatar_url: string;
   profile_url: string;
@@ -21,7 +21,7 @@ export interface GitHubLanguageData {
 }
 
 export interface GitHubStreakData {
-  username: string;
+  username: "Implycitt";
   currentStreak: number;
   longestStreak: number;
   totalContributions: number;
@@ -29,13 +29,34 @@ export interface GitHubStreakData {
 }
 
 export interface GitHubContributionTotalsData {
-  username: string;
   commits: number;
   repositories: number;
   pullRequests: number;
   issues: number;
   reviews: number;
   mergedPullRequests: number | null;
+}
+
+export interface GitHubMergedPullRequest {
+  number: number;
+  title: string;
+  url: string;
+  repository: string;
+  mergedAt: string;
+}
+
+interface GitHubPRSearchItem {
+  number: number;
+  title: string;
+  html_url: string;
+  repository_url: string;
+  pull_request?: {
+    merged_at: string | null;
+  };
+}
+
+interface GitHubPRSearchResponse {
+  items?: GitHubPRSearchItem[];
 }
 
 interface GitHubUser {
@@ -95,7 +116,7 @@ function githubHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
-    "User-Agent": "qb-portfolio-stats",
+    "User-Agent": "portfolio",
   };
   if (TOKEN) headers.Authorization = `Bearer ${TOKEN}`;
   return headers;
@@ -128,7 +149,7 @@ async function githubGraphQL<T>(
         Accept: "application/vnd.github+json",
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
-        "User-Agent": "qb-portfolio-stats",
+        "User-Agent": "portfolio",
       },
       body: JSON.stringify({ query, variables }),
       next: { revalidate: 3600 },
@@ -140,22 +161,18 @@ async function githubGraphQL<T>(
   }
 }
 
-export function fetchGitHubStats(
-  username: string,
-): Promise<GitHubStatsData | null> {
-  return cached(`stats:${username}`, () => loadGitHubStats(username));
+export function fetchGitHubStats(): Promise<GitHubStatsData | null> {
+  return cached(`stats:Implycitt`, () => loadGitHubStats());
 }
 
-async function loadGitHubStats(
-  username: string,
-): Promise<GitHubStatsData | null> {
+async function loadGitHubStats(): Promise<GitHubStatsData | null> {
   const user = await fetchJson<GitHubUser>(
-    `https://api.github.com/users/${username}`,
+    `https://api.github.com/users/Implycitt`,
   );
   if (!user) return null;
 
   const repos = await fetchJson<GitHubRepo[]>(
-    `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`,
+    `https://api.github.com/users/Implycitt/repos?per_page=100&sort=updated`,
   );
 
   const emptyRepos = repos ?? [];
@@ -181,7 +198,7 @@ async function loadGitHubStats(
     .map(([name, count]) => ({ name, count }));
 
   return {
-    username: user.login,
+    username: "Implycitt",
     name: user.name ?? user.login,
     avatar_url: user.avatar_url,
     profile_url: user.html_url,
@@ -196,15 +213,37 @@ async function loadGitHubStats(
   };
 }
 
-export function fetchGitHubPullRequests(
-  username: string,
-): Promise<number | null> {
-  return cached(`merged-prs:${username}`, async () => {
+export function fetchGitHubPullRequests(): Promise<number | null> {
+  return cached(`merged-prs:Implycitt`, async () => {
     const data = await fetchJson<{ total_count?: number }>(
-      `https://api.github.com/search/issues?q=author:${encodeURIComponent(username)}+type:pr+is:merged&per_page=1`,
+      `https://api.github.com/search/issues?q=author:${encodeURIComponent("Implycitt")}+type:pr+is:merged&per_page=1`,
     );
     if (!data) return null;
     return data.total_count ?? 0;
+  });
+}
+
+export function fetchRecentMergedPRs(): Promise<GitHubMergedPullRequest[] | null> {
+  return cached(`recent-merged-prs:Implycitt`, async () => {
+    const data = await fetchJson<GitHubPRSearchResponse>(
+      `https://api.github.com/search/issues?q=author:${encodeURIComponent("Implycitt")}+type:pr+is:merged+is:public&sort=updated&order=desc&per_page=6`
+    );
+    if (!data) return null;
+
+    return (data.items ?? []).flatMap((item) => {
+      const mergedAt = item.pull_request?.merged_at;
+      if(!mergedAt) return [];
+
+      return [
+        {
+          number: item.number,
+          title: item.title,
+          url: item.html_url,
+          repository: item.repository_url.split("/repos/")[1] ?? "unknown",
+          mergedAt
+        }
+      ];
+    });
   });
 }
 
@@ -311,17 +350,13 @@ async function loadLanguageBytesRest(
   return sortLanguages(totals);
 }
 
-function fetchContributionCalendar(
-  username: string,
-): Promise<ContributionCalendar | null> {
-  return cached(`contributions:${username}`, () =>
-    requestContributionCalendar(username),
+function fetchContributionCalendar(): Promise<ContributionCalendar | null> {
+  return cached(`contributions:Implycitt`, () =>
+    requestContributionCalendar(),
   );
 }
 
-async function requestContributionCalendar(
-  username: string,
-): Promise<ContributionCalendar | null> {
+async function requestContributionCalendar(): Promise<ContributionCalendar | null> {
   const query = `query($login: String!) {
     user(login: $login) {
       contributionsCollection {
@@ -343,7 +378,7 @@ async function requestContributionCalendar(
     }
   }`;
 
-  const json = await githubGraphQL<GraphQLResponse>(query, { login: username });
+  const json = await githubGraphQL<GraphQLResponse>(query, { login: "Implycitt" });
   const collection = json?.data?.user?.contributionsCollection;
   const calendar = collection?.contributionCalendar;
   if (!collection || !calendar) return null;
@@ -389,33 +424,28 @@ function streaksFrom(days: number[]): {
   return { currentStreak, longestStreak };
 }
 
-export async function fetchGitHubStreak(
-  username: string,
-): Promise<GitHubStreakData | null> {
-  const calendar = await fetchContributionCalendar(username);
+export async function fetchGitHubStreak(): Promise<GitHubStreakData | null> {
+  const calendar = await fetchContributionCalendar();
   if (!calendar) return null;
 
   return {
-    username,
+    username: "Implycitt",
     ...streaksFrom(calendar.days),
     totalContributions: calendar.totalContributions,
     days: calendar.days.map((count) => ({ count })),
   };
 }
 
-export async function fetchGitHubContributionTotals(
-  username: string,
-): Promise<GitHubContributionTotalsData | null> {
-  const calendar = await fetchContributionCalendar(username);
+export async function fetchGitHubContributionTotals(): Promise<GitHubContributionTotalsData | null> {
+  const calendar = await fetchContributionCalendar();
   if (!calendar) return null;
 
   return {
-    username,
     commits: calendar.commits,
     repositories: calendar.repositories,
     pullRequests: calendar.pullRequests,
     issues: calendar.issues,
     reviews: calendar.reviews,
-    mergedPullRequests: await fetchGitHubPullRequests(username),
+    mergedPullRequests: await fetchGitHubPullRequests(),
   };
 }

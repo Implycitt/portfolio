@@ -1,11 +1,16 @@
 import Carousel from "@/lib/components/Carousel";
-import { fetchGitHubStats } from "@/lib/github-stats";
+import { fetchGitHubStats, fetchGitHubStreak, fetchRecentMergedPRs } from "@/lib/github-stats";
 import { getProjects } from "@/lib/projects";
 import { Language, Stat } from "@/lib/components/Sides";
+import { Heatmap, RecentPRs } from "@/lib/components/Activity";
 
 export default async function Projects() {
-  const projects = await getProjects();
-  const stats = await fetchGitHubStats("Implycitt");
+  const [projects, stats, streak, pullRequests] = await Promise.all([
+    getProjects(),
+    fetchGitHubStats(),
+    fetchGitHubStreak(),
+    fetchRecentMergedPRs()
+  ]);
 
   return (
     <main className="mx-auto my-auto w-full max-w-7xl p-4 sm:p-6 lg:p-10">
@@ -15,7 +20,7 @@ export default async function Projects() {
             <p className="text-xs uppercase tracking-[0.2em] text-rose">
               Github
             </p>
-            <a href="htttps://github.com/Implycitt" target="_blank" rel="noreferrer" className="text-[10px] text-subtle hover:text-rose">@Implycitt</a>
+            <a href="https://github.com/Implycitt" target="_blank" rel="noreferrer" className="text-[10px] text-subtle hover:text-rose">@Implycitt</a>
           </div>
 
           {stats ? (
