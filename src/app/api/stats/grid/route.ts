@@ -25,16 +25,16 @@ export async function GET(request: Request) {
 
   const svg = await cached(`grid-svg:${username}`, async () => {
     const [stats, streak, languageBytes, totals] = await Promise.all([
-      fetchGitHubStats(username),
-      fetchGitHubStreak(username),
-      fetchGitHubLanguageBytes(username),
-      fetchGitHubContributionTotals(username),
+      fetchGitHubStats(),
+      fetchGitHubStreak(),
+      fetchGitHubLanguageBytes(),
+      fetchGitHubContributionTotals(),
     ]);
 
     return svgGrid([
       statsCardContent(stats),
       streakCardContent(streak),
-      languagesCardContent(visibleLanguages(languageBytes), username),
+      languagesCardContent(visibleLanguages(languageBytes)),
       contributionsCardContent(totals),
     ]);
   });
