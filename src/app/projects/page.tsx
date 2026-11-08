@@ -1,16 +1,15 @@
 import Carousel from "@/lib/components/Carousel";
-import { fetchGitHubContributionTotals, fetchGitHubStats, fetchGitHubStreak, fetchRecentMergedPRs } from "@/lib/github-stats";
+import { fetchGitHubStats, fetchGitHubStreak, fetchRecentMergedPRs } from "@/lib/github-stats";
 import { getProjects } from "@/lib/projects";
 import { Language, Stat } from "@/lib/components/Sides";
 import { Heatmap, RecentPRs } from "@/lib/components/Activity";
 
 export default async function Projects() {
-  const [projects, stats, streak, pullRequests, totals] = await Promise.all([
+  const [projects, stats, streak, pullRequests] = await Promise.all([
     getProjects(),
     fetchGitHubStats(),
     fetchGitHubStreak(),
     fetchRecentMergedPRs(),
-    fetchGitHubContributionTotals()
   ]);
 
   return (

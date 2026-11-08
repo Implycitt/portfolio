@@ -146,10 +146,7 @@ function tailNote(languages: GitHubLanguageData[]): string {
   );
 }
 
-export function languagesCardContent(
-  languages: GitHubLanguageData[] | null,
-  username: string,
-): CardContent {
+export function languagesCardContent(languages: GitHubLanguageData[] | null): CardContent {
   if (languages === null) {
     return {
       title: "Languages",
@@ -172,7 +169,7 @@ export function languagesCardContent(
 
   return {
     title: "Languages",
-    note: `@${username}`,
+    note: "@Implycitt",
     body: [languageRows(languages), tailNote(languages)]
       .filter(Boolean)
       .join("\n  "),

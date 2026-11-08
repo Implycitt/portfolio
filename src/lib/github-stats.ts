@@ -273,18 +273,14 @@ const LANGUAGES_QUERY = `query($login: String!, $cursor: String) {
 
 const MAX_LANGUAGE_PAGES = 10;
 
-export function fetchGitHubLanguageBytes(
-  username: string,
-): Promise<GitHubLanguageData[] | null> {
-  return cached(`languages:${username}`, () =>
-    loadGitHubLanguageBytes(username),
+export function fetchGitHubLanguageBytes(): Promise<GitHubLanguageData[] | null> {
+  return cached(`languages:Implycitt`, () =>
+    loadGitHubLanguageBytes(),
   );
 }
 
-async function loadGitHubLanguageBytes(
-  username: string,
-): Promise<GitHubLanguageData[] | null> {
-  if (!process.env.GITHUB_TOKEN) return loadLanguageBytesRest(username);
+async function loadGitHubLanguageBytes(): Promise<GitHubLanguageData[] | null> {
+  if (!process.env.GITHUB_TOKEN) return loadLanguageBytesRest();
 
   const totals: Record<string, number> = {};
   let cursor: string | null = null;
@@ -292,7 +288,7 @@ async function loadGitHubLanguageBytes(
   for (let page = 0; page < MAX_LANGUAGE_PAGES; page++) {
     const json: LanguagesGraphQLResponse | null =
       await githubGraphQL<LanguagesGraphQLResponse>(LANGUAGES_QUERY, {
-        login: username,
+        login: "Implycitt",
         cursor,
       });
     const repositories: LanguageRepositoriesPage | undefined =
@@ -318,18 +314,16 @@ function sortLanguages(totals: Record<string, number>): GitHubLanguageData[] {
     .map(([name, bytes]) => ({ name, bytes }));
 }
 
-async function loadLanguageBytesRest(
-  username: string,
-): Promise<GitHubLanguageData[] | null> {
+async function loadLanguageBytesRest(): Promise<GitHubLanguageData[] | null> {
   const repos = await fetchJson<GitHubRepo[]>(
-    `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`,
+    `https://api.github.com/users/Implycitt/repos?per_page=100&sort=updated`,
   );
   if (!repos) return null;
 
   const owned = repos.filter((repo) => !repo.fork);
   const results = await Promise.allSettled(
     owned.map((repo) =>
-      fetch(`https://api.github.com/repos/${username}/${repo.name}/languages`, {
+      fetch(`https://api.github.com/repos/Implycitt/${repo.name}/languages`, {
         headers: githubHeaders(),
         next: { revalidate: 3600 },
       }).then(async (res) => {
