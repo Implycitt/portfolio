@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Header from "@/lib/components/Header";
 import "katex/dist/katex.min.css";
 import "remark-github-blockquote-alert/alert.css"
+import "./globals.css";
+import Header from "@/lib/components/Header";
 
 const geistMono = Geist_Mono({
   subsets: ["latin"],
@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`h-full antialiased ${geistMono.variable}`}>
-      <body className="flex flex-col mx-4 sm:mx-8 lg:mx-16 mt-8 font-mono">
+      <body className="flex flex-col mx-4 sm:mx-8 lg:mx-16 pt-8 font-mono min-h-dvh">
         <Header/>
         {children}
       </body>

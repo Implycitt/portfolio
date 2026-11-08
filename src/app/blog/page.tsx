@@ -11,7 +11,7 @@ export default async function Blog() {
 
   return (
 
-    <main className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-10 border-[1.5] border-rose rounded-2xl bg-overlay text-center shadow-header">
+    <main className="mx-auto my-auto w-full max-w-5xl p-4 sm:p-6 lg:p-10 border-[1.5] border-rose rounded-2xl bg-overlay text-center shadow-header lg:-translate-y-50">
 
       {Object.entries(byFolder).map(([folder, folderPosts]) => (
         <section key={folder} className="mb-8 text-left last:mb-0">
