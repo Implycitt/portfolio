@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/lib/components/Header";
+import "katex/dist/katex.min.css";
+import "remark-github-blockquote-alert/alert.css"
 
 const geistMono = Geist_Mono({
   subsets: ["latin"],
