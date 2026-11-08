@@ -45,15 +45,7 @@ export function Heatmap({
 
   return (
     <div>
-      <div className="flex items-end justify-between gap-3">
-        <div>
-          <p className="text-[9px] uppercase tracking-[0.16em] text-subtle">
-            Last 13 weeks
-          </p>
-          <p className="mt-1 text-2xl font-bold text-foam">
-            {total.toLocaleString("en-US")}
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-3">
         <p className="text-[9px] uppercase tracking-[0.12em] text-subtle">
           contributions
         </p>
@@ -79,7 +71,7 @@ export function Heatmap({
         ))}
       </div>
 
-      <div className="mt-2 flex items-center justify-end gap-1 text-[9px] uppercase tracking-[0.12em] text-subtle">
+      <div className="mt-2 flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.12em] text-subtle">
         <span className="mr-1">Less</span>
         {HEATMAP_LEVELS.map((className, index) => (
           <span

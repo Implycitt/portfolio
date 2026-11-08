@@ -1,15 +1,16 @@
 import Carousel from "@/lib/components/Carousel";
-import { fetchGitHubStats, fetchGitHubStreak, fetchRecentMergedPRs } from "@/lib/github-stats";
+import { fetchGitHubContributionTotals, fetchGitHubStats, fetchGitHubStreak, fetchRecentMergedPRs } from "@/lib/github-stats";
 import { getProjects } from "@/lib/projects";
 import { Language, Stat } from "@/lib/components/Sides";
 import { Heatmap, RecentPRs } from "@/lib/components/Activity";
 
 export default async function Projects() {
-  const [projects, stats, streak, pullRequests] = await Promise.all([
+  const [projects, stats, streak, pullRequests, totals] = await Promise.all([
     getProjects(),
     fetchGitHubStats(),
     fetchGitHubStreak(),
-    fetchRecentMergedPRs()
+    fetchRecentMergedPRs(),
+    fetchGitHubContributionTotals()
   ]);
 
   return (
@@ -26,10 +27,12 @@ export default async function Projects() {
           {stats ? (
             <>
               <div className="grid grid-cols-2 gap-3">
-                <Stat label="Stars" value={stats.total_stars} accent="gold" />
+                <Stat label="Followers" value={stats.followers} accent="rose" />
                 <Stat label="Repos" value={stats.public_repos} accent="rose" />
-                <Stat label="Followers" value={stats.followers} accent="love" />
-                <Stat label="Forks" value={stats.total_forks} accent="foam" />
+                <Stat label="Forks" value={stats.total_forks} accent="love" />
+                <Stat label="Stars" value={stats.total_stars} accent="love" />
+                <Stat label="Contributions" value={streak?.totalContributions ?? 0} accent="iris" />
+                <Stat label="Day Streak" value={streak?.currentStreak ?? 0} accent="iris" />
               </div>
 
               <div>
@@ -44,6 +47,16 @@ export default async function Projects() {
               Stats not available
             </p>
           )}
+          {streak ? (
+            <p className="text-[10px] text-subtle">
+              {streak.currentStreak} day streak {" "}
+              {streak.totalContributions.toLocaleString("en-US")} this year
+            </p>
+            ) : (
+              <p className="text-[10px] leading-4 text-subtle">
+                no history 
+              </p>
+            )}
         </aside>
         
 
@@ -51,7 +64,21 @@ export default async function Projects() {
           <Carousel projects={projects} />
         </div>
 
-        <aside className="mx-auto flex w-full max-w-80 flex-col items-center justify-center gap-4 rounded-2xl border-[1.5] border-solid border-rose bg-overlay p-5 text-center shadow-header lg:mx-0 lg:w-64">
+        <aside className="mx-auto flex w-full max-w-80 flex-col items-stretch justify-center gap-4 rounded-2xl border-[1.5px] border-solid border-rose bg-overlay p-5 text-center shadow-header lg:mx-0 lg:w-64">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-rose">
+              Activity
+            </p>
+          </div>
+          <Heatmap days={streak?.days ?? []} />
+
+
+            <div>
+              <p className="mb-2 text-[10px] uppercase tracking-[0.16em] text-subtle">
+                Recent merges
+              </p>
+              <RecentPRs pullRequests={pullRequests} />
+            </div>
         </aside>
       </div>
     </main>
