@@ -1,3 +1,5 @@
+import Steam from "@/lib/components/Steam";
+
 const timeline = [
     ["LSU MATH", "Statistical machine learning."],
     ["FAST Enterprises", "Implementation Consultant Intern for Illinois Tax"],
@@ -61,14 +63,22 @@ export default function Home() {
           <div className="grid w-full min-w-0 gap-8 rounded-2xl border-[1.5] border-solid border-rose bg-overlay p-5 shadow-header md:grid-cols-[minmax(0,1fr)_16rem] md:w-auto md:flex-1 md:pr-12 text-left">
 
             <div className="flex min-w-0 flex-col justify-center gap-4 text-center md:col-start-1 md:row-start-1">
-              <p>I'm Quentin</p>
-              <p>
-                a full stack developer. I specialize in low level, systems programming as data engineering. I am currently based in Baton Rouge, Louisiana.
-              </p>
 
-              <p>
-                Currently, I am the webmaster for GDG@LSU. At school, I work on a math research project involving video denoising.
-              </p>
+              <div className="text-left">
+                <p>I'm</p>
+                <p className="text-love">Quentin</p>
+              </div>
+              <div className="mx-auto w-full max-w-[65ch] text-left">
+                <p>
+                  a full stack developer. I specialize in low level, systems programming as data engineering. I am currently based in Baton Rouge, Louisiana.
+                </p>
+
+                <p>
+                  Currently, I am the webmaster for GDG@LSU. At school, I work on a math research project involving video denoising.
+                </p>
+              </div>
+
+              <Steam/>
             </div>
 
             <ol className="relative flex h-full w-full flex-col md:col-start-2 md:row-start-1">
