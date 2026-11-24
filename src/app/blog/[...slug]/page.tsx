@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import { getBlogPost } from "@/lib/blog";
@@ -35,7 +37,7 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
         <div className="prose prose-invert max-w-none prose-headings:font-bold prose-headings:text-love prose-p:text-text prose-strong:text-foam prose-a:text-rose prose-code:text-gold prose-pre:bg-background/70 prose-blockquote:border-rose prose-blockquote:text-subtle prose-li:text-text">
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
-            rehypePlugins={[rehypeKatex]}
+            rehypePlugins={[rehypeKatex, rehypeRaw, rehypeSanitize ]}
           >
             {post.markdown}
           </ReactMarkdown>
