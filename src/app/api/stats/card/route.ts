@@ -5,6 +5,6 @@ import { svgCardResponse } from "@/lib/svg-card";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  return svgCardResponse(statsCardContent(await fetchGitHubStats()));
+export async function GET(): Promise<Response> {
+    return svgCardResponse(statsCardContent(await fetchGitHubStats()));
 }

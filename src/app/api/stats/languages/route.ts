@@ -5,8 +5,8 @@ import { svgCardResponse } from "@/lib/svg-card";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const languages = visibleLanguages(await fetchGitHubLanguageBytes());
+export async function GET(): Promise<Response> {
+    const languages = visibleLanguages(await fetchGitHubLanguageBytes());
 
-  return svgCardResponse(languagesCardContent(languages));
+    return svgCardResponse(languagesCardContent(languages));
 }

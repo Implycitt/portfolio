@@ -17,10 +17,13 @@
 
     "import/extensions": [
       "error",
-      "always",
+      "never",
       {
         "checkTypeImports": true,
         "ignorePackages": true,
+        "pattern": {
+          "css": "always"
+        },
         "pathGroupOverrides": [
           {
             "pattern": "**/*.svelte",
