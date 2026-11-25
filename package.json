@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "fmt": "bun fmt",
+    "fmt:ci": "bun fmt --check",
+    "lint": "oxlint",
+    "lint:ci": "oxlint --format=github",
+    "lint:fix": "oxlint --fix",
+    "typecheck": "bun check"
   },
   "dependencies": {
     "katex": "^0.16.47",
@@ -26,16 +28,14 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.20",
-    "@types/node": "^20",
+    "@types/node": "^26.6.7",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^10.9.1",
-    "eslint-config-next": "^16.3.4",
-    "prettier": "^3.9.7",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "typescript-eslint": "^8.69.0"
+    "typescript": "^7.0.2",
+    "oxfmt": "^0.80.0",
+    "oxlint": "^1.94.0"
   },
   "ignoreScripts": [
     "sharp",
