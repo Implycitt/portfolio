@@ -28,7 +28,7 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
       <article className="rounded-2xl border-[1.5] border-rose bg-overlay p-5 shadow-header sm:p-8">
         <header className="flex mb-8 border-b border-rose/25 pb-5">
           <Link href="/blog" className="hover:text-rose">
-            <svg xmlns="http://w3.org" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Go back">
+            <svg xmlns="http://w3.org" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Go back">
               <path d="M19 12H5" />
               <path d="m12 19-7-7 7-7" />
             </svg>
@@ -41,7 +41,7 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
         <div className="prose prose-invert max-w-none prose-headings:font-bold prose-headings:text-love prose-p:text-text prose-strong:text-foam prose-a:text-rose prose-code:text-gold prose-pre:bg-background/70 prose-blockquote:border-rose prose-blockquote:text-subtle prose-li:text-text">
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
-            rehypePlugins={[rehypeKatex, rehypeRaw, rehypeSanitize]}
+            rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
           >
             {post.markdown}
           </ReactMarkdown>

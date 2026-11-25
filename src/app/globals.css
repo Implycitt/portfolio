@@ -109,3 +109,7 @@ a[aria-current="page"] {
   flex: none;
   fill: currentColor;
 }
+
+.katex .mtable {
+  margin-inline: 0.5em;
+}
