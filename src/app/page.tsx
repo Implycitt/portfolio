@@ -17,8 +17,8 @@ export default function Home(): ReactNode {
                 <RollLang />
 
                 <div className="flex w-full flex-col items-stretch justify-center gap-8 md:flex-row">
-                    <div className="flex w-full max-w-80 flex-col justify-center items-center gap-6 rounded-2xl border-[1.5] border-solid border-rose bg-overlay p-5 text-center shadow-header">
-                        <div className="overflow-hidden w-full max-w-64 rounded-full bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift p-1">
+                    <div className="flex w-full flex-col md:w-80 md:shrink-0 lg:w-96 justify-center items-center gap-6 border-[1.5] border-solid border-rose bg-overlay p-5 text-center shadow-header">
+                        <div className="overflow-hidden w-full max-w-64 lg:max-w-72 rounded-full bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift p-[1.5px]">
                             <Image
                                 src="/headshot.jpg"
                                 alt="Profile"
@@ -100,7 +100,7 @@ export default function Home(): ReactNode {
                             </a>
                         </div>
                     </div>
-                    <div className="grid w-full min-w-0 gap-8 rounded-2xl border-[1.5] border-solid border-rose bg-overlay p-5 shadow-header md:grid-cols-[minmax(0,1fr)_16rem] md:w-auto md:flex-1 md:pr-12 text-left">
+                    <div className="grid w-full min-w-0 gap-8 lg:gap-10 border-[1.5] border-solid border-rose bg-overlay p-5 shadow-header lg:grid-cols-[minmax(0,1fr)_18rem] md:w-auto md:flex-1 md:pr-12 text-left">
                         <div className="flex min-w-0 flex-col justify-center gap-4 text-center md:col-start-1 md:row-start-1">
                             <div className="flex flex-wrap items-baseline gap-2 text-left">
                                 <p>I'm</p>
@@ -127,7 +127,7 @@ export default function Home(): ReactNode {
 
                             {timeline.map(([title, body]) => (
                                 <li key={title} className="flex flex-1 items-center gap-4">
-                                    <div className="ml-auto w-48 min-w-0 text-right">
+                                    <div className="ml-auto w-52 min-w-0 text-right">
                                         <h3 className="text-lg font-bold">{title}</h3>
                                         <p className="text-subtle">{body}</p>
                                     </div>

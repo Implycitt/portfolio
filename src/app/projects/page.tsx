@@ -17,7 +17,7 @@ export default async function Projects(): Promise<ReactNode> {
     return (
         <main className="mx-auto my-auto w-full max-w-7xl p-4 sm:p-6 lg:p-10">
             <div className="flex w-full flex-col items-stretch justify-center gap-8 lg:flex-row lg:items-center">
-                <aside className="mx-auto flex w-full max-w-80 flex-col gap-4 rounded-2xl border-[1.5] border-solid border-rose bg-overlay p-5 text-left shadow-header lg:mx-0 lg:w-64">
+                <aside className="mx-auto flex w-full max-w-80 flex-col gap-4 rounded-md border-[1.5] border-solid border-rose bg-overlay p-5 text-left shadow-header lg:mx-0 lg:w-64">
                     <div className="flex items-center justify-between gap-2">
                         <p className="text-xs uppercase tracking-[0.2em] text-rose">Github</p>
                         <a
@@ -59,11 +59,11 @@ export default async function Projects(): Promise<ReactNode> {
                     )}
                 </aside>
 
-                <div className="h-[58vh] min-h-[26rem] max-h-[38rem] w-full min-w-0 overflow-hidden rounded-2xl border-[1.5] border-solid border-rose bg-overlay shadow-header lg:w-auto lg:flex-1">
+                <div className="h-[58vh] min-h-104 max-h-152 w-full min-w-0 overflow-hidden border-[1.5] border-solid border-rose bg-overlay shadow-header lg:w-auto lg:flex-1">
                     <Carousel projects={projects} />
                 </div>
 
-                <aside className="mx-auto flex w-full max-w-80 flex-col items-stretch justify-center gap-4 rounded-2xl border-[1.5px] border-solid border-rose bg-overlay p-5 text-center shadow-header lg:mx-0 lg:w-64">
+                <aside className="mx-auto flex w-full max-w-80 flex-col items-stretch justify-center gap-4 rounded-md border-[1.5px] border-solid border-rose bg-overlay p-5 text-center shadow-header lg:mx-0 lg:w-64">
                     <div className="flex items-center justify-between gap-2">
                         <p className="text-xs uppercase tracking-[0.2em] text-rose">Activity</p>
                     </div>

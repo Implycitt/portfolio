@@ -365,7 +365,7 @@ export default function Carousel({ projects }: { projects: Project[] }): ReactNo
                                 opacity: "var(--project-opacity, 1)"
                             }}
                         >
-                            <article className="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-rose/25 bg-background/40 p-5 text-left shadow-header transition-colors hover:border-rose hover:bg-background/60 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-rose">
+                            <article className="group relative flex h-full flex-col justify-between overflow-hidden rounded-md border border-rose/25 bg-background/40 p-5 text-left shadow-header transition-colors hover:border-rose hover:bg-background/60 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-rose">
                                 <div className="min-w-0">
                                     <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.18em] text-subtle">
                                         <span className="truncate text-rose">{project.language ?? "Project"}</span>

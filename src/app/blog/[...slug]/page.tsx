@@ -27,7 +27,7 @@ export default async function BlogPost({ params }: BlogPostPageProps): Promise<R
 
     return (
         <main className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-10">
-            <article className="rounded-2xl border-[1.5] border-rose bg-overlay p-5 shadow-header sm:p-8">
+            <article className=" border-[1.5] border-rose bg-overlay p-5 shadow-header sm:p-8 rounded-xl">
                 <header className="flex mb-8 border-b border-rose/25 pb-5">
                     <Link href="/blog" className="hover:text-rose">
                         <svg

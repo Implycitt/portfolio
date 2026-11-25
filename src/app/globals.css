@@ -37,6 +37,12 @@
     --animate-shift: shift-gradient 6s ease infinite;
 }
 
+@layer base {
+    div {
+        border-radius: 0.5rem;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     a {
         transition: none;

@@ -18,7 +18,7 @@ export default function RollLang(): ReactNode {
     }, [index]);
 
     return (
-        <span className="relative inline-grid overflow-hidden leading-tight">
+        <span className="relative inline-grid overflow-hidden leading-[1.35]">
             {hello.map(word => (
                 <span key={word} aria-hidden="true" className="invisible col-start-1 row-start-1 whitespace-nowrap">
                     {word}
@@ -28,7 +28,7 @@ export default function RollLang(): ReactNode {
             <AnimatePresence initial={false}>
                 <motion.span
                     key={index}
-                    className="col-start-1 row-start-1 whitespace-nowrap text-center w-full max-w-full bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift bg-clip-text p-4 text-4xl font-extrabold text-transparent sm:p-8 sm:text-5xl"
+                    className="col-start-1 row-start-1 whitespace-nowrap text-center w-full max-w-full bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift bg-clip-text p-4 text-2xl font-extrabold text-transparent sm:p-6 sm:text-4xl lg:p-8 lg:text-5xl"
                     initial={{ y: reduceMotion ? 0 : "-100%" }}
                     animate={{ y: "0%" }}
                     exit={{ y: reduceMotion ? 0 : "100%" }}

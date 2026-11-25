@@ -12,7 +12,7 @@ export default async function Blog(): Promise<ReactNode> {
     }, {});
 
     return (
-        <main className="mx-auto my-auto w-full max-w-5xl p-4 sm:p-6 lg:p-10 border-[1.5] border-rose rounded-2xl bg-overlay text-center shadow-header lg:-translate-y-50">
+        <main className="mx-auto my-auto w-full max-w-5xl p-4 sm:p-6 lg:p-10 border-[1.5] border-rose  bg-overlay text-center shadow-header lg:-translate-y-50 rounded-md">
             {Object.entries(byFolder).map(([folder, folderPosts]) => (
                 <section key={folder} className="mb-8 text-left last:mb-0">
                     <header className="mb-4">
