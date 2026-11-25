@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 
+import RollLang from "@/lib/components/RollLang";
 import Steam from "@/lib/components/Steam";
 
 const timeline = [
@@ -13,9 +14,7 @@ export default function Home(): ReactNode {
     return (
         <main className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-10">
             <div className="flex w-full flex-col items-center">
-                <div className="w-full max-w-full bg-linear-to-r from-rose via-love to-foam bg-size-[200%_200%] animate-shift bg-clip-text p-4 text-center text-4xl font-extrabold text-transparent sm:p-8 sm:text-5xl">
-                    <h1 className="wrap-break-word">Quentin Bordelon</h1>
-                </div>
+                <RollLang />
 
                 <div className="flex w-full flex-col items-stretch justify-center gap-8 md:flex-row">
                     <div className="flex w-full max-w-80 flex-col justify-center items-center gap-6 rounded-2xl border-[1.5] border-solid border-rose bg-overlay p-5 text-center shadow-header">
@@ -26,6 +25,7 @@ export default function Home(): ReactNode {
                                 className="block aspect-square h-auto w-full rounded-full object-cover"
                                 width={512}
                                 height={512}
+                                loading="eager"
                             />
                         </div>
                         <div className="flex flex-col items-center justify-center">
