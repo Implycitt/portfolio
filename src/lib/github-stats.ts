@@ -110,6 +110,32 @@ interface ContributionCalendar {
     repositories: number;
 }
 
+export interface GitHubCommit {
+    repository: string;
+    message: string;
+    url: string;
+    sha: string;
+    committedAt: string;
+}
+
+export interface GitHubGroup {
+    login: string;
+    url: string;
+    description: string | null;
+}
+
+interface CommitSearchItem {
+    sha: string;
+    html_url: string;
+    commit: { message: string; committer: { date: string } | null };
+    repository: { full_name: string } | null;
+}
+
+interface GitHubOrganization {
+    login: string;
+    description: string | null;
+}
+
 const TOKEN = process.env.GITHUB_TOKEN;
 
 function githubHeaders(): Record<string, string> {
@@ -233,6 +259,47 @@ export function fetchRecentMergedPRs(): Promise<GitHubMergedPullRequest[] | null
                 }
             ];
         });
+    });
+}
+
+export function fetchRecentCommits(): Promise<GitHubCommit[] | null> {
+    return cached("recent-commits:Implycitt", async () => {
+        const search = await fetchJson<{ items?: CommitSearchItem[] }>(
+            "https://api.github.com/search/commits?q=author:Implycitt&sort=committer-date&order=desc&per_page=6"
+        );
+
+        return (
+            search?.items?.flatMap(item => {
+                const repository = item.repository?.full_name;
+                const date = item.commit.committer?.date;
+                if (!repository || !date) return [];
+
+                return [
+                    {
+                        repository,
+                        message: item.commit.message.split("\n")[0] ?? "",
+                        url: item.html_url,
+                        sha: item.sha.slice(0, 7),
+                        committedAt: date
+                    }
+                ];
+            }) ?? null
+        );
+    });
+}
+
+export function fetchGitHubGroups(): Promise<GitHubGroup[] | null> {
+    return cached("groups:Implycitt", async () => {
+        const scope = TOKEN ? "user" : "users/Implycitt";
+        const orgs = await fetchJson<GitHubOrganization[]>(`https://api.github.com/${scope}/orgs?per_page=100`);
+
+        return (
+            orgs?.map(org => ({
+                login: org.login,
+                url: `https://github.com/${org.login}`,
+                description: org.description
+            })) ?? null
+        );
     });
 }
 

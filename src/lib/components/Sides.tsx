@@ -27,7 +27,9 @@ export function Stat({
 }): ReactNode {
     return (
         <div className="min-w-0">
-            <p className="text-[9px] uppercase tracking-[0.16em] text-subtle">{label}</p>
+            <p className="text-[9px] leading-tight uppercase tracking-[0.12em] whitespace-nowrap text-subtle">
+                {label}
+            </p>
             <p className={`mt-1 text-2xl font-bold ${accents[accent]}`}>{numberFormatter.format(value)}</p>
         </div>
     );
